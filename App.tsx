@@ -26,9 +26,20 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-declare const global: {HermesInternal: null | {}};
+import RohText from '@components/RohText';
+
+declare const global: { HermesInternal: null | {} };
 
 const App = () => {
+  React.useEffect(() => {
+    const interVal = setInterval(() => {
+      fetch('https://jsonplaceholder.typicode.com/todos/1')
+        .then(response => response.json())
+        .then(json => console.log(json))
+        .catch(console.log);
+    }, 2000);
+    return () => clearInterval(interVal);
+  }, []);
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -45,9 +56,13 @@ const App = () => {
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
+              <RohText>RohText</RohText>
+              <RohText bold italic>
+                Anather Roh Text
+              </RohText>
               <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-                screen and then come back to see your edits.
+                Edit <Text style={styles.highlight}>App.tsx</Text> to change
+                this screen and then come back to see your edits.
               </Text>
             </View>
             <View style={styles.sectionContainer}>
