@@ -31,6 +31,7 @@ import RohText from '@components/RohText';
 declare const global: { HermesInternal: null | {} };
 
 const App = () => {
+  console.log("ololool");
   React.useEffect(() => {
     const interVal = setInterval(() => {
       fetch('https://jsonplaceholder.typicode.com/todos/1')
