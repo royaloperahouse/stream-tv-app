@@ -4,8 +4,27 @@
  *
  * @format
  */
+const { getDefaultConfig } = require('metro-config');
 
-module.exports = {
+module.exports = (async function () {
+  const {
+    resolver: { sourceExts, assetExts },
+  } = await getDefaultConfig();
+
+  return {
+    transformer: {
+      babelTransformerPath: require.resolve('react-native-svg-transformer'),
+      experimentalImportSupport: false,
+      inlineRequires: false,
+    },
+    resolver: {
+      assetExts: assetExts.filter(ext => ext !== 'svg'),
+      sourceExts: [...sourceExts, 'svg'],
+    },
+  };
+})();
+
+/* {
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -15,3 +34,4 @@ module.exports = {
     }),
   },
 };
+ */

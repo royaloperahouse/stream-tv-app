@@ -8,7 +8,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -25,21 +25,25 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-
+import { verifyDevice } from '@services/apiClient';
+import { getDigitalEventDetails } from '@services/prismicApiClient';
+import { log } from '@utils/loger';
+import { SvgCssUri } from 'react-native-svg';
 import RohText from '@components/RohText';
 
-declare const global: { HermesInternal: null | {} };
+// Enable screens
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
 const App = () => {
-  console.log("ololool");
-  React.useEffect(() => {
-    const interVal = setInterval(() => {
-      fetch('https://jsonplaceholder.typicode.com/todos/1')
-        .then(response => response.json())
-        .then(json => console.log(json))
-        .catch(console.log);
-    }, 2000);
-    return () => clearInterval(interVal);
+  const [devInfo, setDevInfo] = useState();
+  useLayoutEffect(() => {
+    verifyDevice()
+      .then(response => log('Device Info', response))
+      .catch(console.log);
+    getDigitalEventDetails().then(response =>
+      log('DigitalEventDetails Info', response),
+    );
   }, []);
   return (
     <>
@@ -49,25 +53,32 @@ const App = () => {
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
           <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
               <RohText>RohText</RohText>
               <RohText bold italic>
-                Anather Roh Text
+                {devInfo}
               </RohText>
               <Text style={styles.sectionDescription}>
+{/*                 <SvgCssUri
+                  width="200"
+                  height="200"
+                  uri="http://thenewcode.com/assets/svg/accessibility.svg"
+                /> */}
                 Edit <Text style={styles.highlight}>App.tsx</Text> to change
                 this screen and then come back to see your edits.
               </Text>
             </View>
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
+              <Text style={styles.sectionTitle}>
+                See Your Changes
+{/*                 <SvgCssUri
+                  width="1000"
+                  height="500"
+                  uri="https://thenewcode.com/assets/svg/JQuery_logo.svg"
+                /> */}
+              </Text>
               <Text style={styles.sectionDescription}>
                 <ReloadInstructions />
               </Text>
