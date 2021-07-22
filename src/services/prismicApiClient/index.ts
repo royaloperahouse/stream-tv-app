@@ -44,7 +44,6 @@ const commonQuery = (function () {
   return async function (queryObj: TQueryObj = {}): Promise<ApiSearchResponse> {
     const { queryPredicates = '', queryOptions = {} } = queryObj;
     if (!commonQueryOptionsLoaded) {
-      console.log(commonQueryOptionsLoaded, 'commonQueryOptionsLoaded');
       commonQueryOptions = {
         ...(await getCommonQueryOptions(prismicApiClient)),
       };

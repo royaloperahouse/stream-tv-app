@@ -19,7 +19,7 @@ axiosClient.interceptors.request.use(
       axiosConfig.headers,
       axiosConfig.data,
     );
-    return axiosConfig.headers;
+    return axiosConfig;
   },
 );
 
@@ -47,10 +47,4 @@ axiosClient.interceptors.response.use(
 );
 
 export const verifyDevice = () =>
-  fetch(ApiConfig.host + ApiConfig.routes.verifyDevice, {
-    headers: {
-      accept: 'application/json',
-      ['Content-Type']: 'application/json',
-      ['X-Device-ID']: ApiConfig.deviceId,
-    },
-  });
+  axiosClient.get(ApiConfig.routes.verifyDevice);

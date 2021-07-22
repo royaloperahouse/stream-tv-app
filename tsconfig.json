@@ -68,9 +68,17 @@
       "@hooks/*": ["./src/hooks/*"],
       "@themes/*": ["./src/themes/*"],
       "@utils/*": ["./src/utils/*"],
+      "@navigations/*": ["./src/navigations/*"],
     },
   },
   "exclude": [
     "node_modules", "babel.config.js", "metro.config.js", "jest.config.js"
+  ],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    // declarations
+    "declarations-libs.d.ts",
+    "declarations-modules.d.ts",
   ]
 }

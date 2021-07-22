@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<network-security-config cleartextTrafficPermitted="true">
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">localhost</domain>
-    </domain-config>
-    <base-config>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
-            <!-- Trust user added CAs while debuggable only -->
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+        <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.1.1</domain>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">roh-upgrade.global.ssl.fastly.net</domain>
+    </domain-config>
+        <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">royal-opera-house.cdn.prismic.io</domain>
+    </domain-config>
 </network-security-config>
-<!--This will only work only if the android variant has android:debuggable=true -->
-<!-- This is safer than the usual conditional code because, as a security precaution, app stores do not accept apps which are marked debuggable. -->
-<!-- cleartextTrafficPermitted="true" -->
