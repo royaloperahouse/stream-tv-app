@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
@@ -11,10 +11,11 @@ type TNavMenuItemProps = {
   SvgIconActiveComponent: any;
   SvgIconInActiveComponent: any;
   navMenuTitle: string;
-  onFocuse: (id: string, index: number) => void;
+  onFocuse: (id: string, index: number, ref: any) => void;
   isDefault: boolean;
   index: number;
   isLastItem: boolean;
+  onBlur: () => void;
 };
 const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   index,
@@ -25,6 +26,7 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   navMenuTitle,
   onFocuse,
   isDefault,
+  onBlur,
   isMenuShow,
   isLastItem,
 }) => {
@@ -38,12 +40,15 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
     },
     titleText: { opacity: isActive ? 1 : 0.5 },
   });
+  const touchRef = useRef<any>();
   const onFocuseHandler = useCallback(() => {
-    onFocuse(id, index);
+    onFocuse(id, index, touchRef);
   }, [onFocuse, id, index]);
   return (
     <TouchableHighlight
+      ref={touchRef}
       onFocus={onFocuseHandler}
+      onBlur={onBlur}
       hasTVPreferredFocus={false}
       style={dynemicStyles.touchableWrapperStyle}>
       <View style={styles.root}>
