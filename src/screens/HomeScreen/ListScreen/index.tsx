@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { scaleSize } from '@utils/scaleSize';
 
 import { EventModel } from '@services/types/models';
-
+import { navMenuManager } from '@components/NavMenu';
 import Preview from '@screens/HomeScreen/ListScreen/components/Preview';
 import Rail from '@screens/HomeScreen/ListScreen/components/Rail';
 
@@ -41,6 +41,7 @@ const ListView: React.FC<Props> = ({ navigation }) => {
   };
 
   const goToEvent = (event: EventModel) => {
+    navMenuManager.hideNavMenu();
     navigation.navigate('Detail', { event });
   };
 

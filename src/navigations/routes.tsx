@@ -21,8 +21,9 @@ import OperaMusicInActiveIcon from '@assets/svg/navIcons/Opera_&_Music.svg';
 import OperaMusicActiveIcon from '@assets/svg/navIcons/Opera_&_MusicActive.svg';
 import SettingsInActiveIcon from '@assets/svg/navIcons/Settings.svg';
 import SettingsActiveIcon from '@assets/svg/navIcons/SettingsActive.svg';
+import { TRoutes } from '@services/types/models';
 
-export const routes = [
+export const routes: TRoutes = [
   {
     navMenuScreenName: 'search',
     SvgIconActiveComponent: SearchActiveIcon,

@@ -5,13 +5,17 @@ import { EventModel } from '@services/types/models';
 interface EventsState {
   myList: Array<EventModel>;
   featured: Array<EventModel>;
-  isLoading: boolean;
+  allDigitalEventsDitail: { [key: string]: any };
+  eventGroups: { [key: string]: [string] };
+  digitalEventDitailsIdsForHomePage: Array<string>;
 }
 
 const initialState: EventsState = {
   myList: [],
   featured: [],
-  isLoading: false,
+  allDigitalEventsDitail: {},
+  eventGroups: {},
+  digitalEventDitailsIdsForHomePage: [],
 };
 
 initialState.myList = [
@@ -114,19 +118,22 @@ const eventsSlice = createSlice({
   name: 'events',
   initialState,
   reducers: {
-    getEventListStart: state => {
-      state.isLoading = true;
+    getEventListLoopStart: state => state,
+    getEventListSuccess: (state, { payload }) => {
+      state.allDigitalEventsDitail =
+        payload.digitalEventDetailsList.allDigitalEventsDitail;
+      state.eventGroups = payload.digitalEventDetailsList.eventGroups;
+      state.digitalEventDitailsIdsForHomePage =
+        payload.digitalEventDetailsList.eventIdsForHomePage;
     },
-    getEventListSuccess: state => {
-      state.isLoading = false;
-    },
-    getEventListError: state => {
-      state.isLoading = false;
-    },
+    getEventListLoopStop: state => state,
   },
 });
 
-export const { getEventListStart, getEventListSuccess, getEventListError } =
-  eventsSlice.actions;
+export const {
+  getEventListLoopStart,
+  getEventListSuccess,
+  getEventListLoopStop,
+} = eventsSlice.actions;
 
 export const { reducer, name } = eventsSlice;

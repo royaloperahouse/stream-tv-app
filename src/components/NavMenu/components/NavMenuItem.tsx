@@ -1,21 +1,26 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useLayoutEffect } from 'react';
 import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-
+import { TRoute } from '@services/types/models';
 type TNavMenuItemProps = {
   id: string;
-  isMenuShow?: boolean;
+  isMenuShow: boolean;
   isActive: boolean;
-  SvgIconActiveComponent: any;
-  SvgIconInActiveComponent: any;
-  navMenuTitle: string;
-  onFocuse: (id: string, index: number, ref: any) => void;
-  isDefault: boolean;
+  SvgIconActiveComponent: TRoute['SvgIconActiveComponent'];
+  SvgIconInActiveComponent: TRoute['SvgIconInActiveComponent'];
+  navMenuTitle: TRoute['navMenuTitle'];
+  onFocuse: (
+    id: string,
+    index: number,
+    ref: React.RefObject<TouchableHighlight>,
+  ) => void;
+  isDefault: TRoute['isDefault'];
   index: number;
   isLastItem: boolean;
   onBlur: () => void;
+  setActiveMunuItemRef: (ref: React.RefObject<TouchableHighlight>) => void;
 };
 const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   index,
@@ -25,11 +30,12 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   SvgIconInActiveComponent,
   navMenuTitle,
   onFocuse,
-  isDefault,
   onBlur,
   isMenuShow,
   isLastItem,
+  setActiveMunuItemRef,
 }) => {
+  const mountedComponentRef = useRef(false);
   const dynemicStyles = StyleSheet.create({
     touchableWrapperStyle: {
       marginBottom: isLastItem ? 0 : scaleSize(60),
@@ -40,16 +46,22 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
     },
     titleText: { opacity: isActive ? 1 : 0.5 },
   });
-  const touchRef = useRef<any>();
+  const touchRef = useRef<TouchableHighlight | null>(null);
   const onFocuseHandler = useCallback(() => {
     onFocuse(id, index, touchRef);
   }, [onFocuse, id, index]);
+
+  useLayoutEffect(() => {
+    if (!mountedComponentRef.current && isActive) {
+      setActiveMunuItemRef(touchRef);
+    }
+    mountedComponentRef.current = true;
+  }, [setActiveMunuItemRef, isActive]);
   return (
     <TouchableHighlight
       ref={touchRef}
       onFocus={onFocuseHandler}
       onBlur={onBlur}
-      hasTVPreferredFocus={false}
       style={dynemicStyles.touchableWrapperStyle}>
       <View style={styles.root}>
         <View style={[styles.iconContainer, dynemicStyles.iconContainer]}>

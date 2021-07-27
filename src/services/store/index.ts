@@ -21,7 +21,8 @@ const sagaMiddleware = createSagaMiddleware();
 const anyMiddlewares = [sagaMiddleware];
 const middlewares = [
   ...getDefaultMiddleware({
-    thunk: true,
+    thunk: false,
+    serializableCheck: false,
   }),
   ...anyMiddlewares,
 ];

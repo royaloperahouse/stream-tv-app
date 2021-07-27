@@ -6,6 +6,11 @@ import {
   checkDeviceError,
   checkDeviceStart,
 } from '@services/store/auth/Slices';
+import {
+  getEventListLoopStart,
+  //getEventListLoopStop, // fire on logout
+} from '@services/store/events/Slices';
+
 import { Task } from 'redux-saga';
 import { all, call, cancel, delay, fork, put, take } from 'redux-saga/effects';
 import { verifyDevice } from '@services/apiClient';
@@ -32,7 +37,6 @@ function* loginLoopWatcher(): any {
     }
 
     if (action.type === endLoginLoop.toString() && task) {
-      console.log('I am here');
       yield cancel(task);
       task = null;
     }
@@ -47,6 +51,7 @@ function* loginLoopWorker(): any {
       const response: any = yield call(verifyDevice);
       if (response?.data?.data?.attributes?.customerId) {
         runLoop = false;
+        yield put(getEventListLoopStart());
         yield put(checkDeviceSuccess(response.data));
       } else if (
         response?.data?.errors?.some(

@@ -7,6 +7,7 @@ import GoBack from '@components/GoBack';
 import General from '@screens/HomeScreen/DetailsScreen/components/General';
 import Synopsys from '@screens/HomeScreen/DetailsScreen/components/Synopsys';
 import Cast from '@screens/HomeScreen/DetailsScreen/components/Cast';
+import { Dimensions } from 'react-native';
 
 type Props = {
   route?: any; // TODO: find the corrent type for that
@@ -49,11 +50,13 @@ const DetailView: React.FC<Props> = ({ route }) => {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    //flex: 1,
+    flexDirection: 'row',
+    height: Dimensions.get('window').height,
   },
   container: {
     flex: 1,
-    marginLeft: scaleSize(200),
+    //marginLeft: scaleSize(200),
   },
 });
 

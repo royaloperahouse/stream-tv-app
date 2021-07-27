@@ -56,11 +56,19 @@ const commonQuery = (function () {
   };
 })();
 
-export const getDigitalEventDetails = () =>
+export const getDigitalEventDetails = (
+  queryObj: TQueryObj = {},
+): Promise<ApiSearchResponse> =>
   commonQuery({
     queryPredicates: [
       Prismic.Predicates.at('document.type', documentTypes.digitalEventDetails),
+      ...[
+        ...(Array.isArray(queryObj.queryPredicates)
+          ? queryObj.queryPredicates
+          : []),
+      ],
     ],
+    queryOptions: queryObj.queryOptions,
   });
 
 export default prismicApiClient;

@@ -16,3 +16,15 @@ export interface EventModel {
   cast: Array<Cast>;
   creatives: Array<Cast>;
 }
+
+export type TRoutes = Array<TRoute>;
+
+export type TRoute = {
+  navMenuScreenName: string;
+  SvgIconActiveComponent: any;
+  SvgIconInActiveComponent: any;
+  navMenuTitle: string;
+  position: number;
+  isDefault: boolean;
+  ScreenComponent: React.FC<any>;
+};
