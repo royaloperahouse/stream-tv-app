@@ -1,12 +1,11 @@
 import React, { useCallback, useRef, useLayoutEffect } from 'react';
-import { View, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, Animated } from 'react-native';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import { TRoute } from '@services/types/models';
 type TNavMenuItemProps = {
   id: string;
-  isMenuShow: boolean;
   isActive: boolean;
   SvgIconActiveComponent: TRoute['SvgIconActiveComponent'];
   SvgIconInActiveComponent: TRoute['SvgIconInActiveComponent'];
@@ -20,7 +19,10 @@ type TNavMenuItemProps = {
   index: number;
   isLastItem: boolean;
   onBlur: () => void;
+  labelOpacityValue: Animated.AnimatedInterpolation;
   setActiveMunuItemRef: (ref: React.RefObject<TouchableHighlight>) => void;
+  isVisibl: boolean;
+  iconOpacityValue: Animated.AnimatedInterpolation;
 };
 const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   index,
@@ -31,9 +33,11 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   navMenuTitle,
   onFocuse,
   onBlur,
-  isMenuShow,
   isLastItem,
+  labelOpacityValue,
   setActiveMunuItemRef,
+  isVisibl,
+  iconOpacityValue,
 }) => {
   const mountedComponentRef = useRef(false);
   const dynemicStyles = StyleSheet.create({
@@ -62,9 +66,15 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
       ref={touchRef}
       onFocus={onFocuseHandler}
       onBlur={onBlur}
+      accessible={isVisibl}
       style={dynemicStyles.touchableWrapperStyle}>
       <View style={styles.root}>
-        <View style={[styles.iconContainer, dynemicStyles.iconContainer]}>
+        <Animated.View
+          style={[
+            styles.iconContainer,
+            dynemicStyles.iconContainer,
+            { opacity: iconOpacityValue },
+          ]}>
           {isActive ? (
             <SvgIconActiveComponent
               width={scaleSize(40)}
@@ -76,12 +86,13 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
               height={scaleSize(40)}
             />
           )}
-        </View>
-        {isMenuShow && (
+        </Animated.View>
+        <Animated.View
+          style={[styles.titleContainer, { opacity: labelOpacityValue }]}>
           <RohText style={[styles.titleText, dynemicStyles.titleText]}>
             {navMenuTitle.toUpperCase()}
           </RohText>
-        )}
+        </Animated.View>
       </View>
     </TouchableHighlight>
   );
@@ -92,6 +103,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(50),
     alignItems: 'center',
+    width: '100%',
+    overflow: 'hidden',
   },
   iconContainer: {
     height: '100%',
@@ -100,11 +113,17 @@ const styles = StyleSheet.create({
     marginRight: scaleSize(20),
     paddingBottom: scaleSize(4),
   },
+  titleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
   titleText: {
     fontSize: scaleSize(24),
     letterSpacing: scaleSize(1),
     lineHeight: scaleSize(28),
     color: Colors.navIconDefault,
+    width: scaleSize(350), // need to setup good value;
   },
 });
 

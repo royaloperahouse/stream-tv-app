@@ -1,35 +1,39 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet, TouchableHighlight } from 'react-native';
+import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { EventModel } from '@services/types/models';
 import RohText from '@components/RohText';
-
+import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 type Props = {
   event: EventModel;
   selectEvent: (event: EventModel) => void;
   goToEvent: (event: EventModel) => void;
+  canMoveUp?: boolean;
+  hasTVPreferredFocus?: boolean;
 };
 
-const Item: React.FC<Props> = ({ event, selectEvent, goToEvent }) => {
-  const [isItemActive, setFocus] = useState(false);
-
+const Item: React.FC<Props> = ({
+  event,
+  selectEvent,
+  goToEvent,
+  canMoveUp,
+  hasTVPreferredFocus,
+}) => {
   return (
     <View style={styles.container}>
-      <TouchableHighlight
-        style={
-          isItemActive ? styles.imageContainerActive : styles.imageContainer
-        }
+      <TouchableHighlightWrapper
+        hasTVPreferredFocus={hasTVPreferredFocus}
+        canMoveUp={canMoveUp}
+        styleFocused={styles.imageContainerActive}
+        style={styles.imageContainer}
         onFocus={() => {
           selectEvent(event);
-          setFocus(true);
         }}
-        onBlur={() => setFocus(false)}
-        onPress={() => goToEvent(event)}
-        accessible>
+        onPress={() => goToEvent(event)}>
         <View>
           <Image style={styles.image} source={{ uri: event.previewImage }} />
         </View>
-      </TouchableHighlight>
+      </TouchableHighlightWrapper>
       <RohText style={styles.title}>{event.title}</RohText>
     </View>
   );

@@ -56,6 +56,8 @@ const ListView: React.FC<Props> = ({ navigation }) => {
           events={myList}
           selectEvent={fadeOutPreview}
           goToEvent={goToEvent}
+          canMoveUp={false}
+          defaultFocuse
         />
         <Rail
           title="Featured"
