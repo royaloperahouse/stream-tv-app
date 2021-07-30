@@ -4,6 +4,8 @@ export const Colors = Object.freeze({
   defaultBlue: '#6990CE',
   navIconDefault: '#F1F1F1',
   navIconActive: '#FFFFFF',
+  defaultTextColor: '#F1F1F1',
+  searchDisplayBackgroundColor: '#4B5B7A', //#7E91B4'
 });
 
 export const Images = Object.freeze({

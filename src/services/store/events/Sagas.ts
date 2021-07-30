@@ -6,7 +6,7 @@ import {
 } from '@services/store/events/Slices';
 import { Task } from 'redux-saga';
 import { all, call, cancel, delay, fork, put, take } from 'redux-saga/effects';
-import { logError, log } from '@utils/loger';
+import { logError } from '@utils/loger';
 import { getDigitalEventDetails } from '@services/prismicApiClient';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 
@@ -112,18 +112,14 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
         last_publication_date: digitalEventDetail.last_publication_date,
         data: digitalEventDetail.data,
       };
-      const groupKeys: Array<string> =
-        digitalEventDetail.data.vs_event_details.tags.reduce<Array<string>>(
-          (acc, tag) => {
-            const key = tag.attributes.title
-              .toLowerCase()
-              .trim()
-              .replace(/\s/g, '_');
-            acc.push(key);
-            return acc;
-          },
-          [],
-        );
+      const tags: Array<any> = Array.isArray(
+        digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
+      )
+        ? digitalEventDetail.data.vs_event_details.tags
+        : [];
+      const groupKeys: Array<string> = tags.map(tag =>
+        tag.attributes.title.toLowerCase().trim().replace(/\s/g, '_'),
+      );
       for (let i = 0; i < groupKeys.length; i++) {
         if (groupKeys[i] in acc.eventGroups) {
           acc.eventGroups[groupKeys[i]].push(digitalEventDetail.id);

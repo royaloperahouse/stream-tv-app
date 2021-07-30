@@ -5,6 +5,8 @@ import {
   TargetedEvent,
   TouchableHighlight,
   TouchableHighlightProps,
+  GestureResponderEvent,
+  Platform,
 } from 'react-native';
 import { navMenuManager } from '@components/NavMenu';
 
@@ -27,10 +29,12 @@ const TouchableHighlightWrapper: React.FC<TTouchableHighlightWrapperProps> =
       styleFocused = {},
       onFocus,
       onBlur,
+      onPress,
       style = {},
       ...restProps
     } = props;
     const [focused, setFocused] = useState(false);
+    const onPressRef = useRef<number>(0);
     const touchableHighlightRef = useRef<TouchableHighlight>(null);
     const movingAccessibility = {
       nextFocusUp: !canMoveUp
@@ -66,11 +70,28 @@ const TouchableHighlightWrapper: React.FC<TTouchableHighlightWrapperProps> =
       },
       [onBlur],
     );
-
+    const onPressHandler = useCallback(
+      (event: GestureResponderEvent): void => {
+        if (
+          Platform.isTV &&
+          Platform.OS === 'android' &&
+          onPressRef.current < 2
+        ) {
+          onPressRef.current += 1;
+          return;
+        }
+        if (typeof onPress === 'function') {
+          onPress(event);
+        }
+        onPressRef.current = 0;
+      },
+      [onPress],
+    );
     return (
       <TouchableHighlight
         {...restProps}
         {...movingAccessibility}
+        onPress={onPressHandler}
         ref={touchableHighlightRef}
         onFocus={onFocuseHandler}
         onBlur={onBlurHandler}
