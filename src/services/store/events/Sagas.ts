@@ -60,7 +60,7 @@ function* getEventListLoopWorker(): any {
               pageRequestsResult: PromiseSettledResult<ApiSearchResponse>,
             ) => {
               if (pageRequestsResult.status === 'fulfilled') {
-                acc.push(pageRequestsResult.value.results);
+                acc.push(...pageRequestsResult.value.results);
               }
               return acc;
             },
@@ -68,6 +68,10 @@ function* getEventListLoopWorker(): any {
           ),
         );
       }
+    } catch (err) {
+      logError('something went wrong with prismic request', err);
+    }
+    if (result.length) {
       eventIdsForHomePage.push(
         ...result.reduce((acc, event: any, index) => {
           if (index % 2 === 0) {
@@ -76,16 +80,12 @@ function* getEventListLoopWorker(): any {
           return acc;
         }, []),
       );
-    } catch (err) {
-      logError('something went wrong with prismic request', err);
-    }
-    if (result.length) {
-      const resultForDigitalEventsDitailUpdate = groupDigitalEvents(result);
-      resultForDigitalEventsDitailUpdate.eventIdsForHomePage =
+      const resultForDigitalEventsDetailUpdate = groupDigitalEvents(result);
+      resultForDigitalEventsDetailUpdate.eventIdsForHomePage =
         eventIdsForHomePage;
       yield put(
         getEventListSuccess({
-          digitalEventDetailsList: resultForDigitalEventsDitailUpdate,
+          digitalEventDetailsList: resultForDigitalEventsDetailUpdate,
         }),
       );
     }
@@ -107,7 +107,7 @@ function eventPromiseFill(
 function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
   return digitalEventsDetail.reduce<any>(
     (acc, digitalEventDetail) => {
-      acc.allDigitalEventsDitail[digitalEventDetail.id] = {
+      acc.allDigitalEventsDetail[digitalEventDetail.id] = {
         id: digitalEventDetail.id,
         last_publication_date: digitalEventDetail.last_publication_date,
         data: digitalEventDetail.data,
@@ -130,7 +130,7 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
       return acc;
     },
     {
-      allDigitalEventsDitail: {},
+      allDigitalEventsDetail: {},
       eventGroups: {},
     },
   );

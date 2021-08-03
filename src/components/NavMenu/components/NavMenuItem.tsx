@@ -10,7 +10,7 @@ type TNavMenuItemProps = {
   SvgIconActiveComponent: TRoute['SvgIconActiveComponent'];
   SvgIconInActiveComponent: TRoute['SvgIconInActiveComponent'];
   navMenuTitle: TRoute['navMenuTitle'];
-  onFocuse: (
+  onFocus: (
     id: string,
     index: number,
     ref: React.RefObject<TouchableHighlight>,
@@ -21,7 +21,7 @@ type TNavMenuItemProps = {
   onBlur: () => void;
   labelOpacityValue: Animated.AnimatedInterpolation;
   setActiveMunuItemRef: (ref: React.RefObject<TouchableHighlight>) => void;
-  isVisibl: boolean;
+  isVisible: boolean;
   iconOpacityValue: Animated.AnimatedInterpolation;
 };
 const NavMenuItem: React.FC<TNavMenuItemProps> = ({
@@ -31,12 +31,12 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   SvgIconActiveComponent,
   SvgIconInActiveComponent,
   navMenuTitle,
-  onFocuse,
+  onFocus,
   onBlur,
   isLastItem,
   labelOpacityValue,
   setActiveMunuItemRef,
-  isVisibl,
+  isVisible,
   iconOpacityValue,
 }) => {
   const mountedComponentRef = useRef(false);
@@ -51,9 +51,9 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
     titleText: { opacity: isActive ? 1 : 0.5 },
   });
   const touchRef = useRef<TouchableHighlight | null>(null);
-  const onFocuseHandler = useCallback(() => {
-    onFocuse(id, index, touchRef);
-  }, [onFocuse, id, index]);
+  const onFocusHandler = useCallback(() => {
+    onFocus(id, index, touchRef);
+  }, [onFocus, id, index]);
 
   useLayoutEffect(() => {
     if (!mountedComponentRef.current && isActive) {
@@ -64,9 +64,9 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   return (
     <TouchableHighlight
       ref={touchRef}
-      onFocus={onFocuseHandler}
+      onFocus={onFocusHandler}
       onBlur={onBlur}
-      accessible={isVisibl}
+      accessible={isVisible}
       style={dynemicStyles.touchableWrapperStyle}>
       <View style={styles.root}>
         <Animated.View

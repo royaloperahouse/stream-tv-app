@@ -50,7 +50,7 @@ const TouchableHighlightWrapper: React.FC<TTouchableHighlightWrapperProps> =
         ? findNodeHandle(touchableHighlightRef.current)
         : undefined,
     };
-    const onFocuseHandler = useCallback(
+    const onFocusHandler = useCallback(
       (event: NativeSyntheticEvent<TargetedEvent>): void => {
         navMenuManager.setNavMenuBlur();
         setFocused(true);
@@ -93,7 +93,7 @@ const TouchableHighlightWrapper: React.FC<TTouchableHighlightWrapperProps> =
         {...movingAccessibility}
         onPress={onPressHandler}
         ref={touchableHighlightRef}
-        onFocus={onFocuseHandler}
+        onFocus={onFocusHandler}
         onBlur={onBlurHandler}
         style={[style, focused && styleFocused]}>
         {children}

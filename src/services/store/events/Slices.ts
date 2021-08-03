@@ -5,17 +5,19 @@ import { EventModel } from '@services/types/models';
 interface EventsState {
   myList: Array<EventModel>;
   featured: Array<EventModel>;
-  allDigitalEventsDitail: { [key: string]: any };
+  allDigitalEventsDetail: { [key: string]: any };
   eventGroups: { [key: string]: [string] };
-  digitalEventDitailsIdsForHomePage: Array<string>;
+  digitalEventDetailsIdsForHomePage: Array<string>;
+  searchQueryString: string;
 }
 
 const initialState: EventsState = {
   myList: [],
   featured: [],
-  allDigitalEventsDitail: {},
+  allDigitalEventsDetail: {},
   eventGroups: {},
-  digitalEventDitailsIdsForHomePage: [],
+  digitalEventDetailsIdsForHomePage: [],
+  searchQueryString: '',
 };
 
 initialState.myList = [
@@ -120,13 +122,28 @@ const eventsSlice = createSlice({
   reducers: {
     getEventListLoopStart: state => state,
     getEventListSuccess: (state, { payload }) => {
-      state.allDigitalEventsDitail =
-        payload.digitalEventDetailsList.allDigitalEventsDitail;
+      state.allDigitalEventsDetail =
+        payload.digitalEventDetailsList.allDigitalEventsDetail;
       state.eventGroups = payload.digitalEventDetailsList.eventGroups;
-      state.digitalEventDitailsIdsForHomePage =
+      state.digitalEventDetailsIdsForHomePage =
         payload.digitalEventDetailsList.eventIdsForHomePage;
     },
     getEventListLoopStop: state => state,
+    setSearchQuery: (state, { payload }) => {
+      if (payload.searchQuery.length) {
+        state.searchQueryString += payload.searchQuery;
+      } else {
+        state.searchQueryString = state.searchQueryString.length
+          ? state.searchQueryString.substr(
+              0,
+              state.searchQueryString.length - 1,
+            )
+          : state.searchQueryString;
+      }
+    },
+    clearSearchQuery: state => {
+      state.searchQueryString = { ...initialState }.searchQueryString;
+    },
   },
 });
 
@@ -134,6 +151,8 @@ export const {
   getEventListLoopStart,
   getEventListSuccess,
   getEventListLoopStop,
+  setSearchQuery,
+  clearSearchQuery,
 } = eventsSlice.actions;
 
 export const { reducer, name } = eventsSlice;

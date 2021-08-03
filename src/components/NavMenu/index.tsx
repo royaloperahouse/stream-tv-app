@@ -19,18 +19,18 @@ import { navigate } from '@navigations/navigationContainer';
 import { TRoute } from '@services/types/models';
 import {
   widthInvisble,
-  widthWithFocuse,
-  widthWithOutFocuse,
+  widthWithFocus,
+  widthWithOutFocus,
   breakPointInvisble,
-  breakPointWithFocuse,
-  breakPointWithOutFocuse,
-  marginRightWithFocuse,
-  marginRightWithOutFocuse,
+  breakPointWithFocus,
+  breakPointWithOutFocus,
+  marginRightWithFocus,
+  marginRightWithOutFocus,
   opacityOfItemTextStart,
   opacityOfItemTextStop,
   opacityOfItemIconStart,
   opacityOfItemIconStop,
-  focuseAnimationDuration,
+  focusAnimationDuration,
   visibleAnimationDuration,
   marginLeftStart,
   marginLeftStop,
@@ -76,41 +76,41 @@ export const navMenuManager = Object.freeze({
 
 const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   const navMenuMountedRef = useRef<boolean>(false);
-  const [isMenuVisibl, setIsMenuVisibl] = useState<boolean>(true);
+  const [isMenuVisible, setIsMenuVisible] = useState<boolean>(true);
   const [isMenuFocused, setIsMenuFocused] = useState<boolean>(false);
   const [activeMenuId, setActiveMenuid] = useState<string>(
     navMenuConfig.find(route => route.isDefault)?.navMenuScreenName ||
       navMenuConfig[0].navMenuScreenName,
   );
   const menuAnimation = useRef<Animated.Value>(
-    new Animated.Value(breakPointWithOutFocuse),
+    new Animated.Value(breakPointWithOutFocus),
   ).current;
-  const menuFocuseAnimationInProcess = useRef<boolean>(false);
-  const menuVisiblAnimationInProcess = useRef<boolean>(false);
-  const menuFocuseInterpolate: Animated.AnimatedInterpolation =
+  const menuFocusAnimationInProcess = useRef<boolean>(false);
+  const menuVisibleAnimationInProcess = useRef<boolean>(false);
+  const menuFocusInterpolate: Animated.AnimatedInterpolation =
     menuAnimation.interpolate({
       inputRange: [
         breakPointInvisble,
-        breakPointWithOutFocuse,
-        breakPointWithFocuse,
+        breakPointWithOutFocus,
+        breakPointWithFocus,
       ],
-      outputRange: [widthInvisble, widthWithOutFocuse, widthWithFocuse],
+      outputRange: [widthInvisble, widthWithOutFocus, widthWithFocus],
     });
   const menuItemInterpolation: Animated.AnimatedInterpolation =
-    menuFocuseInterpolate.interpolate({
-      inputRange: [widthWithOutFocuse, widthWithFocuse],
+    menuFocusInterpolate.interpolate({
+      inputRange: [widthWithOutFocus, widthWithFocus],
       outputRange: [opacityOfItemTextStart, opacityOfItemTextStop],
       extrapolate: 'clamp',
     });
   const menuItemIconInterpolation: Animated.AnimatedInterpolation =
     menuAnimation.interpolate({
-      inputRange: [breakPointInvisble, breakPointWithOutFocuse],
+      inputRange: [breakPointInvisble, breakPointWithOutFocus],
       outputRange: [opacityOfItemIconStart, opacityOfItemIconStop],
       extrapolate: 'clamp',
     });
   const marginLeftInterpolation: Animated.AnimatedInterpolation =
     menuAnimation.interpolate({
-      inputRange: [breakPointInvisble, breakPointWithOutFocuse],
+      inputRange: [breakPointInvisble, breakPointWithOutFocus],
       outputRange: [marginLeftStart, marginLeftStop],
       extrapolateRight: 'clamp',
     });
@@ -118,13 +118,13 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     menuAnimation.interpolate({
       inputRange: [
         breakPointInvisble,
-        breakPointWithOutFocuse,
-        breakPointWithFocuse,
+        breakPointWithOutFocus,
+        breakPointWithFocus,
       ],
       outputRange: [
         marginRightInvisble,
-        marginRightWithOutFocuse,
-        marginRightWithFocuse,
+        marginRightWithOutFocus,
+        marginRightWithFocus,
       ],
     });
   const flatListRef = useRef<FlatList | null>(null);
@@ -140,10 +140,10 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     navMenuRef,
     () => ({
       showNavMenu: () => {
-        setIsMenuVisibl(true);
+        setIsMenuVisible(true);
       },
       hideNavMenu: () => {
-        setIsMenuVisibl(false);
+        setIsMenuVisible(false);
       },
       setNavMenuBlur: () => {
         if (onBlurRef.current) {
@@ -154,11 +154,11 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     }),
     [],
   );
-  const setMenuBlure = useCallback(() => {
+  const setMenuBlur = useCallback(() => {
     onBlurRef.current = true;
   }, []);
 
-  const setMenuFocuse = useCallback(
+  const setMenuFocus = useCallback(
     (id: string, index: number, ref: React.RefObject<TouchableHighlight>) => {
       if (onBlurRef.current) {
         setActiveMenuid(id);
@@ -190,44 +190,44 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   useLayoutEffect(() => {
     if (
       !navMenuMountedRef.current ||
-      menuVisiblAnimationInProcess.current ||
-      menuFocuseAnimationInProcess.current
+      menuVisibleAnimationInProcess.current ||
+      menuFocusAnimationInProcess.current
     ) {
       return;
     }
-    menuFocuseAnimationInProcess.current = true;
+    menuFocusAnimationInProcess.current = true;
     Animated.timing(menuAnimation, {
-      toValue: isMenuFocused ? breakPointWithFocuse : breakPointWithOutFocuse,
-      duration: focuseAnimationDuration,
+      toValue: isMenuFocused ? breakPointWithFocus : breakPointWithOutFocus,
+      duration: focusAnimationDuration,
       useNativeDriver: false,
     }).start(({ finished }) => {
-      if (!finished && !menuVisiblAnimationInProcess.current) {
+      if (!finished && !menuVisibleAnimationInProcess.current) {
         menuAnimation.setValue(
-          isMenuFocused ? breakPointWithOutFocuse : breakPointWithFocuse,
+          isMenuFocused ? breakPointWithOutFocus : breakPointWithFocus,
         );
       }
-      menuFocuseAnimationInProcess.current = false;
+      menuFocusAnimationInProcess.current = false;
     });
   }, [isMenuFocused, menuAnimation]);
 
   useLayoutEffect(() => {
-    if (!navMenuMountedRef.current || menuVisiblAnimationInProcess.current) {
+    if (!navMenuMountedRef.current || menuVisibleAnimationInProcess.current) {
       return;
     }
-    menuVisiblAnimationInProcess.current = true;
+    menuVisibleAnimationInProcess.current = true;
     Animated.timing(menuAnimation, {
-      toValue: isMenuVisibl ? breakPointWithOutFocuse : breakPointInvisble,
+      toValue: isMenuVisible ? breakPointWithOutFocus : breakPointInvisble,
       duration: visibleAnimationDuration,
       useNativeDriver: false,
     }).start(({ finished }) => {
       if (!finished) {
         menuAnimation.setValue(
-          isMenuVisibl ? breakPointInvisble : breakPointWithOutFocuse,
+          isMenuVisible ? breakPointInvisble : breakPointWithOutFocus,
         );
       }
-      menuVisiblAnimationInProcess.current = false;
+      menuVisibleAnimationInProcess.current = false;
     });
-  }, [isMenuVisibl, menuAnimation]);
+  }, [isMenuVisible, menuAnimation]);
 
   useLayoutEffect(() => {
     navMenuMountedRef.current = true;
@@ -239,7 +239,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
         {
           marginLeft: marginLeftInterpolation,
           marginRight: marginRightInterpolation,
-          width: menuFocuseInterpolate,
+          width: menuFocusInterpolate,
         },
       ]}>
       {
@@ -266,14 +266,14 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
               SvgIconActiveComponent={item.SvgIconActiveComponent}
               SvgIconInActiveComponent={item.SvgIconInActiveComponent}
               navMenuTitle={item.navMenuTitle}
-              onFocuse={setMenuFocuse}
-              onBlur={setMenuBlure}
+              onFocus={setMenuFocus}
+              onBlur={setMenuBlur}
               isDefault={item.isDefault}
               isLastItem={index === navMenuConfig.length - 1}
               setActiveMunuItemRef={setActiveMunuItemRef}
               labelOpacityValue={menuItemInterpolation}
               iconOpacityValue={menuItemIconInterpolation}
-              isVisibl={isMenuVisibl}
+              isVisible={isMenuVisible}
             />
           )}
         />

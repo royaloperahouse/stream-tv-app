@@ -11,7 +11,7 @@ type Props = {
   selectEvent: (event: EventModel) => void;
   goToEvent: (event: EventModel) => void;
   canMoveUp?: boolean;
-  defaultFocuse?: boolean;
+  defaultFocus?: boolean;
 };
 
 const Rail: React.FC<Props> = ({
@@ -20,7 +20,7 @@ const Rail: React.FC<Props> = ({
   selectEvent,
   goToEvent,
   canMoveUp,
-  defaultFocuse,
+  defaultFocus,
 }) => {
   return (
     <View style={styles.container}>
@@ -28,7 +28,7 @@ const Rail: React.FC<Props> = ({
       <ScrollView horizontal>
         {events.map((event, index) => (
           <Item
-            hasTVPreferredFocus={defaultFocuse && index === 0}
+            hasTVPreferredFocus={defaultFocus && index === 0}
             event={event}
             selectEvent={selectEvent}
             key={event.id}

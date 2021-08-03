@@ -4,6 +4,12 @@ import { SentryDNS } from '@configs/globalConfig';
 import { Provider } from 'react-redux';
 import { store } from '@services/store';
 import AppLayout from '@layouts/appLayout';
+
+// Pronlem with allSettled in RN 0.63, 0.64; use promise.allsettled as polyfill
+if (typeof Promise.allSettled !== 'function') {
+  Promise.allSettled = require('promise.allsettled');
+}
+
 // Enable screens
 import { enableScreens } from 'react-native-screens';
 Sentry.init({

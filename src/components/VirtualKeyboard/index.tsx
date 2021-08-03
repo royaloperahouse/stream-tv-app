@@ -10,6 +10,9 @@ import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import Delete from '@assets/svg/virualKeybord/Delete.svg';
 import Space from '@assets/svg/virualKeybord/Space.svg';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { searchQuerySelector } from '@services/store/events/Selectors';
+import { setSearchQuery } from '@services/store/events/Slices';
 
 const keyboardDataLocale: TKeyboardAdditionalLocales = [
   keyboardDataEng,
@@ -167,25 +170,23 @@ export const DisplayForVirtualKeyboard = forwardRef<
   TDisplayForVirtualKeyboardProps
 >((props, ref) => {
   const { containerStyle = {}, textStyle = {} } = props;
-  const [searchText, setSearchText] = useState<string>('');
+  const searchText = useSelector(searchQuerySelector, shallowEqual);
+  const dispatch = useDispatch();
+
   useImperativeHandle(
     ref,
     () => ({
       addLetterToSearch: (text: string): void => {
-        setSearchText(prevState => prevState + text);
+        dispatch(setSearchQuery({ searchQuery: text }));
       },
       addSpaceToSearch: (): void => {
-        setSearchText(prevState => prevState + ' ');
+        dispatch(setSearchQuery({ searchQuery: ' ' }));
       },
       removeLetterFromSearch: (): void => {
-        setSearchText(prevState =>
-          prevState.length
-            ? prevState.substr(0, prevState.length - 1)
-            : prevState,
-        );
+        dispatch(setSearchQuery({ searchQuery: '' }));
       },
     }),
-    [],
+    [dispatch],
   );
   return (
     <View style={[dStyle.container, containerStyle]}>
