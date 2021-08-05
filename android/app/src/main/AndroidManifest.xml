@@ -8,7 +8,7 @@
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
-      android:allowBackup="false"
+      android:allowBackup="true"
       android:banner="@drawable/tv_banner"
       android:screenOrientation="portrait"
       android:usesCleartextTraffic="true"
@@ -30,6 +30,8 @@
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+
+      <meta-data android:name="BITMOVIN_PLAYER_LICENSE_KEY" android:value="fcf95645-e1ce-40df-a64d-0cdc78f5d0d2" />
     </application>
 
 </manifest>
