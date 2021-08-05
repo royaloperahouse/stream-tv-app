@@ -3,15 +3,31 @@ import {
   getEventListLoopStart,
   getEventListSuccess,
   getEventListLoopStop,
+  saveSearchResultQuery,
 } from '@services/store/events/Slices';
+import { searchQuerySelector } from '@services/store/events/Selectors';
 import { Task } from 'redux-saga';
-import { all, call, cancel, delay, fork, put, take } from 'redux-saga/effects';
+import {
+  all,
+  call,
+  cancel,
+  delay,
+  fork,
+  put,
+  select,
+  take,
+  takeEvery,
+} from 'redux-saga/effects';
 import { logError } from '@utils/loger';
 import { getDigitalEventDetails } from '@services/prismicApiClient';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
+import { addItemToPrevSearchList } from '@services/previousSearch';
 
 export default function* eventRootSagas() {
-  yield all([call(getEventListLoopWatcher)]);
+  yield all([
+    call(getEventListLoopWatcher),
+    call(saveSearchResultQueryWatcher),
+  ]);
 }
 
 function* getEventListLoopWatcher() {
@@ -34,6 +50,13 @@ function* getEventListLoopWatcher() {
       task = null;
     }
   }
+}
+
+function* saveSearchResultQueryWatcher() {
+  yield takeEvery(
+    saveSearchResultQuery.toString(),
+    saveSearchResultQueryWorker,
+  );
 }
 
 function* getEventListLoopWorker(): any {
@@ -91,6 +114,11 @@ function* getEventListLoopWorker(): any {
     }
     yield call(bigDelay, 30 * 60 * 1000);
   }
+}
+
+function* saveSearchResultQueryWorker(): any {
+  const searchQueryString = yield select(searchQuerySelector);
+  yield call(addItemToPrevSearchList, searchQueryString);
 }
 
 function eventPromiseFill(

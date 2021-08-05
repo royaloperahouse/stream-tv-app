@@ -141,9 +141,13 @@ const eventsSlice = createSlice({
           : state.searchQueryString;
       }
     },
+    setFullSearchQuery: (state, { payload }) => {
+      state.searchQueryString = payload.searchQuery;
+    },
     clearSearchQuery: state => {
       state.searchQueryString = { ...initialState }.searchQueryString;
     },
+    saveSearchResultQuery: state => state,
   },
 });
 
@@ -153,6 +157,8 @@ export const {
   getEventListLoopStop,
   setSearchQuery,
   clearSearchQuery,
+  setFullSearchQuery,
+  saveSearchResultQuery,
 } = eventsSlice.actions;
 
 export const { reducer, name } = eventsSlice;

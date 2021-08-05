@@ -4,6 +4,7 @@ import { scaleSize } from '@utils/scaleSize';
 import { EventModel } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import { useRef } from 'react';
 type Props = {
   event: EventModel;
   selectEvent: (event: EventModel) => void;

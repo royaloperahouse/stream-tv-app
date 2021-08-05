@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,7 @@ import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 
-type TButtonPRops = {
+type TButtonProps = TouchableHighlightProps & {
   text?: string;
   Icon?: any;
   iconWidth?: number;
@@ -25,39 +25,45 @@ type TButtonPRops = {
   hasTVPreferredFocus?: boolean;
 };
 
-const Button: React.FC<TButtonPRops> = ({
-  text,
-  Icon,
-  onPress,
-  style = {},
-  styleFocused = {},
-  textStyle = {},
-  iconHeight = scaleSize(40),
-  iconWidth = scaleSize(40),
-  hasTVPreferredFocus = false,
-  ...restProps
-}) => {
-  const onClick = () => {
-    onPress(text);
-  };
-  return (
-    <TouchableHighlightWrapper
-      style={[styles.touchContainer, style]}
-      styleFocused={[styleFocused, styles.styleFocused]}
-      {...restProps}
-      hasTVPreferredFocus={hasTVPreferredFocus}
-      onPress={onClick}>
-      <View style={styles.viewContainer}>
-        {text !== undefined && text !== '' && (
-          <RohText style={[styles.textStyle, textStyle]}>
-            {text.toUpperCase()}
-          </RohText>
-        )}
-        {Icon && <Icon width={iconWidth} height={iconHeight} />}
-      </View>
-    </TouchableHighlightWrapper>
-  );
-};
+const Button = forwardRef<any, TButtonProps>(
+  (
+    {
+      text,
+      Icon,
+      onPress,
+      style = {},
+      styleFocused = {},
+      textStyle = {},
+      iconHeight = scaleSize(40),
+      iconWidth = scaleSize(40),
+      hasTVPreferredFocus = false,
+      ...restProps
+    },
+    ref,
+  ) => {
+    const onClick = () => {
+      onPress(text);
+    };
+    return (
+      <TouchableHighlightWrapper
+        ref={ref}
+        style={[styles.touchContainer, style]}
+        styleFocused={[styleFocused, styles.styleFocused]}
+        {...restProps}
+        hasTVPreferredFocus={hasTVPreferredFocus}
+        onPress={onClick}>
+        <View style={styles.viewContainer}>
+          {text !== undefined && text !== '' && (
+            <RohText style={[styles.textStyle, textStyle]}>
+              {text.toUpperCase()}
+            </RohText>
+          )}
+          {Icon && <Icon width={iconWidth} height={iconHeight} />}
+        </View>
+      </TouchableHighlightWrapper>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   touchContainer: {},

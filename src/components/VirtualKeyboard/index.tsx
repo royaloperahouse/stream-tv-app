@@ -1,4 +1,9 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import { View, FlatList, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import keyboardDataEng from './components/translations/eng.json';
 import keyboardDataRu from './components/translations/ru.json';
@@ -13,6 +18,7 @@ import Space from '@assets/svg/virualKeybord/Space.svg';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { searchQuerySelector } from '@services/store/events/Selectors';
 import { setSearchQuery } from '@services/store/events/Slices';
+import { useLayoutEffect } from 'react';
 
 const keyboardDataLocale: TKeyboardAdditionalLocales = [
   keyboardDataEng,
@@ -46,7 +52,14 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
     ref,
   ) => {
     const [selectedLanguage, setSelectedLanguage] = useState<number>(0);
+    const specSymbolsButtonRef = useRef(null);
     const [isSpecSymbols, setIsSpecSymbols] = useState(false);
+    const [specSymbolsButtonNode, setSpecSymbolsButtonNode] = useState<
+      number | undefined
+    >();
+    const [keyboardDatalastItemButtonNode, setKeyboardDatalastItemButtonNode] =
+      useState<number | undefined>();
+    const keyboardDatalastItemButtonRef = useRef();
     const addLetterToSearch = (text: string): void => {
       ref?.current?.addLetterToSearch?.(text);
     };
@@ -76,6 +89,16 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
     const specSymbolsButtonLabel = isSpecSymbols
       ? keyboardDataLocale[selectedLanguage].switchSpecButton.text
       : keyboardDataSpecSymbols.switchSpecButton.text;
+    const startIndexOfLastRow: number =
+      Math.floor(keyboardData.length / cols) * cols;
+    useLayoutEffect(() => {
+      setSpecSymbolsButtonNode(specSymbolsButtonRef.current?.getNode());
+    }, []);
+    useLayoutEffect(() => {
+      setKeyboardDatalastItemButtonNode(
+        keyboardDatalastItemButtonRef.current?.getNode(),
+      );
+    }, [isSpecSymbols, selectedLanguage]);
     return (
       <View style={{ width: cols * cellWidth }}>
         <FlatList
@@ -89,18 +112,28 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
           showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <Button
+              ref={
+                index === keyboardData.length - 1
+                  ? keyboardDatalastItemButtonRef
+                  : undefined
+              }
               hasTVPreferredFocus={index === 0}
               text={item.text}
               onPress={addLetterToSearch}
               style={{ width: cellWidth, height: cellHeight }}
               canMoveUp={index >= cols}
+              nextFocusDown={
+                index >= startIndexOfLastRow ? specSymbolsButtonNode : undefined
+              }
             />
           )}
         />
         <View style={styles.supportButtonsContainer}>
           <Button
+            ref={specSymbolsButtonRef}
             text={specSymbolsButtonLabel}
             onPress={keybordTypeSwitch}
+            nextFocusUp={keyboardDatalastItemButtonNode}
             canMoveDown={false}
             textStyle={styles.specSymbolsLabelText}
             style={{
@@ -118,6 +151,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
                 ].langSwitchButton.text
               }
               canMoveDown={false}
+              nextFocusUp={keyboardDatalastItemButtonNode}
               textStyle={styles.specSymbolsLabelText}
               onPress={switchLanguage}
               style={{ height: cellHeight, width: cellWidth * 1.5 }}

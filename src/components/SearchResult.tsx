@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, Image } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { digitalEventDetailsSearchSelector } from '@services/store/events/Selectors';
+import {
+  setFullSearchQuery,
+  saveSearchResultQuery,
+} from '@services/store/events/Slices';
 import RohText from './RohText';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
 import FastImage from 'react-native-fast-image';
 import get from 'lodash.get';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
-import { useState } from 'react';
+import { getPrevSearchList } from '@services/previousSearch';
 
 type TSearchResultProps = {};
 const SearchResult: React.FC<TSearchResultProps> = () => {
   const digitalEventDetails = useSelector(digitalEventDetailsSearchSelector);
   if (!digitalEventDetails.length) {
-    return null;
+    return <PreviousSearchList />;
   }
   const onPress = (id: string) => console.log(id);
   return (
@@ -24,7 +28,7 @@ const SearchResult: React.FC<TSearchResultProps> = () => {
       keyExtractor={item => item.id}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
-      ListHeaderComponent={ResultHraderComponent}
+      ListHeaderComponent={<ResultHraderComponent headerText="results" />}
       initialNumToRender={0}
       renderItem={({ item, index }) => (
         <SearchItemComponent
@@ -53,6 +57,7 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   onPress,
   canMoveUp,
 }) => {
+  const dispatch = useDispatch();
   const [isFocused, setIsFocused] = useState(false);
   const touchableHandler = () => onPress(item.id);
   const title: string =
@@ -75,13 +80,17 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
     '',
   );
   const toggleFocus = () => setIsFocused(prevState => !prevState);
+  const focusHandler = () => {
+    dispatch(saveSearchResultQuery());
+    toggleFocus();
+  };
   return (
     <View style={styles.itemContainer}>
       <TouchableHighlightWrapper
         onPress={touchableHandler}
         styleFocused={styles.itemImageContainerActive}
         onBlur={toggleFocus}
-        onFocus={toggleFocus}
+        onFocus={focusHandler}
         canMoveUp={canMoveUp}
         style={styles.itemImageContainer}>
         {imgUrl.length ? (
@@ -126,12 +135,77 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   );
 };
 
-type TResultHeaderComponentProps = {};
-const ResultHraderComponent: React.FC<TResultHeaderComponentProps> = () => (
+type TResultHeaderComponentProps = {
+  headerText: string;
+};
+const ResultHraderComponent: React.FC<TResultHeaderComponentProps> = ({
+  headerText,
+}) => (
   <View style={styles.headerContainer}>
-    <RohText style={styles.headerText}>RESULTS</RohText>
+    <RohText style={styles.headerText}>{headerText.toUpperCase()}</RohText>
   </View>
 );
+
+type TPreviousSearchListProps = {};
+
+const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
+  const [previousSearchesList, setPreviousSearchesList] =
+    useState<Array<string>>();
+
+  useEffect(() => {
+    getPrevSearchList()
+      .then(previousSearchesListData =>
+        setPreviousSearchesList(previousSearchesListData),
+      )
+      .catch(console.log);
+  }, []);
+
+  if (!Array.isArray(previousSearchesList) || !previousSearchesList.length) {
+    return null;
+  }
+  return (
+    <FlatList
+      style={styles.searchItemListContainer}
+      data={previousSearchesList}
+      keyExtractor={item => item}
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
+      ListHeaderComponent={
+        <ResultHraderComponent headerText="previous searches" />
+      }
+      renderItem={({ item, index }) => (
+        <PreviousSearchListItemComponent text={item} canMoveUp={index !== 0} />
+      )}
+    />
+  );
+};
+
+type TPreviousSearchListItemComponentProps = {
+  text: string;
+  canMoveUp: boolean;
+};
+const PreviousSearchListItemComponent: React.FC<TPreviousSearchListItemComponentProps> =
+  ({ text, canMoveUp }) => {
+    const dispatch = useDispatch();
+    const onPressHandler = () => {
+      dispatch(setFullSearchQuery({ searchQuery: text }));
+    };
+    return (
+      <View style={styles.searchesResultItemContainer}>
+        <View>
+          <TouchableHighlightWrapper
+            onPress={onPressHandler}
+            canMoveUp={canMoveUp}
+            style={styles.searchesResultItemWrapperContainer}
+            styleFocused={styles.searchesResultItemWrapperActive}>
+            <RohText style={styles.searchesResultItemText} numberOfLines={1}>
+              {text.toUpperCase()}
+            </RohText>
+          </TouchableHighlightWrapper>
+        </View>
+      </View>
+    );
+  };
 
 const styles = StyleSheet.create({
   searchItemListContainer: {
@@ -192,5 +266,27 @@ const styles = StyleSheet.create({
     lineHeight: scaleSize(30),
     letterSpacing: scaleSize(1),
     color: Colors.midGrey,
+  },
+  searchesResultItemContainer: {
+    height: scaleSize(80),
+    width: '100%',
+    flexDirection: 'row',
+  },
+  searchesResultItemWrapperActive: {
+    backgroundColor: Colors.defaultBlue,
+    paddingHorizontal: scaleSize(25),
+    opacity: 1,
+  },
+  searchesResultItemWrapperContainer: {
+    height: '100%',
+    justifyContent: 'center',
+    opacity: 0.7,
+  },
+  searchesResultItemText: {
+    maxWidth: scaleSize(875),
+    fontSize: scaleSize(26),
+    lineHeight: scaleSize(30),
+    letterSpacing: scaleSize(1),
+    color: Colors.defaultTextColor,
   },
 });
