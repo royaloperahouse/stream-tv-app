@@ -22,6 +22,7 @@ type TTouchableHighlightWrapperProps = TouchableHighlightProps & {
   canMoveRight?: boolean;
   canMoveDown?: boolean;
   styleFocused?: TouchableHighlightProps['style'];
+  children: React.ReactNode;
 };
 
 const TouchableHighlightWrapper = forwardRef<

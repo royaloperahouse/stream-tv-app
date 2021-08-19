@@ -13,14 +13,21 @@ import get from 'lodash.get';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
 import { getPrevSearchList } from '@services/previousSearch';
+import { useNavigation } from '@react-navigation/core';
+import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
+import { useRef } from 'react';
+import { useLayoutEffect } from 'react';
+import { TEventContainer } from '@services/types/models';
+import { navMenuManager } from '@components/NavMenu';
 
 type TSearchResultProps = {};
 const SearchResult: React.FC<TSearchResultProps> = () => {
-  const digitalEventDetails = useSelector(digitalEventDetailsSearchSelector);
+  const digitalEventDetails = useSelector<Partial<any>, Array<TEventContainer>>(
+    digitalEventDetailsSearchSelector,
+  );
   if (!digitalEventDetails.length) {
     return <PreviousSearchList />;
   }
-  const onPress = (id: string) => console.log(id);
   return (
     <FlatList
       style={styles.searchItemListContainer}
@@ -31,11 +38,7 @@ const SearchResult: React.FC<TSearchResultProps> = () => {
       ListHeaderComponent={<ResultHraderComponent headerText="results" />}
       initialNumToRender={0}
       renderItem={({ item, index }) => (
-        <SearchItemComponent
-          item={item}
-          onPress={onPress}
-          canMoveUp={index !== 0}
-        />
+        <SearchItemComponent item={item} canMoveUp={index !== 0} />
       )}
     />
   );
@@ -43,38 +46,37 @@ const SearchResult: React.FC<TSearchResultProps> = () => {
 export default SearchResult;
 
 type TSearchItemComponentProps = {
-  item: {
-    id: string;
-    data: any;
-    last_publication_date: string;
-  };
+  item: TEventContainer;
   canMoveUp: boolean;
-  onPress: (id: string) => void;
 };
 
 export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   item,
-  onPress,
   canMoveUp,
 }) => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [isFocused, setIsFocused] = useState(false);
-  const touchableHandler = () => onPress(item.id);
+  const touchableHandler = () => {
+    navMenuManager.hideNavMenu();
+    navigation.push(
+      additionalRoutesWithoutNavMenuNavigation.eventDetais.navMenuScreenName,
+      { event: item },
+    );
+  };
+
   const title: string =
-    get<string>(item.data, ['vs_event_details', 'title'], '').replace(
+    get(item.data, ['vs_event_details', 'title'], '').replace(
       /(<([^>]+)>)/gi,
       '',
     ) ||
-    get<string>(item.data, ['vs_title', '0', 'text'], '').replace(
-      /(<([^>]+)>)/gi,
-      '',
-    );
-  const description: string = get<string>(
+    get(item.data, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
+  const description: string = get(
     item.data,
     ['vs_event_details', 'shortDescription'],
     '',
   ).replace(/(<([^>]+)>)/gi, '');
-  const imgUrl: string = get<string>(
+  const imgUrl: string = get(
     item.data,
     ['vs_background', '0', 'vs_background_image', 'url'],
     '',
@@ -137,11 +139,17 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
 
 type TResultHeaderComponentProps = {
   headerText: string;
+  isPrevSearch?: boolean;
 };
 const ResultHraderComponent: React.FC<TResultHeaderComponentProps> = ({
   headerText,
+  isPrevSearch,
 }) => (
-  <View style={styles.headerContainer}>
+  <View
+    style={[
+      styles.headerContainer,
+      isPrevSearch && styles.headerContainerPrevSearch,
+    ]}>
     <RohText style={styles.headerText}>{headerText.toUpperCase()}</RohText>
   </View>
 );
@@ -149,17 +157,23 @@ const ResultHraderComponent: React.FC<TResultHeaderComponentProps> = ({
 type TPreviousSearchListProps = {};
 
 const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
+  const isMounted = useRef<boolean>(false);
   const [previousSearchesList, setPreviousSearchesList] =
     useState<Array<string>>();
 
-  useEffect(() => {
-    getPrevSearchList()
-      .then(previousSearchesListData =>
-        setPreviousSearchesList(previousSearchesListData),
-      )
-      .catch(console.log);
+  useLayoutEffect(() => {
+    isMounted.current = true;
   }, []);
 
+  useEffect(() => {
+    getPrevSearchList()
+      .then(previousSearchesListData => {
+        if (isMounted.current) {
+          setPreviousSearchesList(previousSearchesListData?.reverse());
+        }
+      })
+      .catch(console.log);
+  }, []);
   if (!Array.isArray(previousSearchesList) || !previousSearchesList.length) {
     return null;
   }
@@ -171,7 +185,7 @@ const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
-        <ResultHraderComponent headerText="previous searches" />
+        <ResultHraderComponent headerText="previous searches" isPrevSearch />
       }
       renderItem={({ item, index }) => (
         <PreviousSearchListItemComponent text={item} canMoveUp={index !== 0} />
@@ -260,6 +274,9 @@ const styles = StyleSheet.create({
     marginLeft: scaleSize(18),
     justifyContent: 'flex-end',
     paddingBottom: scaleSize(54),
+  },
+  headerContainerPrevSearch: {
+    marginLeft: 0,
   },
   headerText: {
     fontSize: scaleSize(26),

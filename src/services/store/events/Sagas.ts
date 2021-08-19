@@ -145,14 +145,18 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
       )
         ? digitalEventDetail.data.vs_event_details.tags
         : [];
-      const groupKeys: Array<string> = tags.map(tag =>
-        tag.attributes.title.toLowerCase().trim().replace(/\s/g, '_'),
-      );
-      for (let i = 0; i < groupKeys.length; i++) {
-        if (groupKeys[i] in acc.eventGroups) {
-          acc.eventGroups[groupKeys[i]].push(digitalEventDetail.id);
+      for (let i = 0; i < tags.length; i++) {
+        const groupKey = tags[i].attributes.title
+          .toLowerCase()
+          .trim()
+          .replace(/\s/g, '_');
+        if (groupKey in acc.eventGroups) {
+          acc.eventGroups[groupKey].ids.push(digitalEventDetail.id);
         } else {
-          acc.eventGroups[groupKeys[i]] = [digitalEventDetail.id];
+          acc.eventGroups[groupKey] = {
+            title: tags[i].attributes.title,
+            ids: [digitalEventDetail.id],
+          };
         }
       }
       return acc;

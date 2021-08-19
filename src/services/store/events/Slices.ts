@@ -1,12 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { EventModel } from '@services/types/models';
+import { EventModel, TEventContainer } from '@services/types/models';
 
 interface EventsState {
   myList: Array<EventModel>;
   featured: Array<EventModel>;
-  allDigitalEventsDetail: { [key: string]: any };
-  eventGroups: { [key: string]: [string] };
+  allDigitalEventsDetail: { [key: string]: TEventContainer };
+  eventGroups: { [key: string]: { title: string; ids: string[] } };
   digitalEventDetailsIdsForHomePage: Array<string>;
   searchQueryString: string;
 }

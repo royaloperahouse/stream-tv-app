@@ -6,6 +6,9 @@ import LiveStreamScreen from '@screens/LiveStreamScreen';
 import MyListScreen from '@screens/MyListScreen';
 import OperaMusicScreen from '@screens/OperaMusicScreen';
 import SettingsScreen from '@screens/SettingsScreen';
+
+import EventDetailsScreen from '@screens/EventDetailsScreen';
+import HomePageScreen from '@screens/HomePageScreen';
 //NavMenu SVG Icons
 import SearchInActiveIcon from '@assets/svg/navIcons/Search.svg';
 import SearchActiveIcon from '@assets/svg/navIcons/SearchActive.svg';
@@ -40,7 +43,7 @@ export const routes: TRoutes = [
     navMenuTitle: 'Home',
     position: 2,
     isDefault: true,
-    ScreenComponent: HomeScreen,
+    ScreenComponent: HomePageScreen,
   },
   {
     navMenuScreenName: 'opera&music',
@@ -87,4 +90,17 @@ export const routes: TRoutes = [
     isDefault: false,
     ScreenComponent: SettingsScreen,
   },
+];
+
+export const additionalRoutesWithoutNavMenuNavigation = {
+  eventDetais: {
+    navMenuScreenName: 'eventDetails',
+    ScreenComponent: EventDetailsScreen,
+    isDefault: false,
+  },
+};
+
+export const allRoutes = [
+  ...routes,
+  ...Object.values(additionalRoutesWithoutNavMenuNavigation),
 ];

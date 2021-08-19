@@ -140,6 +140,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     navMenuRef,
     () => ({
       showNavMenu: () => {
+        setIsMenuFocused(true);
         setIsMenuVisible(true);
       },
       hideNavMenu: () => {
@@ -211,7 +212,11 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   }, [isMenuFocused, menuAnimation]);
 
   useLayoutEffect(() => {
-    if (!navMenuMountedRef.current || menuVisibleAnimationInProcess.current) {
+    if (
+      !navMenuMountedRef.current ||
+      menuVisibleAnimationInProcess.current ||
+      menuFocusAnimationInProcess.current
+    ) {
       return;
     }
     menuVisibleAnimationInProcess.current = true;

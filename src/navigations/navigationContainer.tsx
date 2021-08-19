@@ -1,4 +1,4 @@
-import React, { createRef } from 'react';
+import React, { createRef, useCallback, useEffect } from 'react';
 import {
   NavigationContainer,
   NavigationContainerRef,
@@ -6,8 +6,6 @@ import {
   StackActions,
   DefaultTheme,
 } from '@react-navigation/native';
-import { useCallback } from 'react';
-import { useEffect } from 'react';
 
 const navigationRef = createRef<NavigationContainerRef>();
 let isReady: boolean = false;

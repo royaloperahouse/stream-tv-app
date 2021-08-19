@@ -1,15 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Image,
-  StyleSheet,
-  Dimensions,
-  TouchableHighlight,
-} from 'react-native';
-import { Icons } from '@themes/Styleguide';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { navMenuManager } from '@components/NavMenu';
 import { scaleSize } from '@utils/scaleSize';
 import { useNavigation } from '@react-navigation/native';
+import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
+import TouchableHighlightWrapper from './TouchableHighlightWrapper';
 
 type TGoBackProps = {};
 
@@ -22,13 +17,16 @@ const GoBack: React.FC<TGoBackProps> = () => {
     }
   };
   return (
-    <TouchableHighlight onPress={onPressHandler}>
+    <TouchableHighlightWrapper
+      onPress={onPressHandler}
+      style={styles.wrapperStyle}
+      styleFocused={styles.wrapperStyleActive}>
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
-          <Image style={styles.back} source={Icons.back} />
+          <GoBackIcon width={scaleSize(40)} height={scaleSize(40)} />
         </View>
       </View>
-    </TouchableHighlight>
+    </TouchableHighlightWrapper>
   );
 };
 
@@ -45,6 +43,12 @@ const styles = StyleSheet.create({
   back: {
     width: scaleSize(40),
     height: scaleSize(40),
+  },
+  wrapperStyle: {
+    opacity: 0.5,
+  },
+  wrapperStyleActive: {
+    opacity: 0.7,
   },
 });
 
