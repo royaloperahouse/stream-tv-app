@@ -14,12 +14,12 @@ type Props = {
   navigation?: any; // TODO: find the corrent type for that
 };
 
-const DetailView: React.FC<Props> = ({ route }) => {
+const DetailView: React.FC<Props> = ({ route, navigation }) => {
   const { event } = route.params;
 
-  /*   const showPlayer = () => {
+  const showPlayer = () => {
     navigation.navigate('Player', {});
-  }; */
+  };
 
   let _scrollView = useRef<any>();
 
@@ -39,7 +39,7 @@ const DetailView: React.FC<Props> = ({ route }) => {
         <General
           event={event}
           scrollToMe={scrollToElement}
-          showPlayer={() => {}}
+          showPlayer={showPlayer}
         />
         <Synopsys event={event} />
         <Cast event={event} />
