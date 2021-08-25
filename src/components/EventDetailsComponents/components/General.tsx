@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
@@ -14,6 +14,13 @@ import AudioDescription from '@assets/svg/eventDetails/AudioDescription.svg';
 import ActionButtonList, {
   EActionButtonListType,
 } from '../commonControls/ActionButtonList';
+
+import {
+  hasMyListItem,
+  removeIdFromMyList,
+  addToMyList,
+} from '@services/myList';
+
 type Props = {
   event: TEventContainer;
   scrollToMe: () => void;
@@ -29,6 +36,9 @@ const General: React.FC<Props> = ({
   nextScreenText = 'Some Screen',
   //isBMPlayerShowing,
 }) => {
+  const generalMountedRef = useRef<boolean | undefined>(false);
+  const addOrRemoveBusyRef = useRef<boolean>(true);
+  const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
       /(<([^>]+)>)/gi,
@@ -45,6 +55,26 @@ const General: React.FC<Props> = ({
     ['vs_background', '0', 'vs_background_image', 'url'],
     '',
   );
+
+  const addOrRemoveItemIdFromMyListHandler = () => {
+    if (addOrRemoveBusyRef.current) {
+      return;
+    }
+    addOrRemoveBusyRef.current = true;
+    (existInMyList ? removeIdFromMyList : addToMyList)(event.id, () => {
+      hasMyListItem(event.id)
+        .then(isExist => {
+          if (generalMountedRef.current) {
+            setExistInMyList(isExist);
+          }
+        })
+        .finally(() => {
+          if (generalMountedRef.current) {
+            addOrRemoveBusyRef.current = false;
+          }
+        });
+    });
+  };
 
   const actionButtonListFactory = (typeOfList: EActionButtonListType) => {
     const buttonListCollection = {
@@ -73,8 +103,8 @@ const General: React.FC<Props> = ({
         },
         {
           key: 'AddToMyList',
-          text: 'Add to my list',
-          onPress: () => console.log('Add to my list press'),
+          text: (existInMyList ? 'Remove from' : 'Add to') + ' my list',
+          onPress: addOrRemoveItemIdFromMyListHandler,
           onFocus: () => console.log('Add to my list focus'),
           Icon: AddToMyList,
         },
@@ -93,6 +123,17 @@ const General: React.FC<Props> = ({
     return buttonListCollection[EActionButtonListType.common];
   };
 
+  useEffect(() => {
+    hasMyListItem(event.id)
+      .then(isExist => setExistInMyList(isExist))
+      .finally(() => {
+        addOrRemoveBusyRef.current = false;
+      });
+  }, [event.id]);
+
+  useEffect(() => {
+    generalMountedRef.current = true;
+  }, []);
   return (
     <View style={styles.generalContainer}>
       <View style={styles.contentContainer}>

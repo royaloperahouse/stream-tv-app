@@ -16,10 +16,12 @@ import {
   marginRightWithOutFocus,
   marginLeftStop,
 } from '@configs/navMenuConfig';
+import { useMyList } from '@hooks/useMyList';
 
 type THomePageScreenProps = {};
 const HomePageScreen: React.FC<THomePageScreenProps> = () => {
-  const data = useSelector(digitalEventsForHomePageSelector);
+  const myList = useMyList();
+  const data = useSelector(digitalEventsForHomePageSelector(myList));
   const previewRef = useRef(null);
   if (!data.length) {
     return null;

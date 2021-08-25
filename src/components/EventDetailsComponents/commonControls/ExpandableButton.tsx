@@ -22,6 +22,7 @@ const ExpandableButton: React.FC<Props> = ({
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
+        canMoveRight={false}
         hasTVPreferredFocus={hasTVPreferredFocus}
         style={styles.button}
         styleFocused={styles.buttonActive}

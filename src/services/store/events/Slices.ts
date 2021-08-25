@@ -9,6 +9,7 @@ interface EventsState {
   eventGroups: { [key: string]: { title: string; ids: string[] } };
   digitalEventDetailsIdsForHomePage: Array<string>;
   searchQueryString: string;
+  eventsLoaded: boolean;
 }
 
 const initialState: EventsState = {
@@ -18,6 +19,7 @@ const initialState: EventsState = {
   eventGroups: {},
   digitalEventDetailsIdsForHomePage: [],
   searchQueryString: '',
+  eventsLoaded: false,
 };
 
 initialState.myList = [
@@ -127,6 +129,7 @@ const eventsSlice = createSlice({
       state.eventGroups = payload.digitalEventDetailsList.eventGroups;
       state.digitalEventDetailsIdsForHomePage =
         payload.digitalEventDetailsList.eventIdsForHomePage;
+      state.eventsLoaded = true;
     },
     getEventListLoopStop: state => state,
     setSearchQuery: (state, { payload }) => {
