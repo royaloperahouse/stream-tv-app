@@ -21,7 +21,7 @@ type Props = {
 const General: React.FC<Props> = ({
   event,
   scrollToMe,
-  showPlayer = () => {},
+  showPlayer,
 }) => {
   return (
     <View style={styles.generalContainer}>

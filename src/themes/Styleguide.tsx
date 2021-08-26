@@ -23,6 +23,7 @@ export const Fonts = Object.freeze({
   italic: 'GothamSSm-MediumItalic',
   boldItalic: 'GothamSSm-BoldItalic',
 });
+
 export const Icons = Object.freeze({
   addToList: require('@assets/icons/add_to_list.png'),
   back: require('@assets/icons/back.png'),
@@ -32,9 +33,21 @@ export const Icons = Object.freeze({
   watch: require('@assets/icons/watch.png'),
 });
 
+export const PlayerIcons = Object.freeze({
+  play: require('@assets/icons/player_play.png'),
+  pause: require('@assets/icons/player_pause.png'),
+  seekForward: require('@assets/icons/player_seek_forward.png'),
+  seekBackward: require('@assets/icons/player_seek_backward.png'),
+  subtitles: require('@assets/icons/player_subtitles.png'),
+  description: require('@assets/icons/player_description.png'),
+  close: require('@assets/icons/player_close.png'),
+  restart: require('@assets/icons/player_restart.png'),
+});
+
 export default Object.freeze({
   colors: Colors,
   images: Images,
   icons: Icons,
   fonts: Fonts,
+  playerIcons: PlayerIcons,
 });
