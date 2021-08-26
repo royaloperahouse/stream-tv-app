@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForHomePageSelector } from '@services/store/events/Selectors';
 import {
@@ -8,9 +8,7 @@ import {
   DigitalEventSectionHeader,
   RailSections,
 } from '@components/EventListComponents';
-import { StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { Dimensions } from 'react-native';
 import {
   widthWithOutFocus,
   marginRightWithOutFocus,

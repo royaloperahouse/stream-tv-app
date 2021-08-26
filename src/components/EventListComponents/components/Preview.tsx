@@ -29,7 +29,7 @@ const Preview = forwardRef<any, TPreviewProps>((props, ref) => {
   );
   const eventGroupTitle: string = get(
     event,
-    ['vs_event_details', 'tags', '0', 'attributes', '0', 'title'],
+    ['vs_event_details', 'tags', '0', 'attributes', 'title'],
     '',
   );
   const eventTitle: string =
