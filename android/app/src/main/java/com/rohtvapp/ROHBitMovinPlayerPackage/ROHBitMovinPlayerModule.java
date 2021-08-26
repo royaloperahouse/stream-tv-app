@@ -22,7 +22,7 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @Override
   public String getName() {
-    return "ROHBitMovinPlayer";
+    return "ROHBitMovinPlayerControl";
   }
 
   @ReactMethod

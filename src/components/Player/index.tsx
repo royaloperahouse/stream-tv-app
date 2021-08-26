@@ -14,29 +14,27 @@ import {
 import { scaleSize } from '@utils/scaleSize';
 import PlayerControls from './PlayerControls';
 
-const ROHBitmovinPlayerModule = NativeModules.ROHBitmovinPlayer;
+const ROHBitmovinPlayerModule = NativeModules.ROHBitMovinPlayerControl;
 
 const NativeBitMovinPlayer = requireNativeComponent('ROHBitMovinPlayer');
 
 const eventEmitter = new NativeEventEmitter(
-  NativeModules.ReactNativeBitmovinPlayer
+  NativeModules.ROHBitMovinPlayer
 );
 
-type CallbackFunc = (data?: any) => void;
+type TCallbackFunc = (data?: any) => void;
 
 type TPlayerProps = {
   autoPlay?: boolean;
   style?: any;
   onEvent?: (event: any) => void;
   onError?: (event: any) => void;
+  title: string;
+  subtitle: string;
   configuration: {
     url: string;
     poster?: string;
-    startOffset: number;
     subtitles?: string;
-    title?: string;
-    subtitle?: string;
-    hearbeat?: number;
   };
   // analytics?: {
   //   videoId: string;
@@ -56,6 +54,8 @@ const Player: React.FC<TPlayerProps> = (props) => {
     style,
     onEvent,
     onError,
+    title,
+    subtitle,
     configuration,
   } = props;
 
@@ -63,24 +63,33 @@ const Player: React.FC<TPlayerProps> = (props) => {
 
   const [playerLoaded, setLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
-  const onLoad: CallbackFunc = (data) => {
+  const onLoad: TCallbackFunc = (data) => {
+    console.log(data);
     const { duration } = data.nativeEvent;
-    setDuration(duration);
+    setDuration(parseFloat(duration));
     setLoaded(true);
   };
 
   const [isPlaying, setPlaying] = useState(false);
-  const onPlaying: CallbackFunc = () => setPlaying(true);
-  const onPause: CallbackFunc = () => setPlaying(false);
-
+  const onPlaying: TCallbackFunc = (data) => {
+    console.log(data);
+    setPlaying(true);
+  }
+  const onPause: TCallbackFunc = (data) => {
+    console.log(data);
+    setPlaying(false);
+  }
   const [currentTime, setTime] = useState(0);
-  const onTimeChanged: CallbackFunc = (data) => {
+  const onTimeChanged: TCallbackFunc = (data) => {
+    console.log(data);
     const { time } = data.nativeEvent;
-    setTime(time);
+    setPlaying(true);
+    setTime(parseFloat(time));
   };
-  const onSeek: CallbackFunc = (data) => {
+  const onSeek: TCallbackFunc = (data) => {
+    console.log(data);
     const { time } = data.nativeEvent;
-    setTime(time);
+    setTime(parseFloat(time));
   };
 
   const setPlayer = (ref: any) => { player = ref; };
@@ -134,21 +143,32 @@ const Player: React.FC<TPlayerProps> = (props) => {
     };
   }, []);
 
-  const play = () => {
-    ROHBitmovinPlayerModule.play(findNodeHandle(player));
-  };
-
-  const pause = () => {
-    ROHBitmovinPlayerModule.pause(findNodeHandle(player));
-  };
-
-  const seek = (forward: true) => {
-    const offset = forward ? 10 : -10;
-    const seekTime = parseFloat(currentTime + offset);
-
-    if (seekTime) {
-      ROHBitmovinPlayerModule.seek(findNodeHandle(player), seekTime);
+  const actionPlay = () => {
+    if (isPlaying) {
+      ROHBitmovinPlayerModule.pause(findNodeHandle(player));
+    } else {
+      ROHBitmovinPlayerModule.play(findNodeHandle(player));
     }
+  };
+
+  const actionSeekForward = () => {
+    let seekTime = currentTime + 10.0;
+    if (seekTime > duration) seekTime = duration;
+    ROHBitmovinPlayerModule.seek(findNodeHandle(player), currentTime + 10.0);
+    setTime(seekTime);
+  };
+
+  const actionSeekBackward = () => {
+    let seekTime = currentTime - 10.0;
+    if (seekTime < 0) seekTime = 0.0;
+    ROHBitmovinPlayerModule.seek(findNodeHandle(player), currentTime - 10.0);
+    setTime(seekTime);
+  };
+
+  const actionRestart = () => {
+    ROHBitmovinPlayerModule.seek(findNodeHandle(player), 0.0);
+    setTime(0.0);
+    ROHBitmovinPlayerModule.play(findNodeHandle(player));
   };
 
   const getCurrentTime = () => ROHBitmovinPlayerModule.getCurrentTime(findNodeHandle(player));
@@ -162,7 +182,7 @@ const Player: React.FC<TPlayerProps> = (props) => {
   // const isPlaying = () => ROHBitmovinPlayerModule.isPlaying(findNodeHandle(player));
 
   return (
-    <SafeAreaView style={style}>
+    <SafeAreaView style={playerLoaded ? styles.playerLoaded : {}}>
       <NativeBitMovinPlayer
         ref={setPlayer}
         configuration={configuration}
@@ -170,17 +190,36 @@ const Player: React.FC<TPlayerProps> = (props) => {
           {
             backgroundColor: 'black',
           },
-          style,
+          playerLoaded ? styles.playerLoaded : {},
         ]}
       />
       { playerLoaded &&
-        <PlayerControls />
+        <PlayerControls
+          title={title}
+          subtitle={subtitle}
+          currentTime={currentTime}
+          duration={duration}
+          playerLoaded={playerLoaded}
+          isPlaying={isPlaying}
+          onPlayPress={actionPlay}
+          onSeekForwardPress={actionSeekForward}
+          onSeekBackwardPress={actionSeekBackward}
+          onRestartPress={actionRestart}
+        />
       }
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  playerLoaded: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    opacity: 1,
+    position: 'absolute',
+  },
   controlsContainer: {
     position: 'absolute',
     bottom: 0,

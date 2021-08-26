@@ -188,6 +188,7 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     implementation 'com.bitmovin.player:player:3.4.0'
+    implementation 'com.bitmovin.analytics:collector-bitmovin-player:2.0.0'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
