@@ -55,7 +55,7 @@ const PlayerControls: React.FC<TPlayerControlsProps> = (props) => {
 
   const resetTimer = () => {
     if (hideTimer) clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => setInactive(!isPlaying), 5000);
+    if (isPlaying) hideTimer = setTimeout(() => setInactive(isPlaying), 5000);
   };
 
   const activateControls = (callback?: any) => {
