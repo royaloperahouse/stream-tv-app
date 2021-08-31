@@ -46,6 +46,8 @@ Start Metro:
 
 `$ npx react-native run-android`
 
+NB: If you have issues with the emulator hanging, you are probably running macOS Big Sur ;) See https://stackoverflow.com/a/67304587/1861645 for more info. In Android studio, go to SDK Manager -> SDK Tools Tab -> uncheck `Android Emulator`and Apply, then go back in and re-check the emulator. This will trigger the update that fixes the problem.
+
 ### IOS
 
 `$ npx react-native run-ios`
