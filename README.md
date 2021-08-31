@@ -30,7 +30,7 @@ Install CocoaPods:
 `$ sudo gem install cocoapods`
 
 In ios directory:
-`$ pod install`
+`$ pod install` (you will possibly need to run `$ pod repo update` prior to this)
 
 Java Development Kit:
 `$ brew install --cask adoptopenjdk/openjdk/adoptopenjdk8`
@@ -46,23 +46,54 @@ Start Metro:
 
 `$ npx react-native run-android`
 
-NB: If you have issues with the emulator hanging, you are probably running macOS Big Sur ;) See https://stackoverflow.com/a/67304587/1861645 for more info. In Android studio, go to SDK Manager -> SDK Tools Tab -> uncheck `Android Emulator`and Apply, then go back in and re-check the emulator. This will trigger the update that fixes the problem.
+NB: If you have issues with the emulator hanging, you are probably running macOS Big Sur ;) See https://stackoverflow.com/a/67304587/1861645 for more info. In Android studio, go to `SDK Manager` -> `SDK Tools Tab` -> uncheck `Android Emulator`and Apply, then go back in and re-check the emulator. This will trigger the update that fixes the problem.
+
+_(Status: It is currently possible to run on an Android TV emulator (in fact on an Android emulator, but the experience really own works well on a TV emulator), but there are certain issues. The recommended experience is on an Amazon Fire Stick.)_
+
+#### Current flow for running app on Android TV Emulator
+Once you have the app running, press the "Getting Started" button on the start screen. You will then be presented with a QR Code login screen. You will need to provide your public IP address to ROH so that they can add it to their database. Once that is done, you will see a code on-screen (No need to refresh as the login updates regularly). You will then need again to provide this code to ROH. Once they have added it to their database, you will (again, no need to refresh) see and be able to use the rest of the app.
 
 ### IOS
 
 `$ npx react-native run-ios`
 
+_(Status: Will build, but not currently operational)_
+
 ### AppleTV
 
 `$ npx react-native run-ios  --simulator "Apple TV" --scheme "StreamTvApp-tvOS"`
 
+_(Status: No target, doesn't exist as yet)_
+
 ## Development
 
-TODO
+Quick rundown of technologies used:
+- Typescript!
+- Redux: app state
+- Redux-saga: asynchronous side-effects middleware
+- Axios: promise-based http client
+- Prismic: headless CMS
+
+### Architecture notes
+
+There are two main loops in the app, initiated/maintained by sagas
+* the auth login loop
+  * updates every 10 secs
+  * continues until login is complete
+* the main login loop
+  * updates every 30 mins
+  * continues throughout app lifetime
+  * fetches new content 
 
 ## Testing
 
-TODO
+### Unit testing
+
+(eg. Jest, the obvious choice...)
+
+### Integration testing
+
+(eg. Detox)
 
 ## Deployment
 
