@@ -1,3 +1,3 @@
 # Overview
 
-Something general about the project here.
+A TV app for Royal Opera House Stream, implemented in React Native.
