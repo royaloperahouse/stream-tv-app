@@ -67,12 +67,13 @@ _(Status: No target, doesn't exist as yet)_
 
 ## Development
 
-Quick rundown of technologies used:
+Technologies used:
 - Typescript!
 - Redux: app state
 - Redux-saga: asynchronous side-effects middleware
 - Axios: promise-based http client
 - Prismic: headless CMS
+- Fuse: client-size fuzzy search
 
 ### Architecture notes
 
