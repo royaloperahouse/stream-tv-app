@@ -8,7 +8,7 @@ Please see [Developer Setup docs](developer-setup.md) for background, installati
 
 ## Documentation
 
-Please see [the documentation page](docs.md) for how to generate these docs.s
+Please see [the documentation page](docs.md) for how to generate these docs.
 
 ## Testing
 
