@@ -19,7 +19,7 @@ Thus, the application is currently running `0.63.4`.
 
 You should be familiar with React Native and mobile development.
 
-We recommend installing Node and Watchman using Homebrew. Run the following commands in a Terminal after installing Homebrew:
+We recommend installing Node and Watchman using Homebrew. Run the following commands in a terminal after installing Homebrew:
 
 `$ brew install node`
 
