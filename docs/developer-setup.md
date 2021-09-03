@@ -115,6 +115,8 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
 };
 ```
 
+There are also many full-featured feature flag services available such as [flagsmith](https://flagsmith.com) and [flagship](https://developers.flagship.io). These can be used to extend the existing provider functionality. Flagged can recieve either an array of flags or an object with flag keys and values. This fact enables us to prepare the flags elsewhere - for example, perhaps via flagship's Decision API. In this way, we can handle the same feature in various systems simultaneously.
+
 ### Technologies used:
  - Typescript!
  - Redux: app state
