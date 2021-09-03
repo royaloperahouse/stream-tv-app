@@ -36,15 +36,19 @@ type TPlayerProps = {
     poster?: string;
     subtitles?: string;
   };
-  // analytics?: {
-  //   videoId: string;
-  //   title: string | undefined;
-  //   userId: string | undefined;
-  //   cdnProvider: string;
-  //   customData1: string;
-  //   customData2: string;
-  //   customData3: string;
-  // };
+  analytics?: {
+    videoId: string;
+    title?: string;
+    userId?: string;
+    experiment?: string;
+    customData1?: string;
+    customData2?: string;
+    customData3?: string;
+    customData4?: string;
+    customData5?: string;
+    customData6?: string;
+    customData7?: string;
+  };
 };
 
 const Player: React.FC<TPlayerProps> = (props) => {
@@ -57,6 +61,7 @@ const Player: React.FC<TPlayerProps> = (props) => {
     title,
     subtitle,
     configuration,
+    analytics,
   } = props;
 
   let player: any = null;
@@ -64,7 +69,7 @@ const Player: React.FC<TPlayerProps> = (props) => {
   const [playerLoaded, setLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
   const onLoad: TCallbackFunc = (data) => {
-    console.log(data);
+    // console.log(data);
     const { duration } = data.nativeEvent;
     setDuration(parseFloat(duration));
     setLoaded(true);
@@ -72,24 +77,24 @@ const Player: React.FC<TPlayerProps> = (props) => {
 
   const [isPlaying, setPlaying] = useState(false);
   const onPlaying: TCallbackFunc = (data) => {
-    console.log(data);
+    // console.log(data);
     setPlaying(true);
   }
   const onPause: TCallbackFunc = (data) => {
-    console.log(data);
+    // console.log(data);
     setPlaying(false);
   }
   const [currentTime, setTime] = useState(0);
   const onTimeChanged: TCallbackFunc = (data) => {
-    console.log(data);
+    // console.log(data);
     const { time } = data.nativeEvent;
     setPlaying(true);
     setTime(parseFloat(time));
   };
   const onSeek: TCallbackFunc = (data) => {
-    console.log(data);
-    const { time } = data.nativeEvent;
-    setTime(parseFloat(time));
+    // console.log(data);
+    // const { time } = data.nativeEvent;
+    // setTime(parseFloat(time));
   };
 
   const setPlayer = (ref: any) => { player = ref; };
@@ -186,6 +191,7 @@ const Player: React.FC<TPlayerProps> = (props) => {
       <NativeBitMovinPlayer
         ref={setPlayer}
         configuration={configuration}
+        analytics={analytics}
         style={[
           {
             backgroundColor: 'black',

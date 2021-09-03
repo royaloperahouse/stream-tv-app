@@ -90,8 +90,8 @@ const PlayerControls: React.FC<TPlayerControlsProps> = (props) => {
             <ControlButton icon={PlayerIcons.seekForward} onPress={() => activateControls(onSeekForwardPress)} onFocus={activateControls} />
           </View>
           <View style={styles.rightControls}>
-            <ControlButton icon={PlayerIcons.subtitles} />
-            <ControlButton icon={PlayerIcons.description} />
+            <ControlButton icon={PlayerIcons.subtitles} text='Subtitles' expand={true} />
+            <ControlButton icon={PlayerIcons.description} text='Watch with audio description' expand={true} />
           </View>
         </View>
       }

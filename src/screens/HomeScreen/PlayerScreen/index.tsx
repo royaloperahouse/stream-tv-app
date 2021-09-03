@@ -16,6 +16,18 @@ const PlayerView: React.FC<Props> = () => {
         poster: 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
         startOffset: 0,
       }}
+      analytics={{
+        videoId: "blahblahblah",
+        title: "Some video title",
+        experiment: "ROH TV app",
+        customData1: "",
+        customData2: "",
+        customData3: "",
+        customData4: "",
+        customData5: "",
+        customData6: "",
+        customData7: "",
+      }}
       title="event title"
       subtitle="some subtitle"
       />

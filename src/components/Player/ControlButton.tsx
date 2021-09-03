@@ -11,7 +11,7 @@ type Props = {
   icon: any;
   text?: string;
   expand?: boolean,
-  onPress?: (val: boolean) => void;
+  onPress?: () => void;
   onFocus?: () => void;
 };
 
@@ -24,14 +24,25 @@ const ControlButton: React.FC<Props> = ({
 }) => {
   const [isButtonActive, setFocus] = useState(false);
 
+  const onFocusHandler = () => {
+    setFocus(true);
+    if (onFocus) onFocus();
+  };
+
+  const onBlurHandler = () => setFocus(false);
+
+  const onPressHandler = () => {
+    if (onPress) onPress();
+  };
+
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
         style={styles.button}
         styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
-        onFocus={() => { setFocus(true); onFocus && onFocus(); }}
-        onBlur={() => setFocus(false)}
-        onPress={() => onPress && onPress(true)}
+        onFocus={onFocusHandler}
+        onBlur={onBlurHandler}
+        onPress={onPressHandler}
         accessible>
         <View style={styles.wrapper}>
           <Image style={styles.icon} source={icon} />
