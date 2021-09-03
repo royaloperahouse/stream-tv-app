@@ -2,14 +2,23 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
+import { useFeature } from 'flagged';
 
 type TOperaMusicScreenProps = {};
 const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
+  const hasOpera = useFeature('hasOpera');
+
   return (
     <View style={styles.root}>
-      <RohText style={styles.rootText} bold>
-        Opera & Music Screen will be soon
-      </RohText>
+      {
+        hasOpera ? 
+        <RohText style={styles.rootText} bold>
+          Activated: Opera & Music Screen
+        </RohText> :
+        <RohText style={styles.rootText} bold>
+          Opera & Music Screen coming soon
+        </RohText>
+      }
     </View>
   );
 };

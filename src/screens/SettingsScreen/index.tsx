@@ -8,7 +8,7 @@
 //   return (
 //     <View style={styles.root}>
 //       <RohText style={styles.rootText} bold>
-//         Settings Screen will be soon
+//         Settings Screen coming soon
 //       </RohText>
 //     </View>
 //   );
