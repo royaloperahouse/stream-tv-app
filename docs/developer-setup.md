@@ -51,7 +51,7 @@ Start Metro:
 
 NB: If you have issues with the emulator hanging, you are probably running macOS Big Sur ;) See https://stackoverflow.com/a/67304587/1861645 for more info. In Android studio, go to `SDK Manager` -> `SDK Tools Tab` -> uncheck `Android Emulator`and Apply, then go back in and re-check the emulator. This will trigger the update that fixes the problem.
 
-_(Status: It is currently possible to run on an Android TV emulator (in fact on an Android emulator, but the experience really own works well on a TV emulator), but there are certain issues. The recommended experience is on an Amazon Fire Stick.)_
+_(Status: It is currently possible to run on an Android TV emulator (in fact on an Android emulator, but the experience really only works well on a TV emulator), but there are certain issues. The recommended experience is on an Amazon Fire Stick.)_
 
 #### Current flow for using the app on Android TV Emulator
 * Once you have the app running, press the "Getting Started" button on the start screen. 
