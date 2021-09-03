@@ -8,8 +8,8 @@ const LiveStreamScreen: React.FC<TLiveStreamScreenProps> = () => {
   return (
     <View style={styles.root}>
       <RohText style={styles.rootText} bold>
-        LiveStream Screen will be soon
-      </RohText>
+        LiveStream Screen coming soon
+      </RohText>  
     </View>
   );
 };

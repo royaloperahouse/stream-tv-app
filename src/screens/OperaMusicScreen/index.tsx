@@ -8,7 +8,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
   return (
     <View style={styles.root}>
       <RohText style={styles.rootText} bold>
-        Opera & Music Screen will be soon
+        Opera & Music Screen coming soon
       </RohText>
     </View>
   );

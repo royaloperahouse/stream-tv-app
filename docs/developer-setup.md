@@ -80,6 +80,43 @@ _(Status: No target, doesn't exist as yet)_
 
 ## Development
 
+### Feature flags
+
+All new features should be developed under feature flags. We use [flagged](https://github.com/sergiodxa/flagged).
+Consult the documentation for more details but in short:
+
+First, we wrap our `App` component in flagged's `FeatureProvider`, defining flags in an object prop:
+
+```
+    <FlagsProvider features={{ hasOpera: false }}>
+        <AppLayout />
+    </FlagsProvider>
+```
+
+Then, consume the feature flag in the code in question, typically to switch in/out a component, for example:
+
+```
+const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
+  const hasOpera = useFeature('hasOpera');
+  console.log("hasOpera: ", hasOpera);
+  return (
+    <View style={styles.root}>
+      { 
+        hasOpera ?
+          <RohText style={styles.rootText} bold>
+            Opera & Music Screen is here!
+          </RohText> :
+          <RohText style={styles.rootText} bold>
+            Opera & Music Screen coming soon
+          </RohText>
+      }
+    </View>
+  );
+};
+```
+
+There are also many full-featured feature flag services available such as [flagsmith](https://flagsmith.com) and [flagship](https://developers.flagship.io). These can be used to extend the existing provider functionality. Flagged can recieve either an array of flags or an object with flag keys and values. This fact enables us to prepare the flags elsewhere - for example, perhaps via flagship's Decision API. In this way, we can handle the same feature in various systems simultaneously.
+
 ### Technologies used:
  - Typescript!
  - Redux: app state

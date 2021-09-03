@@ -8,7 +8,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   return (
     <View style={styles.root}>
       <RohText style={styles.rootText} bold>
-        Ballet & Dance Screen will be soon
+        Ballet & Dance Screen coming soon
       </RohText>
     </View>
   );
