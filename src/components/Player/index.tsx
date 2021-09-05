@@ -77,15 +77,19 @@ type TPlayerProps = {
     subtitles?: string;
     configuration?: string;
   };
-  // analytics?: {
-  //   videoId: string;
-  //   title: string | undefined;
-  //   userId: string | undefined;
-  //   cdnProvider: string;
-  //   customData1: string;
-  //   customData2: string;
-  //   customData3: string;
-  // };
+  analytics?: {
+    videoId: string;
+    title?: string;
+    userId?: string;
+    experiment?: string;
+    customData1?: string;
+    customData2?: string;
+    customData3?: string;
+    customData4?: string;
+    customData5?: string;
+    customData6?: string;
+    customData7?: string;
+  };
 };
 
 const Player: React.FC<TPlayerProps> = props => {
@@ -98,6 +102,7 @@ const Player: React.FC<TPlayerProps> = props => {
     title,
     subtitle,
     configuration,
+    analytics,
   } = props;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const controlRef = useRef<TPlayerControlsRef | null>(null);
@@ -445,6 +450,7 @@ don`t forget to remove it when player will integrate;
       <NativeBitMovinPlayer
         ref={setPlayer}
         configuration={configuration}
+        analytics={analytics}
         style={[
           {
             backgroundColor: 'black',

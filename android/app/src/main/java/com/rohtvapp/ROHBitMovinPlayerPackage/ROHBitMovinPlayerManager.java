@@ -1,11 +1,15 @@
 package com.rohtvapp.ROHBitMovinPlayerPackage;
 
+import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
+
 import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 
-// import com.bitmovin.analytics.BitmovinAnalyticsConfig;
-// import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
+import com.bitmovin.analytics.BitmovinAnalyticsConfig;
+import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
+import com.bitmovin.analytics.enums.CDNProvider;
 import com.bitmovin.player.PlayerView;
 import com.bitmovin.player.SubtitleView;
 import com.bitmovin.player.api.PlaybackConfig;
@@ -50,7 +54,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private ReadableMap configuration;
   private ReadableMap analyticsConfig;
-  // private BitmovinPlayerCollector analyticsCollector;
+  private BitmovinPlayerCollector analyticsCollector;
   private PlayerConfig playerConfig = new PlayerConfig();
   // private PlaybackConfig playbackConfig = PlaybackConfig();
   private SubtitleTrack subtitleTrack;
@@ -98,6 +102,102 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     if (autoPlay != null && autoPlay == true) {
       // playbackConfig.isAutoplayEnabled = true;
     }
+  }
+
+
+  @ReactProp(name = "analytics")
+  public void setAnalytics(PlayerView view, ReadableMap analytics) {
+
+    String videoId = "";
+    String title = "";
+    String userId = "";
+    String experiment = "";
+    String customData1 = "";
+    String customData2 = "";
+    String customData3 = "";
+    String customData4 = "";
+    String customData5 = "";
+    String customData6 = "";
+    String customData7 = "";
+
+    PackageManager pm = reactContext.getPackageManager();
+    String licenseKey = null;
+    String analyticsKey = null;
+
+    try {
+      ApplicationInfo pInfo = pm.getApplicationInfo(reactContext.getPackageName(), PackageManager.GET_META_DATA);
+      licenseKey = pInfo.metaData.getString("BITMOVIN_PLAYER_LICENSE_KEY");
+      analyticsKey = pInfo.metaData.getString("BITMOVIN_ANALYTICS_LICENSE_KEY");
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+      Log.e("[METADATA]", " name not found");
+    }
+
+    BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(
+      analyticsKey,
+      licenseKey
+    );
+
+    if (analytics != null && analytics.getString("videoId") != null) {
+      videoId = analytics.getString("videoId");
+    }
+
+    if (analytics != null && analytics.getString("title") != null) {
+      title = analytics.getString("title");
+    }
+
+    if (analytics != null && analytics.getString("userId") != null) {
+      userId = analytics.getString("userId");
+    }
+
+    if (analytics != null && analytics.getString("experiment") != null) {
+      experiment = analytics.getString("experiment");
+    }
+
+    if (analytics != null && analytics.getString("customData1") != null) {
+      customData1 = analytics.getString("customData1");
+    }
+
+    if (analytics != null && analytics.getString("customData2") != null) {
+      customData2 = analytics.getString("customData2");
+    }
+
+    if (analytics != null && analytics.getString("customData3") != null) {
+      customData3 = analytics.getString("customData3");
+    }
+
+    if (analytics != null && analytics.getString("customData4") != null) {
+      customData4 = analytics.getString("customData4");
+    }
+
+    if (analytics != null && analytics.getString("customData5") != null) {
+      customData5 = analytics.getString("customData5");
+    }
+
+    if (analytics != null && analytics.getString("customData6") != null) {
+      customData6 = analytics.getString("customData6");
+    }
+
+    if (analytics != null && analytics.getString("customData7") != null) {
+      customData7 = analytics.getString("customData7");
+    }
+
+    bitmovinAnalyticsConfig.setVideoId(videoId);
+    bitmovinAnalyticsConfig.setTitle(title);
+    bitmovinAnalyticsConfig.setCustomUserId(userId);
+    bitmovinAnalyticsConfig.setCdnProvider(CDNProvider.BITMOVIN);
+    bitmovinAnalyticsConfig.setExperimentName(experiment);
+    bitmovinAnalyticsConfig.setCustomData1(customData1);
+    bitmovinAnalyticsConfig.setCustomData2(customData2);
+    bitmovinAnalyticsConfig.setCustomData3(customData3);
+    bitmovinAnalyticsConfig.setCustomData4(customData4);
+    bitmovinAnalyticsConfig.setCustomData5(customData5);
+    bitmovinAnalyticsConfig.setCustomData6(customData6);
+    bitmovinAnalyticsConfig.setCustomData7(customData7);
+
+    BitmovinPlayerCollector analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, reactContext);
+
+    analyticsCollector.attachPlayer(player);
   }
 
   @ReactProp(name = "configuration")

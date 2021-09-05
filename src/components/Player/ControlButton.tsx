@@ -26,17 +26,29 @@ const ControlButton: React.FC<Props> = ({
 }) => {
   const [isButtonActive, setFocus] = useState(false);
 
+  const onFocusHandler = () => {
+    setFocus(true);
+    if (typeof onFocus === 'function') {
+      onFocus();
+    }
+  };
+
+  const onBlurHandler = () => setFocus(false);
+
+  const onPressHandler = () => {
+    if (typeof onPress === 'function') {
+      onPress(true);
+    }
+  };
+
   return (
     <TouchableHighlightWrapper
       style={styles.button}
       styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
       hasTVPreferredFocus={hasTVPreferredFocus}
-      onFocus={() => {
-        setFocus(true);
-        onFocus && onFocus();
-      }}
-      onBlur={() => setFocus(false)}
-      onPress={() => onPress && onPress(true)}>
+      onFocus={onFocusHandler}
+      onBlur={onBlurHandler}
+      onPress={onPressHandler}>
       <View style={styles.wrapper}>
         <Image style={styles.icon} source={icon} />
         {isButtonActive && expand && (
@@ -77,7 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: null,
+    width: undefined,
     height: scaleSize(72),
     backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),

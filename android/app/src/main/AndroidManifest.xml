@@ -33,6 +33,7 @@
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
       <meta-data android:name="BITMOVIN_PLAYER_LICENSE_KEY" android:value="1cb2ef33-6d56-4632-8d8b-1fdbf64b3511" />
+      <meta-data android:name="BITMOVIN_ANALYTICS_LICENSE_KEY" android:value="45a0bac7-b900-4a0f-9d87-41a120744160" />
     </application>
 
 </manifest>
