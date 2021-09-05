@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
       Dimensions.get('window').width -
       (widthWithOutFocus + marginRightWithOutFocus + marginLeftStop),
     height: Dimensions.get('window').height,
+    justifyContent: 'flex-end',
   },
   railContainerStyle: {
     top: 0,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableHighlight, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 
 import { scaleSize } from '@utils/scaleSize';
 
@@ -10,9 +10,10 @@ import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 type Props = {
   icon: any;
   text?: string;
-  expand?: boolean,
+  expand?: boolean;
   onPress?: (val: boolean) => void;
   onFocus?: () => void;
+  hasTVPreferredFocus?: boolean;
 };
 
 const ControlButton: React.FC<Props> = ({
@@ -21,24 +22,28 @@ const ControlButton: React.FC<Props> = ({
   expand,
   onPress,
   onFocus,
+  hasTVPreferredFocus = false,
 }) => {
   const [isButtonActive, setFocus] = useState(false);
 
   return (
-    <View style={styles.buttonContainer}>
-      <TouchableHighlightWrapper
-        style={styles.button}
-        styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
-        onFocus={() => { setFocus(true); onFocus && onFocus(); }}
-        onBlur={() => setFocus(false)}
-        onPress={() => onPress && onPress(true)}
-        accessible>
-        <View style={styles.wrapper}>
-          <Image style={styles.icon} source={icon} />
-          {isButtonActive && expand && <RohText style={styles.text}>{text}</RohText>}
-        </View>
-      </TouchableHighlightWrapper>
-    </View>
+    <TouchableHighlightWrapper
+      style={styles.button}
+      styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      onFocus={() => {
+        setFocus(true);
+        onFocus && onFocus();
+      }}
+      onBlur={() => setFocus(false)}
+      onPress={() => onPress && onPress(true)}>
+      <View style={styles.wrapper}>
+        <Image style={styles.icon} source={icon} />
+        {isButtonActive && expand && (
+          <RohText style={styles.text}>{text}</RohText>
+        )}
+      </View>
+    </TouchableHighlightWrapper>
   );
 };
 

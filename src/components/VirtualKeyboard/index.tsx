@@ -117,7 +117,6 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
                   ? keyboardDatalastItemButtonRef
                   : undefined
               }
-              hasTVPreferredFocus={index === 0}
               text={item.text}
               onPress={addLetterToSearch}
               style={{ width: cellWidth, height: cellHeight }}

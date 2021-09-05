@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForBalletAndDanceSelector } from '@services/store/events/Selectors';
@@ -14,11 +14,23 @@ import {
   marginRightWithOutFocus,
   marginLeftStop,
 } from '@configs/navMenuConfig';
+import { TPreviewRef } from '@components/EventListComponents/components/Preview';
 
 type TBalletDanceScreenProps = {};
 const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   const data = useSelector(digitalEventsForBalletAndDanceSelector);
-  const previewRef = useRef(null);
+  const previewRef = useRef<TPreviewRef | null>(null);
+  const runningOnceRef = useRef<boolean>(false);
+  useLayoutEffect(() => {
+    if (
+      typeof previewRef.current?.setDigigtalEvent === 'function' &&
+      data.length &&
+      !runningOnceRef.current
+    ) {
+      runningOnceRef.current = true;
+      previewRef.current.setDigigtalEvent(data[0]?.data[0]);
+    }
+  }, [data]);
   if (!data.length) {
     return null;
   }
@@ -42,7 +54,6 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
               event={item}
               ref={previewRef}
               canMoveUp={section.sectionIndex !== 0}
-              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
             />
@@ -59,6 +70,7 @@ const styles = StyleSheet.create({
       Dimensions.get('window').width -
       (widthWithOutFocus + marginRightWithOutFocus + marginLeftStop),
     height: Dimensions.get('window').height,
+    justifyContent: 'flex-end',
   },
   railContainerStyle: {
     top: 0,

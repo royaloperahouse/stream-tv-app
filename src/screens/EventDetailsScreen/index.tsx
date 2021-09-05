@@ -7,6 +7,7 @@ import collectionOfEventDetailsSections, {
   TEventDitailsSection,
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
+import Player from '@components/Player';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
@@ -16,7 +17,13 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   const [isBMPlayerShowing, setIsBMPlayerShowing] = useState<boolean>(false);
   const { event } = route.params;
   const scrollViewRef = useRef<ScrollView>(null);
-
+  const showPlayer = useCallback(() => {
+    setIsBMPlayerShowing(true);
+  }, []);
+  const closePlayer = useCallback(time => {
+    console.log(time, ' time');
+    setIsBMPlayerShowing(false);
+  }, []);
   const sectionsFactory = useCallback(
     (item: TEventDitailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
@@ -29,6 +36,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
             <Component
               key={item?.key || index}
               event={event}
+              showPlayer={showPlayer}
               isBMPlayerShowing={isBMPlayerShowing}
               nextScreenText={item.nextSectionTitle}
               scrollToMe={() => {
@@ -57,11 +65,23 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
         }
       }
     },
-    [isBMPlayerShowing, event],
+    [isBMPlayerShowing, event, showPlayer],
   );
 
   if (isBMPlayerShowing) {
-    return null;
+    return (
+      <Player
+        autoPlay
+        configuration={{
+          url: 'https://video-ingestor-output-bucket.s3-eu-west-1.amazonaws.com/12338/manifest.m3u8',
+          poster:
+            'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+        }}
+        title="event title"
+        subtitle="some subtitle"
+        onClose={closePlayer}
+      />
+    );
   }
   return (
     <View style={styles.rootContainer}>

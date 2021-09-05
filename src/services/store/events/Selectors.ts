@@ -30,7 +30,7 @@ export const digitalEventsForHomePageSelector =
       ids: Array<string>;
     }>(store.events.eventGroups).filter(([key]) => key in homePageWhiteList);
     const arrayOfIdsForRemoveFromMyList: Array<string> = [];
-    if (myList.length) {
+    if (myList.length && eventGroupsArray.length) {
       eventGroupsArray.unshift(['', { title: myListTitle, ids: myList }]);
     }
     const eventSections = eventGroupsArray.reduce<
