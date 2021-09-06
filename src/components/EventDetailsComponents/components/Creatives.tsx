@@ -9,7 +9,6 @@ import {
 import { scaleSize } from '@utils/scaleSize';
 import {
   TEventContainer,
-  TVSEventDetailsCast,
   TVSEventDetailsCreative,
 } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -17,38 +16,17 @@ import GoDown from '../commonControls/GoDown';
 import get from 'lodash.get';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 
-type CastAndCreativesProps = {
+type CreativesProps = {
   event: TEventContainer;
   nextScreenText: string;
   scrollToMe: () => void;
 };
 
-const CastAndCreatives: React.FC<CastAndCreativesProps> = ({
+const Creatives: React.FC<CreativesProps> = ({
   event,
   nextScreenText,
   scrollToMe,
 }) => {
-  const castList: Array<TVSEventDetailsCast> = get(
-    event.data,
-    ['vs_event_details', 'cast'],
-    [],
-  );
-  const listOfEvalableCasts = castList.reduce<{ [key: string]: string }>(
-    (acc, cast) => {
-      const role = get(cast, ['attributes', 'role'], '');
-      const name = get(cast, ['attributes', 'name'], '');
-      if (!name) {
-        return acc;
-      }
-      if (role && role in acc) {
-        acc[role] += `, ${name}`;
-      } else {
-        acc[role] = name;
-      }
-      return acc;
-    },
-    {},
-  );
   const creativesList: Array<TVSEventDetailsCreative> = get(
     event.data,
     ['vs_event_details', 'creatives'],
@@ -73,19 +51,8 @@ const CastAndCreatives: React.FC<CastAndCreativesProps> = ({
     <TouchableHighlightWrapper>
       <View style={styles.generalContainer}>
         <View style={styles.wrapper}>
-          <RohText style={styles.title}>Cast {'\n'}& Creatives</RohText>
+          <RohText style={styles.title}>Creatives</RohText>
           <View style={styles.castCreativesContainer}>
-            <View style={styles.columnContainer}>
-              <RohText style={styles.columnTtitle}>Cast</RohText>
-              <ScrollView>
-                {Object.entries(listOfEvalableCasts).map(([role, name]) => (
-                  <View style={styles.elementContainer} key={role}>
-                    <RohText style={styles.role}>{role}</RohText>
-                    <RohText style={styles.name}>{name}</RohText>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
             <View style={styles.columnContainer}>
               <RohText style={styles.columnTtitle}>Creatives</RohText>
               <ScrollView>
@@ -161,4 +128,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CastAndCreatives;
+export default Creatives;
