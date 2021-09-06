@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableHighlight, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 
 import { scaleSize } from '@utils/scaleSize';
 
@@ -10,9 +10,10 @@ import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 type Props = {
   icon: any;
   text?: string;
-  expand?: boolean,
-  onPress?: () => void;
+  expand?: boolean;
+  onPress?: (val: boolean) => void;
   onFocus?: () => void;
+  hasTVPreferredFocus?: boolean;
 };
 
 const ControlButton: React.FC<Props> = ({
@@ -21,35 +22,40 @@ const ControlButton: React.FC<Props> = ({
   expand,
   onPress,
   onFocus,
+  hasTVPreferredFocus = false,
 }) => {
   const [isButtonActive, setFocus] = useState(false);
 
   const onFocusHandler = () => {
     setFocus(true);
-    if (onFocus) onFocus();
+    if (typeof onFocus === 'function') {
+      onFocus();
+    }
   };
 
   const onBlurHandler = () => setFocus(false);
 
   const onPressHandler = () => {
-    if (onPress) onPress();
+    if (typeof onPress === 'function') {
+      onPress(true);
+    }
   };
 
   return (
-    <View style={styles.buttonContainer}>
-      <TouchableHighlightWrapper
-        style={styles.button}
-        styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
-        onFocus={onFocusHandler}
-        onBlur={onBlurHandler}
-        onPress={onPressHandler}
-        accessible>
-        <View style={styles.wrapper}>
-          <Image style={styles.icon} source={icon} />
-          {isButtonActive && expand && <RohText style={styles.text}>{text}</RohText>}
-        </View>
-      </TouchableHighlightWrapper>
-    </View>
+    <TouchableHighlightWrapper
+      style={styles.button}
+      styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      onFocus={onFocusHandler}
+      onBlur={onBlurHandler}
+      onPress={onPressHandler}>
+      <View style={styles.wrapper}>
+        <Image style={styles.icon} source={icon} />
+        {isButtonActive && expand && (
+          <RohText style={styles.text}>{text}</RohText>
+        )}
+      </View>
+    </TouchableHighlightWrapper>
   );
 };
 
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: null,
+    width: undefined,
     height: scaleSize(72),
     backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),

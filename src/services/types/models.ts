@@ -191,3 +191,9 @@ export type TVSBackgroundImage = {
   copyright: null | any; // need better type;
   url: string;
 };
+
+export type TBitMovinPlayerSavedPosition = {
+  id: string;
+  position: string;
+  eventId?: string;
+};

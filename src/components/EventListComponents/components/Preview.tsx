@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useLayoutEffect,
 } from 'react';
-import { View, StyleSheet, Animated, Image } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEvent, TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -13,23 +13,30 @@ import get from 'lodash.get';
 import FastImage from 'react-native-fast-image';
 import { Colors } from '@themes/Styleguide';
 
+export type TPreviewRef = {
+  setDigigtalEvent?: (digitalEvent: TEventContainer) => void;
+};
+
 type TPreviewProps = {};
 
-const Preview = forwardRef<any, TPreviewProps>((props, ref) => {
+const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   const fadeAnimation = useRef<Animated.Value>(new Animated.Value(0)).current;
+  const mountedRef = useRef<boolean>(false);
   const [event, setEvent] = useState<TEvent | null>(null);
   useImperativeHandle(
     ref,
     () => ({
       setDigigtalEvent: (digitalEvent: TEventContainer) => {
-        setEvent(digitalEvent.data);
+        if (mountedRef.current) {
+          setEvent(digitalEvent.data);
+        }
       },
     }),
     [],
   );
   const eventGroupTitle: string = get(
     event,
-    ['vs_event_details', 'tags', '0', 'attributes', '0', 'title'],
+    ['vs_event_details', 'tags', '0', 'attributes', 'title'],
     '',
   );
   const eventTitle: string =
@@ -58,7 +65,9 @@ const Preview = forwardRef<any, TPreviewProps>((props, ref) => {
       }).start();
     }
   }, [event]);
-
+  useLayoutEffect(() => {
+    mountedRef.current = true;
+  }, []);
   if (!event) {
     return null;
   }

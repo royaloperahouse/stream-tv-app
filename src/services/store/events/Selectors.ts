@@ -3,6 +3,12 @@ import { detailEventsSearchOptions } from '@configs/fuseConfig';
 import { TEventContainer } from '@services/types/models';
 import { myListTitle } from '@configs/myListConfig';
 import { removeIdsFromMyList } from '@services/myList';
+import {
+  homePageWhiteList,
+  operaAndMusicWhiteList,
+  balletAndDanceWhiteList,
+} from '@configs/eventListScreensConfig';
+import get from 'lodash.get';
 
 export const digitalEventDetailsSearchSelector = (store: {
   [key: string]: any;
@@ -19,15 +25,15 @@ export const searchQuerySelector = (store: { [key: string]: any }) =>
 
 export const digitalEventsForHomePageSelector =
   (myList: Array<string>) => (store: { [key: string]: any }) => {
-    const eventGropsArray = Object.entries<{
+    const eventGroupsArray = Object.entries<{
       title: string;
       ids: Array<string>;
-    }>(store.events.eventGroups);
+    }>(store.events.eventGroups).filter(([key]) => key in homePageWhiteList);
     const arrayOfIdsForRemoveFromMyList: Array<string> = [];
-    if (myList.length) {
-      eventGropsArray.unshift(['', { title: myListTitle, ids: myList }]);
+    if (myList.length && eventGroupsArray.length) {
+      eventGroupsArray.unshift(['', { title: myListTitle, ids: myList }]);
     }
-    const eventSections = eventGropsArray.reduce<
+    const eventSections = eventGroupsArray.reduce<
       Array<{
         sectionIndex: number;
         title: string;
@@ -73,3 +79,87 @@ export const digitalEventsForMyListScreenSelector =
     }
     return eventListForMyList;
   };
+
+export const digitalEventsForBalletAndDanceSelector = (store: {
+  [key: string]: any;
+}) => {
+  const eventGroupsArray = Object.entries<{
+    title: string;
+    ids: Array<string>;
+  }>(store.events.eventGroups).filter(
+    ([key]) => key in balletAndDanceWhiteList,
+  );
+  let sectionIndex = 0;
+  const eventSections = Array.from(
+    new Set(
+      eventGroupsArray.reduce<Array<string>>((acc, [_, groupInfo]) => {
+        acc.push(...groupInfo.ids);
+        return acc;
+      }, []),
+    ),
+  ).reduce<{
+    [key: string]: {
+      sectionIndex: number;
+      title: string;
+      data: Array<TEventContainer>;
+    };
+  }>((acc, id) => {
+    const event = store.events.allDigitalEventsDetail[id];
+    const genres: Array<{ tag: string }> = get(event.data, 'vs_genres', []);
+    for (let i = 0; i < genres.length; i++) {
+      const genre = genres[i].tag || 'without genre';
+      if (genre in acc) {
+        acc[genre].data.push(store.events.allDigitalEventsDetail[id]);
+      } else {
+        acc[genre] = {
+          sectionIndex: sectionIndex++,
+          title: genre,
+          data: [store.events.allDigitalEventsDetail[id]],
+        };
+      }
+    }
+    return acc;
+  }, {});
+  return Object.values(eventSections);
+};
+
+export const digitalEventsForOperaAndMusicSelector = (store: {
+  [key: string]: any;
+}) => {
+  const eventGroupsArray = Object.entries<{
+    title: string;
+    ids: Array<string>;
+  }>(store.events.eventGroups).filter(([key]) => key in operaAndMusicWhiteList);
+  let sectionIndex = 0;
+  const eventSections = Array.from(
+    new Set(
+      eventGroupsArray.reduce<Array<string>>((acc, [_, groupInfo]) => {
+        acc.push(...groupInfo.ids);
+        return acc;
+      }, []),
+    ),
+  ).reduce<{
+    [key: string]: {
+      sectionIndex: number;
+      title: string;
+      data: Array<TEventContainer>;
+    };
+  }>((acc, id) => {
+    const event = store.events.allDigitalEventsDetail[id];
+    const genres: Array<{ tag: string }> = get(event.data, 'vs_genres', []);
+    for (let i = 0; i < genres.length; i++) {
+      const genre = genres[i].tag || 'without genre';
+      if (genre in acc) {
+        acc[genre].data.push(store.events.allDigitalEventsDetail[id]);
+      } else {
+        acc[genre] = {
+          sectionIndex: sectionIndex++,
+          title: genre,
+          data: [store.events.allDigitalEventsDetail[id]],
+        };
+      }
+    }
+    return acc;
+  }, {});
+  return Object.values(eventSections);
+};

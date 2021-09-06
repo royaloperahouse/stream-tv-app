@@ -24,15 +24,15 @@ import {
 type Props = {
   event: TEventContainer;
   scrollToMe: () => void;
-  showPlayer: () => void;
   nextScreenText: string;
   isBMPlayerShowing: boolean;
+  showPlayer: (...args: any[]) => void;
 };
 
 const General: React.FC<Props> = ({
   event,
   scrollToMe = () => {},
-  //showPlayer = () => {},
+  showPlayer,
   nextScreenText = 'Some Screen',
   //isBMPlayerShowing,
 }) => {
@@ -83,7 +83,7 @@ const General: React.FC<Props> = ({
           key: 'WatchNow',
           text: 'Watch now',
           hasTVPreferredFocus: true,
-          onPress: () => console.log('Watch now press'),
+          onPress: showPlayer,
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },

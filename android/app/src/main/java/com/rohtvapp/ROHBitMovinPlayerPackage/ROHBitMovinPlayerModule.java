@@ -135,4 +135,26 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
       throw new ClassCastException(String.format("Cannot isPlaying: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
   }
+
+  @ReactMethod
+  public void destroy(int tag) {
+    View playerView = getCurrentActivity().findViewById(tag);
+
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().destroy();
+    } else {
+      throw new ClassCastException(String.format("Cannot destroy: view with tag #%d is not a ROHBitMovinPlayer", tag));
+    }
+  }
+  @ReactMethod
+  public void restart(int tag) {
+    View playerView = getCurrentActivity().findViewById(tag);
+
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().seek(0.0);
+      ((PlayerView) playerView).getPlayer().play();
+    } else {
+      throw new ClassCastException(String.format("Cannot seek: view with tag #%d is not a ROHBitMovinPlayer", tag));
+    }
+  }
 }

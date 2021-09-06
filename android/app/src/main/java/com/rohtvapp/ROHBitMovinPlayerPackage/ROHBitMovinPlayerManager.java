@@ -22,6 +22,8 @@ import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
 // import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
 import com.bitmovin.player.api.source.Source;
 import com.bitmovin.player.api.source.SourceConfig;
+import com.bitmovin.player.api.media.LabelingConfig;
+import com.bitmovin.player.api.vr.VrConfig;
 import com.bitmovin.player.api.source.SourceOptions;
 import com.bitmovin.player.api.source.SourceType;
 import com.bitmovin.player.api.ui.StyleConfig;
@@ -39,6 +41,7 @@ import org.json.JSONObject;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
@@ -57,9 +60,10 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   private SubtitleTrack subtitleTrack;
   // private ThumbnailTrack thumbnailTrack;
   private int heartbeat = 10;
-  private double offset = 0.0;
   private boolean nextCallback = false;
   private boolean customSeek = false;
+  private double stoppedTime = 0.0;
+  private double duration = 0.0;
 
   @Override
   public String getName() {
@@ -88,6 +92,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     player.on(PlayerEvent.Paused.class, this::onPause);
     player.on(PlayerEvent.Seek.class, this::onSeek);
     player.on(PlayerEvent.TimeChanged.class, this::onTimeChanged);
+    player.on(PlayerEvent.Destroy.class, this::onDestroy);
 
     return playerView;
   }
@@ -201,6 +206,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
     String url = "";
     String poster = "";
+    Double offset = 0.0;
     SourceType type;
 
     if (configuration != null && configuration.getString("url") != null) {
@@ -222,11 +228,27 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
       // SourceOptions options = new SourceOptions();
 
       // options.startOffset = configuration.getDouble("startOffset");
+      if (configuration.getString("offset") != null) {
+        offset = Double.valueOf(configuration.getString("offset"));
+      }
 
       Source source = Source.create(
         new SourceConfig(
           url,
-          SourceType.Hls
+          SourceType.Hls,
+          null,
+          null,
+          null,
+          false,
+          new ArrayList(),
+          null,
+          null,
+          new LabelingConfig(),
+          new VrConfig(),
+          new ArrayList(),
+          new ArrayList(),
+          new SourceOptions(offset, null),
+          null
         )
       );
 
@@ -248,7 +270,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     map.putString("message", "play");
     map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
     map.putString("duration", Double.valueOf(player.getDuration()).toString());
-
+    stoppedTime = Double.valueOf(player.getCurrentTime());
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -264,7 +286,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     map.putString("message", "timeChanged");
     map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
     map.putString("duration", Double.valueOf(player.getDuration()).toString());
-
+    stoppedTime = Double.valueOf(player.getCurrentTime());
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -277,10 +299,10 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onPause(PlayerEvent.Paused event) {
     WritableMap map = Arguments.createMap();
+    stoppedTime = Double.valueOf(player.getCurrentTime());
     map.putString("message", "pause");
-    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
+    map.putString("time", String.valueOf(stoppedTime));
     map.putString("duration", Double.valueOf(player.getDuration()).toString());
-
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -293,9 +315,9 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onLoad(SourceEvent.Loaded event) {
     WritableMap map = Arguments.createMap();
+    duration = Double.valueOf(player.getDuration());
     map.putString("message", "load");
-    map.putString("duration", Double.valueOf(player.getDuration()).toString());
-
+    map.putString("duration", String.valueOf(duration));
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -311,7 +333,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     map.putString("message", "seek");
     map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
     map.putString("duration", Double.valueOf(player.getDuration()).toString());
-
+    stoppedTime = Double.valueOf(player.getCurrentTime());
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -322,5 +344,18 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     }
   }
 
+  private void onDestroy(PlayerEvent.Destroy event) {
+    WritableMap map = Arguments.createMap();
+    map.putString("message", "destroy");
+    map.putString("time", String.valueOf(stoppedTime));
+    map.putString("duration", String.valueOf(duration));
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onDestroy", map);
 
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
 }
