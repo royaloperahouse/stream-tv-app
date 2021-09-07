@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
   ScrollView,
+  FlatList,
+  LogBox,
 } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import {
@@ -16,6 +18,7 @@ import RohText from '@components/RohText';
 import GoDown from '../commonControls/GoDown';
 import get from 'lodash.get';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import MultiColumnRoleNameList from '../commonControls/MultiColumnRoleNameList';
 
 type CastProps = {
   event: TEventContainer;
@@ -49,6 +52,8 @@ const Cast: React.FC<CastProps> = ({
     },
     {},
   );
+  let data: Array<{role: string, name: string}> = [];
+  Object.entries(listOfEvalableCasts).map(([role, name]) => data.push({ role, name }));
   return (
     <TouchableHighlightWrapper>
       <View style={styles.generalContainer}>
@@ -56,15 +61,7 @@ const Cast: React.FC<CastProps> = ({
           <RohText style={styles.title}>Cast</RohText>
           <View style={styles.castCreativesContainer}>
             <View style={styles.columnContainer}>
-              <RohText style={styles.columnTtitle}>Cast</RohText>
-              <ScrollView>
-                {Object.entries(listOfEvalableCasts).map(([role, name]) => (
-                  <View style={styles.elementContainer} key={role}>
-                    <RohText style={styles.role}>{role}</RohText>
-                    <RohText style={styles.name}>{name}</RohText>
-                  </View>
-                ))}
-              </ScrollView>
+              <MultiColumnRoleNameList numColumns={3} data={data} />
             </View>
           </View>
         </View>
@@ -115,18 +112,6 @@ const styles = StyleSheet.create({
     fontSize: scaleSize(26),
     textTransform: 'uppercase',
     marginBottom: scaleSize(20),
-  },
-  elementContainer: {
-    marginBottom: scaleSize(32),
-  },
-  role: {
-    fontSize: scaleSize(20),
-    color: '#7E91B4',
-    textTransform: 'uppercase',
-  },
-  name: {
-    color: 'white',
-    fontSize: scaleSize(20),
   },
 });
 
