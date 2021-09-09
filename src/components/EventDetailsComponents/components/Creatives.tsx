@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  columnTtitle: {
+  columnTitle: {
     color: Colors.title,
     fontSize: scaleSize(26),
     textTransform: 'uppercase',
