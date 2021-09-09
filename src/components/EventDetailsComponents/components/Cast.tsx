@@ -31,6 +31,7 @@ const Cast: React.FC<CastProps> = ({
 }) => {
   const [active, toggleActive] = useState(false);
   const [numColumns, setNumColumns] = useState(1);
+  const [shouldShowHasMore, setShouldShowHasMore] = useState(true);
   const columnContainerRef = useRef<TMultiColumnRoleNameListRef>(null);
   const accumulatedHeight = useRef(0);
   const containerHeight = useRef(0);
@@ -87,17 +88,21 @@ const Cast: React.FC<CastProps> = ({
     setNumColumns(Math.min(numColumns + 1, MAX_NUM_COLUMNS));
   }
 
+  const updateReachedEnd = (distanceFromEnd: number) => {
+    setShouldShowHasMore(false);
+  }
+
   return (
     <TouchableHighlightWrapper
       onPress={() => {
-        toggleActive(!active);
-        scroll();
+          toggleActive(!active);
+          scroll();
       }}
       >
       <View style={styles.generalContainer}>
         <View style={styles.wrapper}>
           <RohText style={styles.title}>Cast</RohText>
-          <View style={active ? styles.highlightActive : styles.highlightHidden} />
+          <View style={active && shouldShowHasMore ? styles.highlightActive : styles.highlightHidden} />
             <View style={styles.castContainer}>
               <View style={styles.columnContainer}>
                 <MultiColumnRoleNameList
@@ -107,7 +112,9 @@ const Cast: React.FC<CastProps> = ({
                   ref={columnContainerRef}
                   setItemHeight={height => accumulateHeight(height)}
                   setContainerHeight={height => setContainerHeight(height)}
+                  setReachedEnd={(distanceFromEnd) => updateReachedEnd(distanceFromEnd)}
                 />
+                {shouldShowHasMore && <RohText style={styles.hasMore}>Press select for more...</RohText>}
               </View>
             </View>
           </View>
@@ -173,6 +180,14 @@ const styles = StyleSheet.create({
   columnContainer: {
     flex: 1,
   },
+  hasMore: {
+    color: Colors.defaultTextColor,
+    opacity: 0.8,
+    position: 'absolute',
+    bottom: scaleSize(10),
+    alignSelf: 'center',
+    backgroundColor: Colors.backgroundColorTransparent
+  }
 });
 
 export default Cast;

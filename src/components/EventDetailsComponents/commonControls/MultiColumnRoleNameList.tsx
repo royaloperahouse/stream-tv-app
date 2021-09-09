@@ -9,12 +9,12 @@ type TMultiColumnRoleNameListProps = {
     numColumns: number,
     setItemHeight(height: number): void
     setContainerHeight(height: number): void
+    setReachedEnd: (distanceFromEnd: number) => void;
 };
 
 export type TMultiColumnRoleNameListRef = {
   scrollToEnd?: () => void;
   scrollToTop?: () => void;
-  setHasMore?: () => void;
 };
 
 const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListProps> (
@@ -23,7 +23,8 @@ const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListPro
       data,
       numColumns,
       setItemHeight,
-      setContainerHeight
+      setContainerHeight,
+      setReachedEnd,
     } = props;
 
     const flatlistRef = useRef<FlatList>(null);
@@ -51,7 +52,12 @@ const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListPro
     return (
       <FlatList
         ref={flatlistRef}
+        showsVerticalScrollIndicator={false}
         onLayout={(event: LayoutChangeEvent) => setContainerHeight(event.nativeEvent.layout.height)}
+        onEndReached={({distanceFromEnd}) => {
+          return setReachedEnd(distanceFromEnd);
+        }}
+        onEndReachedThreshold={0.1}
         numColumns={numColumns}
         style={styles.list}
         data={data}
