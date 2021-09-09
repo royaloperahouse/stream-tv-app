@@ -14,6 +14,7 @@ type TMultiColumnRoleNameListProps = {
 export type TMultiColumnRoleNameListRef = {
   scrollToEnd?: () => void;
   scrollToTop?: () => void;
+  setHasMore?: () => void;
 };
 
 const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListProps> (
@@ -57,7 +58,7 @@ const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListPro
         keyExtractor={item => item.role}
         renderItem = {({ item }) => (
           <View
-            style={styles.elementContainer}
+            style={[styles.elementContainer, {maxWidth: `${1/numColumns * 100}%`}]}
             onLayout={(event: LayoutChangeEvent) => setItemHeight(event.nativeEvent.layout.height)}>
             <RohText style={styles.role}>{item.role}</RohText>
             <RohText style={styles.name}>{item.name}</RohText>
@@ -80,7 +81,6 @@ const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListPro
       elementContainer: {
         marginBottom: scaleSize(32),
         flex: 1,
-        maxWidth: `${1/3 * 100}%`
       },
       list: {
         flex: 1
