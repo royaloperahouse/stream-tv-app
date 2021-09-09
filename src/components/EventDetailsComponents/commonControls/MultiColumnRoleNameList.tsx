@@ -1,44 +1,80 @@
-import { FlatList, View, StyleSheet, LogBox } from "react-native";
+import { FlatList, View, StyleSheet, LogBox, LayoutChangeEvent } from "react-native";
 import RohText from "@components/RohText";
 import { scaleSize } from "@utils/scaleSize";
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useImperativeHandle } from 'react';
+import { Colors } from "@themes/Styleguide";
 
-type MultiColumnRoleNameListProps = {
+type TMultiColumnRoleNameListProps = {
     data: Array<{role: string, name: string}>,
-    numColumns: number
+    numColumns: number,
+    setItemHeight(height: number): void
+    setContainerHeight(height: number): void
 };
 
-const MultiColumnRoleNameList: React.FC<MultiColumnRoleNameListProps> = ({
-    data,
-    numColumns
-  }) => {
+export type TMultiColumnRoleNameListRef = {
+  scrollToEnd?: () => void;
+  scrollToTop?: () => void;
+};
+
+const MultiColumnRoleNameList = React.forwardRef<any,TMultiColumnRoleNameListProps> (
+  (props, ref) => {
+    const {
+      data,
+      numColumns,
+      setItemHeight,
+      setContainerHeight
+    } = props;
+
+    const flatlistRef = useRef<FlatList>(null);
     useEffect(() => {
       LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
     }, [])
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        scrollToEnd: () => {
+          if (flatlistRef.current) {
+            flatlistRef.current.scrollToEnd();
+          }
+        },
+        scrollToTop: () => {
+          if (flatlistRef.current) {
+            flatlistRef.current.scrollToOffset({ offset: 0 });
+          }
+        },
+      }),
+      [],
+    );
+
     return (
       <FlatList
+        ref={flatlistRef}
+        onLayout={(event: LayoutChangeEvent) => setContainerHeight(event.nativeEvent.layout.height)}
         numColumns={numColumns}
-        style={{ flex: 1 }}
+        style={styles.list}
         data={data}
         keyExtractor={item => item.role}
         renderItem = {({ item }) => (
-        <View style={styles.elementContainer}>
-          <RohText style={styles.role}>{item.role}</RohText>
-          <RohText style={styles.name}>{item.name}</RohText>
-        </View>
+          <View
+            style={styles.elementContainer}
+            onLayout={(event: LayoutChangeEvent) => setItemHeight(event.nativeEvent.layout.height)}>
+            <RohText style={styles.role}>{item.role}</RohText>
+            <RohText style={styles.name}>{item.name}</RohText>
+          </View>
         )}
       />
       );
-    };
+    });
 
     const styles = StyleSheet.create({
-    role: {
+      role: {
         fontSize: scaleSize(20),
-        color: '#7E91B4',
+        color: Colors.midGrey,
         textTransform: 'uppercase',
       },
       name: {
-        color: 'white',
+        color: Colors.defaultTextColor,
         fontSize: scaleSize(20),
       },
       elementContainer: {
@@ -46,6 +82,9 @@ const MultiColumnRoleNameList: React.FC<MultiColumnRoleNameListProps> = ({
         flex: 1,
         maxWidth: `${1/3 * 100}%`
       },
+      list: {
+        flex: 1
+      }
     });
 
     export default MultiColumnRoleNameList;
