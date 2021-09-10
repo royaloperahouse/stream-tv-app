@@ -141,9 +141,7 @@ const General: React.FC<Props> = ({
           <RohText style={styles.title} numberOfLines={2}>
             {title.toUpperCase()}
           </RohText>
-          {/* <RohText style={styles.ellipsis}>{event.captionText}</RohText> need more information*/}
           <RohText style={styles.description}>{shortDescription}</RohText>
-          {/* <RohText style={styles.info}>{event.info}</RohText> need more information*/}
           <View style={styles.buttonsContainer}>
             <ActionButtonList
               buttonsFactory={actionButtonListFactory}
@@ -222,7 +220,7 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     width: '100%',
-    height: scaleSize(192),
+    height: scaleSize(352),
     marginTop: scaleSize(50),
   },
 });
