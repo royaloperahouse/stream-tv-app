@@ -25,9 +25,16 @@ end
 
 target 'RohTVApp-tvOS' do
   # Pods for RohTVApp-tvOS
+  platform :tvos, '12.0'
+
+  config = use_native_modules!
+
+  # Hermes not yet available on tvOS
+  use_react_native!(:path => config["reactNativePath"])
 
   target 'RohTVApp-tvOSTests' do
-    inherit! :search_paths
+    inherit! :complete
     # Pods for testing
   end
+
 end
