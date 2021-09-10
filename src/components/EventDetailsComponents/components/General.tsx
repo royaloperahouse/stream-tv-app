@@ -88,13 +88,6 @@ const General: React.FC<Props> = ({
           Icon: Watch,
         },
         {
-          key: 'WatchWithAudioDescription',
-          text: 'Watch with audio description',
-          onPress: () => console.log('Watch with audio description press'),
-          onFocus: () => console.log('Watch with audio description focus'),
-          Icon: AudioDescription,
-        },
-        {
           key: 'WatchTrailer',
           text: 'Watch trailer',
           onPress: () => console.log('Watch trailer press'),
@@ -220,7 +213,7 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     width: '100%',
-    height: scaleSize(352),
+    height: scaleSize(272),
     marginTop: scaleSize(50),
   },
 });
