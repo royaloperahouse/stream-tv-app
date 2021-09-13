@@ -6641,9 +6641,9 @@ react-native-safe-area-context@^3.2.0:
   integrity sha512-k2Nty4PwSnrg9HwrYeeE+EYqViYJoOFwEy9LxL5RIRfoqxAq/uQXNGwpUg2/u4gnKpBbEPa9eRh15KKMe/VHkA==
 
 react-native-screens@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-3.4.0.tgz"
-  integrity sha512-cg+q9MRnVdeOcJyvJtqffoXLur/C2wHA/7IO2+FAipzTlgHbbM1mTuSM7qG+SeiQjoIs4mHOEf7A0ziPKW04sA==
+  version "3.7.0"
+  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-3.7.0.tgz#95dfc69a0c26dc6f87dc957e56ccccfabc9820a8"
+  integrity sha512-+fmODKdhLITkxmynP2LXEN5DsKzot5TRWnSgkh8zVdf4BL7mDTN035PiOSjlgCxTqXopRPMZJk9TUPCYsRkbeA==
   dependencies:
     warn-once "^0.1.0"
 
@@ -8125,7 +8125,7 @@ walker@^1.0.7, walker@~1.0.5:
 
 warn-once@^0.1.0:
   version "0.1.0"
-  resolved "https://registry.npmjs.org/warn-once/-/warn-once-0.1.0.tgz"
+  resolved "https://registry.npmjs.org/warn-once/-/warn-once-0.1.0.tgz#4f58d89b84f968d0389176aa99e0cf0f14ffd4c8"
   integrity sha512-recZTSvuaH/On5ZU5ywq66y99lImWqzP93+AiUo9LUwG8gXHW+LJjhOd6REJHm7qb0niYqrEQJvbHSQfuJtTqA==
 
 wcwidth@^1.0.1:
