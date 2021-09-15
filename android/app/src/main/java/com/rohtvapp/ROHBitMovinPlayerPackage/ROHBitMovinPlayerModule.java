@@ -9,6 +9,13 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
@@ -28,9 +35,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void play(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
-
     if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().play();
+      if (((PlayerView) playerView).getPlayer().getCurrentTime() < ((PlayerView) playerView).getPlayer().getDuration()) {
+        ((PlayerView) playerView).getPlayer().play();
+      }
     } else {
       throw new ClassCastException(String.format("Cannot play: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
@@ -155,6 +163,17 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
       ((PlayerView) playerView).getPlayer().play();
     } else {
       throw new ClassCastException(String.format("Cannot seek: view with tag #%d is not a ROHBitMovinPlayer", tag));
+    }
+  }
+
+  @ReactMethod
+  public void setSubtitle(int tag, String trackId) {
+    View playerView = getCurrentActivity().findViewById(tag);
+
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().setSubtitle(trackId);
+    } else {
+      throw new ClassCastException(String.format("Cannot setSubtitle: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
   }
 }
