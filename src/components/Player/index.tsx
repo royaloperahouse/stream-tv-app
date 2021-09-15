@@ -207,7 +207,6 @@ const Player: React.FC<TPlayerProps> = props => {
         onSeek({ nativeEvent: event }),
       );
       eventEmitter.addListener('onDestroy', (event: TOnDestoyPayload) => {
-        //ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
         const initDuration = parseFloat(event?.duration);
         const floatTime = parseFloat(event?.time);
         const stoppedTimePoint =
@@ -302,7 +301,6 @@ const Player: React.FC<TPlayerProps> = props => {
   const isStalled = () =>
     ROHBitmovinPlayerModule.isStalled(findNodeHandle(playerRef.current));
 
-  // const isPlaying = () => ROHBitmovinPlayerModule.isPlaying(findNodeHandle(player));
   const setSubtitle = useCallback(
     (trackID: string) =>
       ROHBitmovinPlayerModule.setSubtitle(

@@ -34,7 +34,6 @@ const General: React.FC<Props> = ({
   scrollToMe = () => {},
   showPlayer,
   nextScreenText = 'Some Screen',
-  //isBMPlayerShowing,
 }) => {
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);

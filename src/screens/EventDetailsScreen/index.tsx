@@ -73,7 +73,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
       <Player
         autoPlay
         configuration={{
-          url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8', // https://video-ingestor-output-bucket.s3-eu-west-1.amazonaws.com/12338/manifest.m3u8
+          url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
           poster:
             'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
         }}

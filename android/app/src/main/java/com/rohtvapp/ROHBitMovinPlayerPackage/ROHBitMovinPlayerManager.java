@@ -17,9 +17,7 @@ import com.bitmovin.player.api.Player;
 import com.bitmovin.player.api.PlayerConfig;
 import com.bitmovin.player.api.event.PlayerEvent;
 import com.bitmovin.player.api.event.SourceEvent;
-// import com.bitmovin.player.api.event;
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
-// import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
 import com.bitmovin.player.api.source.Source;
 import com.bitmovin.player.api.source.SourceConfig;
 import com.bitmovin.player.api.media.LabelingConfig;
@@ -59,9 +57,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   private ReadableMap analyticsConfig;
   private BitmovinPlayerCollector analyticsCollector;
   private PlayerConfig playerConfig = new PlayerConfig();
-  // private PlaybackConfig playbackConfig = PlaybackConfig();
   private SubtitleTrack subtitleTrack;
-  // private ThumbnailTrack thumbnailTrack;
   private int heartbeat = 10;
   private boolean nextCallback = false;
   private boolean customSeek = false;
@@ -77,8 +73,6 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   public PlayerView createViewInstance(ThemedReactContext context) {
     reactContext = context;
 
-    // playerConfig.playbackConfig = playbackConfig;
-
     StyleConfig styleConfig = new StyleConfig();
     styleConfig.setUiEnabled(false);
 
@@ -87,12 +81,6 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     player = Player.create(reactContext, playerConfig);
 
     playerView = new PlayerView(reactContext, player);
-/*     subtitleView = new SubtitleView(reactContext, null);
-    subtitleView.setPlayer(player);
-    subtitleView.setUserDefaultStyle();
-    subtitleView.setUserDefaultTextSize(); */
-
-    // playerView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
     player.on(SourceEvent.Loaded.class, this::onLoad);
     player.on(PlayerEvent.Playing.class, this::onPlay);
@@ -112,7 +100,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   @ReactProp(name = "autoPlay")
   public void setAutoPlay(PlayerView view, Boolean autoPlay) {
     if (autoPlay != null && autoPlay == true) {
-      // playbackConfig.isAutoplayEnabled = true;
+      // do something
     }
   }
 
@@ -224,22 +212,10 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     if (configuration != null && configuration.getString("url") != null) {
       url = configuration.getString("url");
 
-      //if (configuration.getString("subtitles") != null) {
-      // subtitleTrack = new SubtitleTrack(configuration.getString("subtitles"), null, "en", "en", false, "en");
-     // }
-
-      // if (configuration.getString("thumbnails") != null) {
-      //   thumbnailTrack = ThumbnailTrack(configuration.getString("thumbnails"));
-      // }
-
       if (configuration.getString("poster") != null) {
         poster = configuration.getString("poster");
       }
 
-      //List subtitleTracks = Arrays.<SubtitleTrack>asList(subtitleTrack);
-      // SourceOptions options = new SourceOptions();
-
-      // options.startOffset = configuration.getDouble("startOffset");
       if (configuration.getString("offset") != null) {
         offset = Double.valueOf(configuration.getString("offset"));
       }

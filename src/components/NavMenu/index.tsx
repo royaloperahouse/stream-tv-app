@@ -36,7 +36,6 @@ import {
   marginLeftStop,
   marginRightInvisble,
 } from '@configs/navMenuConfig';
-//import { log } from '@utils/loger';
 type TNavMenuProps = {
   navMenuConfig: Array<{
     navMenuScreenName: TRoute['navMenuScreenName'];

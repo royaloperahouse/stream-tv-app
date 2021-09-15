@@ -311,7 +311,6 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
   const [subtitleList, setSubtitleList] = useState<TSubtitles>([]);
   const [showList, setShowList] = useState<boolean>(false);
   const showListPrevState = useRef<boolean>(showList);
-  //const activeItemRef = useRef<string | null>(null);
   const firstItemRef = useRef<TTouchableHighlightWrapperRef | null>(null);
   const subtitlesMountedRef = useRef<boolean>(false);
 
@@ -340,7 +339,6 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
       });
     });
   };
-  //const onFocusHandler = () => {};
   useImperativeHandle(
     ref,
     () => ({
@@ -486,7 +484,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    bottom: scaleSize(112), //176
+    bottom: scaleSize(112),
     flexDirection: 'row',
   },
   controlContainer: {
