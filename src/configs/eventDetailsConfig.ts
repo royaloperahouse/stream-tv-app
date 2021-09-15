@@ -1,6 +1,7 @@
 import {
   General,
-  CastAndCreatives,
+  Cast,
+  Creatives,
   Synopsis,
 } from '@components/EventDetailsComponents/';
 
@@ -18,10 +19,15 @@ export const eventDetailsSectionsConfig: {
     nextSectionTitle: 'CAST & MORE',
     Component: General,
   },
-  castAndCreatives: {
-    key: 'castAndCreatives',
+  cast: {
+    key: 'cast',
+    nextSectionTitle: 'CREATIVES & MORE',
+    Component: Cast,
+  },
+  creatives: {
+    key: 'creatives',
     nextSectionTitle: 'SYNOPSIS & MORE',
-    Component: CastAndCreatives,
+    Component: Creatives,
   },
   synopsis: {
     key: 'synopsis',

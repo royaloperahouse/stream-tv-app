@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
-
+import { decode } from 'html-entities';
 import { Fonts } from '@themes/Styleguide';
 
 type TRohTextProps = TextProps & {
@@ -27,7 +27,7 @@ const RohText: React.FC<TRohTextProps> = ({
 
   return (
     <Text {...props} style={[style, { fontFamily }]}>
-      {children}
+      {decode(children?.toString())}
     </Text>
   );
 };
