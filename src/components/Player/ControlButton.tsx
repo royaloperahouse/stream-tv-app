@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 
 import { scaleSize } from '@utils/scaleSize';
@@ -16,16 +16,16 @@ type Props = {
   hasTVPreferredFocus?: boolean;
 };
 
-const ControlButton: React.FC<Props> = ({
-  icon,
-  text,
-  expand,
-  onPress,
-  onFocus,
-  hasTVPreferredFocus = false,
-}) => {
+const ControlButton = forwardRef<any, Props>((props, ref) => {
   const [isButtonActive, setFocus] = useState(false);
-
+  const {
+    icon,
+    text,
+    expand,
+    onPress,
+    onFocus,
+    hasTVPreferredFocus = false,
+  } = props;
   const onFocusHandler = () => {
     setFocus(true);
     if (typeof onFocus === 'function') {
@@ -42,22 +42,25 @@ const ControlButton: React.FC<Props> = ({
   };
 
   return (
-    <TouchableHighlightWrapper
-      style={styles.button}
-      styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
-      hasTVPreferredFocus={hasTVPreferredFocus}
-      onFocus={onFocusHandler}
-      onBlur={onBlurHandler}
-      onPress={onPressHandler}>
-      <View style={styles.wrapper}>
-        <Image style={styles.icon} source={icon} />
-        {isButtonActive && expand && (
-          <RohText style={styles.text}>{text}</RohText>
-        )}
-      </View>
-    </TouchableHighlightWrapper>
+    <View style={styles.buttonContainer}>
+      <TouchableHighlightWrapper
+        ref={ref}
+        style={styles.button}
+        styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
+        hasTVPreferredFocus={hasTVPreferredFocus}
+        onFocus={onFocusHandler}
+        onBlur={onBlurHandler}
+        onPress={onPressHandler}>
+        <View style={styles.wrapper}>
+          <Image style={styles.icon} source={icon} />
+          {isButtonActive && Boolean(text) && (
+            <RohText style={styles.text}>{text}</RohText>
+          )}
+        </View>
+      </TouchableHighlightWrapper>
+    </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   buttonContainer: {
@@ -68,6 +71,7 @@ const styles = StyleSheet.create({
   wrapper: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
+    alignItems: 'center',
   },
   button: {
     alignItems: 'center',

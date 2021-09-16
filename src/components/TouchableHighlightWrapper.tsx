@@ -4,6 +4,7 @@ import React, {
   useCallback,
   forwardRef,
   useImperativeHandle,
+  RefObject,
 } from 'react';
 import {
   findNodeHandle,
@@ -25,6 +26,11 @@ type TTouchableHighlightWrapperProps = TouchableHighlightProps & {
   children: React.ReactNode;
 };
 
+export type TTouchableHighlightWrapperRef = {
+  getNode?: () => number;
+  getRef?: () => RefObject<TouchableHighlight>;
+};
+
 const TouchableHighlightWrapper = forwardRef<
   any,
   TTouchableHighlightWrapperProps
@@ -40,6 +46,7 @@ const TouchableHighlightWrapper = forwardRef<
     onBlur,
     onPress,
     style = {},
+    accessible = true,
     ...restProps
   } = props;
   const [focused, setFocused] = useState(false);
@@ -51,6 +58,11 @@ const TouchableHighlightWrapper = forwardRef<
       getNode: () => {
         if (touchableHighlightRef.current) {
           return findNodeHandle(touchableHighlightRef.current);
+        }
+      },
+      getRef: () => {
+        if (touchableHighlightRef.current) {
+          return touchableHighlightRef;
         }
       },
     }),
@@ -118,6 +130,7 @@ const TouchableHighlightWrapper = forwardRef<
     <TouchableHighlight
       {...restProps}
       {...movingAccessibility}
+      accessible={accessible}
       onPress={onPressHandler}
       ref={touchableHighlightRef}
       onFocus={onFocusHandler}

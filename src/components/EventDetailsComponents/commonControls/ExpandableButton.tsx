@@ -57,8 +57,6 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    //justifyContent: 'center',
-    //width: scaleSize(300),
     height: scaleSize(70),
     flexDirection: 'row',
     opacity: 0.5,
@@ -66,9 +64,6 @@ const styles = StyleSheet.create({
   buttonActive: {
     backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),
-    //paddingRight: scaleSize(30),
-    //borderWidth: 0,
-    //width: 'auto',
     opacity: 1,
   },
   text: {

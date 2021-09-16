@@ -5,7 +5,7 @@ import { scaleSize } from '@utils/scaleSize';
 import { useNavigation } from '@react-navigation/native';
 import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
-
+import { useAndroidBackHandler } from 'react-navigation-backhandler';
 type TGoBackProps = {};
 
 const GoBack: React.FC<TGoBackProps> = () => {
@@ -16,6 +16,10 @@ const GoBack: React.FC<TGoBackProps> = () => {
       navMenuManager.showNavMenu();
     }
   };
+  useAndroidBackHandler(() => {
+    navMenuManager.showNavMenu();
+    return false;
+  });
   return (
     <TouchableHighlightWrapper
       onPress={onPressHandler}

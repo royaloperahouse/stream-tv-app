@@ -6,7 +6,6 @@ import {
   refLabelOfPublishing,
 } from '@configs/prismicApiConfig';
 import DefaultClient from '@prismicio/client/types/client';
-//import Predicates from '@prismicio/client/types/Predicates';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { QueryOptions } from '@prismicio/client/types/ResolvedApi';
 
@@ -72,12 +71,3 @@ export const getDigitalEventDetails = (
   });
 
 export default prismicApiClient;
-
-//
-/*
-export const simpleClientExample = () =>
-  prismicApiClient.query(
-    Prismic.Predicates.at('document.type', documentTypes.digitalEventDetails),
-    { ref: 'YO71ORAAABAAhkmF~YO71_BAAACIAhk1D' },
-  );
-*/
