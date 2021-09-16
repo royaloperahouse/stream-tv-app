@@ -315,7 +315,7 @@ PODS:
   - Sentry/Core (7.1.4)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
-    - Yoga (~> 1.14)
+    - Yoga
 
 DEPENDENCIES:
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
@@ -375,6 +375,9 @@ DEPENDENCIES:
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
+  https://github.com/react-native-tvos/react-native-tvos-podspecs.git:
+    - Flipper-PeerTalk
+    - YogaKit
   trunk:
     - boost-for-react-native
     - CocoaAsyncSocket
@@ -384,7 +387,6 @@ SPEC REPOS:
     - Flipper-Fmt
     - Flipper-Folly
     - Flipper-Glog
-    - Flipper-PeerTalk
     - Flipper-RSocket
     - FlipperKit
     - libevent
@@ -393,7 +395,6 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
-    - YogaKit
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -477,7 +478,7 @@ SPEC CHECKSUMS:
   Flipper-Fmt: 60cbdd92fc254826e61d669a5d87ef7015396a9b
   Flipper-Folly: 4c7cf530a9038ae25b0fa37e00b00491c467aaea
   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
-  Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
+  Flipper-PeerTalk: c41cddbfcfa98abeebd9c8503eb94d204a145c01
   Flipper-RSocket: d9d9ade67cbecf6ac10730304bf5607266dd2541
   FlipperKit: ab353d41aea8aae2ea6daaf813e67496642f3d7d
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
@@ -517,8 +518,8 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   Sentry: 1d3eb1a25f8c5333c88dd5603904a6d461cd9fcf
   Yoga: 1cb424a95ffa7e14cacce4c0ac07ba8e59393ebf
-  YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
+  YogaKit: 1e22bf2228b3a5ac8cc88965153061ae92c494b5
 
-PODFILE CHECKSUM: 3204b61af225374c7284c61797179291b3124c26
+PODFILE CHECKSUM: 51ea37e1da268e33c4114a382d6052dd4484387d
 
 COCOAPODS: 1.10.1

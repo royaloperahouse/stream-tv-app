@@ -9,21 +9,21 @@ import { routes } from '@navigations/routes';
 type TMainLayoutProps = {};
 
 const MainLayout: React.FC<TMainLayoutProps> = () => {
-  const navMenuConfig = routes.map(route => ({
-    navMenuScreenName: route.navMenuScreenName,
-    SvgIconActiveComponent: route.SvgIconActiveComponent,
-    SvgIconInActiveComponent: route.SvgIconInActiveComponent,
-    navMenuTitle: route.navMenuTitle,
-    position: route.position,
-    isDefault: route.isDefault,
-  }));
+  // const navMenuConfig = routes.map(route => ({
+  //   navMenuScreenName: route.navMenuScreenName,
+  //   SvgIconActiveComponent: route.SvgIconActiveComponent,
+  //   SvgIconInActiveComponent: route.SvgIconInActiveComponent,
+  //   navMenuTitle: route.navMenuTitle,
+  //   position: route.position,
+  //   isDefault: route.isDefault,
+  // }));
   return (
     <WithBackground>
       <WithLogo>
         <NavigationContainer>
           <View style={styles.root}>
-            <NavMenu navMenuConfig={navMenuConfig} />
-            <ContentLayout />
+            {/* <NavMenu navMenuConfig={navMenuConfig} /> */}
+            {/* <ContentLayout /> */}
           </View>
         </NavigationContainer>
       </WithLogo>
