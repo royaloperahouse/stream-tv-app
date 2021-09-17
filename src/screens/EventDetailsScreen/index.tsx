@@ -8,6 +8,8 @@ import collectionOfEventDetailsSections, {
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
+import RohText from '@components/RohText';
+import { scaleSize } from '@utils/scaleSize';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
@@ -70,29 +72,34 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
 
   if (isBMPlayerShowing) {
     return (
-      <Player
-        autoPlay
-        configuration={{
-          url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
-          poster:
-            'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-        }}
-        title="event title"
-        subtitle="some event subtitle"
-        onClose={closePlayer}
-        analytics={{
-          videoId: 'blahblahblah',
-          title: 'Some video title',
-          experiment: 'ROH TV app',
-          customData1: '',
-          customData2: '',
-          customData3: '',
-          customData4: '',
-          customData5: '',
-          customData6: '',
-          customData7: '',
-        }}
-      />
+    <View style={styles.root}>
+      <RohText style={styles.rootText} bold>
+        iOS bitmoving player coming soon
+      </RohText>
+    </View> 
+    // <Player
+    //   autoPlay
+    //   configuration={{
+    //     url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
+    //     poster:
+    //       'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+    //   }}
+    //   title="event title"
+    //   subtitle="some event subtitle"
+    //   onClose={closePlayer}
+    //   analytics={{
+    //     videoId: 'blahblahblah',
+    //     title: 'Some video title',
+    //     experiment: 'ROH TV app',
+    //     customData1: '',
+    //     customData2: '',
+    //     customData3: '',
+    //     customData4: '',
+    //     customData5: '',
+    //     customData6: '',
+    //     customData7: '',
+    //   }}
+    // />
     );
   }
   return (
@@ -112,6 +119,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  rootText: {
+    color: 'white',
+    fontSize: scaleSize(48),
   },
 });
 
