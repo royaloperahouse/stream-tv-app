@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: scaleSize(141),
     marginRight: scaleSize(130),
-    //maxWidth: scaleSize(615),
   },
   snapshotContainer: {
     width: scaleSize(975),

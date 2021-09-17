@@ -50,13 +50,11 @@ const DetailView: React.FC<Props> = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   root: {
-    //flex: 1,
     flexDirection: 'row',
     height: Dimensions.get('window').height,
   },
   container: {
     flex: 1,
-    //marginLeft: scaleSize(200),
   },
 });
 

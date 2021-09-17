@@ -44,31 +44,38 @@ function* loginLoopWatcher(): any {
 }
 
 function* loginLoopWorker(): any {
-  let runLoop: boolean = true;
-  while (runLoop) {
-    yield put(checkDeviceStart());
-    try {
-      const response: any = yield call(verifyDevice);
-      if (response?.data?.data?.attributes?.customerId) {
-        runLoop = false;
-        yield put(getEventListLoopStart());
-        yield put(checkDeviceSuccess(response.data));
-      } else if (
-        response?.data?.errors?.some(
-          (error: TAuthResponseError) => error.detail,
-        )
-      ) {
-        const errObj: TAuthResponseError = response.data.errors.find(
-          (error: TAuthResponseError) => error.detail,
-        );
-        yield put(checkDeviceError(errObj));
-      } else {
-        throw Error();
-      }
-    } catch (err) {
-      logError('something went wrong', err);
-      yield put(checkDeviceError({}));
-    }
-    yield delay(10000);
-  }
+  let runLoop: boolean = false;
+  yield put(getEventListLoopStart());
+  yield put(
+    checkDeviceSuccess({
+      data: { attributes: { customerId: 1, devicePin: '8C86725D-1AD4-49CF-BC4F-B8E8EFD5F133'}}
+    }),
+  );
+  // let runLoop: boolean = true;
+  // while (runLoop) {
+  //   yield put(checkDeviceStart());
+  //   try {
+  //     const response: any = yield call(verifyDevice);
+  //     if (response?.data?.data?.attributes?.customerId) {
+  //       runLoop = false;
+  //       yield put(getEventListLoopStart());
+  //       yield put(checkDeviceSuccess(response.data));
+  //     } else if (
+  //       response?.data?.errors?.some(
+  //         (error: TAuthResponseError) => error.detail,
+  //       )
+  //     ) {
+  //       const errObj: TAuthResponseError = response.data.errors.find(
+  //         (error: TAuthResponseError) => error.detail,
+  //       );
+  //       yield put(checkDeviceError(errObj));
+  //     } else {
+  //       throw Error();
+  //     }
+  //   } catch (err) {
+  //     logError('something went wrong', err);
+  //     yield put(checkDeviceError({}));
+  //   }
+  //   yield delay(10000);
+  // }
 }

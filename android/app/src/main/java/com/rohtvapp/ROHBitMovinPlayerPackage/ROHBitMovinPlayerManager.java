@@ -17,9 +17,7 @@ import com.bitmovin.player.api.Player;
 import com.bitmovin.player.api.PlayerConfig;
 import com.bitmovin.player.api.event.PlayerEvent;
 import com.bitmovin.player.api.event.SourceEvent;
-// import com.bitmovin.player.api.event;
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
-// import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
 import com.bitmovin.player.api.source.Source;
 import com.bitmovin.player.api.source.SourceConfig;
 import com.bitmovin.player.api.media.LabelingConfig;
@@ -32,6 +30,9 @@ import com.bitmovin.player.ui.CustomMessageHandler;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -56,9 +57,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   private ReadableMap analyticsConfig;
   private BitmovinPlayerCollector analyticsCollector;
   private PlayerConfig playerConfig = new PlayerConfig();
-  // private PlaybackConfig playbackConfig = PlaybackConfig();
   private SubtitleTrack subtitleTrack;
-  // private ThumbnailTrack thumbnailTrack;
   private int heartbeat = 10;
   private boolean nextCallback = false;
   private boolean customSeek = false;
@@ -74,8 +73,6 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   public PlayerView createViewInstance(ThemedReactContext context) {
     reactContext = context;
 
-    // playerConfig.playbackConfig = playbackConfig;
-
     StyleConfig styleConfig = new StyleConfig();
     styleConfig.setUiEnabled(false);
 
@@ -85,14 +82,17 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
     playerView = new PlayerView(reactContext, player);
 
-    // playerView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
     player.on(SourceEvent.Loaded.class, this::onLoad);
     player.on(PlayerEvent.Playing.class, this::onPlay);
     player.on(PlayerEvent.Paused.class, this::onPause);
     player.on(PlayerEvent.Seek.class, this::onSeek);
     player.on(PlayerEvent.TimeChanged.class, this::onTimeChanged);
     player.on(PlayerEvent.Destroy.class, this::onDestroy);
+    player.on(PlayerEvent.Seeked.class, this::onSeeked);
+    player.on(PlayerEvent.PlaybackFinished.class, this::onPlaybackFinished);
+    player.on(PlayerEvent.Ready.class, this::onReady);
+    player.on(SourceEvent.Error.class, this::onError);
+    player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
 
     return playerView;
   }
@@ -100,7 +100,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   @ReactProp(name = "autoPlay")
   public void setAutoPlay(PlayerView view, Boolean autoPlay) {
     if (autoPlay != null && autoPlay == true) {
-      // playbackConfig.isAutoplayEnabled = true;
+      // do something
     }
   }
 
@@ -212,22 +212,10 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     if (configuration != null && configuration.getString("url") != null) {
       url = configuration.getString("url");
 
-      if (configuration.getString("subtitles") != null) {
-        subtitleTrack = new SubtitleTrack(configuration.getString("subtitles"), null, "en", "en", false, "en");
-      }
-
-      // if (configuration.getString("thumbnails") != null) {
-      //   thumbnailTrack = ThumbnailTrack(configuration.getString("thumbnails"));
-      // }
-
       if (configuration.getString("poster") != null) {
         poster = configuration.getString("poster");
       }
 
-      List subtitleTracks = Arrays.<SubtitleTrack>asList(subtitleTrack);
-      // SourceOptions options = new SourceOptions();
-
-      // options.startOffset = configuration.getDouble("startOffset");
       if (configuration.getString("offset") != null) {
         offset = Double.valueOf(configuration.getString("offset"));
       }
@@ -254,10 +242,11 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
       player.load(source);
 
+      subtitleView = new SubtitleView(reactContext, null);
+      subtitleView.setPlayer(player);
+      subtitleView.setUserDefaultStyle();
+      subtitleView.setUserDefaultTextSize();
       player.setVolume(100);
-
-      // subtitleView = SubtitleView(reactContext);
-      // subtitleView.setPlayer(player);
     }
 
     if (configuration != null && configuration.getString("heartbeat") != null) {
@@ -315,9 +304,23 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onLoad(SourceEvent.Loaded event) {
     WritableMap map = Arguments.createMap();
+    List<SubtitleTrack> subtitles = player.getAvailableSubtitles();
+      WritableArray app_list = new WritableNativeArray();
+      for (SubtitleTrack subtitleTrack : subtitles) {
+        try {
+          WritableMap track = new WritableNativeMap();
+          track.putString("id", subtitleTrack.getId());
+          track.putString("label", subtitleTrack.getLabel());
+          track.putString("url", subtitleTrack.getUrl());
+          app_list.pushMap(track);
+        } catch (Exception ex) {
+          System.err.println("Exception: " + ex.getMessage());
+        }
+      }
     duration = Double.valueOf(player.getDuration());
     map.putString("message", "load");
     map.putString("duration", String.valueOf(duration));
+    map.putArray("subtitles", app_list);
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -333,12 +336,26 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     map.putString("message", "seek");
     map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
     map.putString("duration", Double.valueOf(player.getDuration()).toString());
-    stoppedTime = Double.valueOf(player.getCurrentTime());
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
         .emit("onSeek", map);
 
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
+
+  private void onSeeked(PlayerEvent.Seeked event) {
+    WritableMap map = Arguments.createMap();
+    map.putString("message", "seeked");
+    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
+    map.putString("duration", Double.valueOf(player.getDuration()).toString());
+    stoppedTime = Double.valueOf(player.getCurrentTime());
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onSeek", map);
     } catch (Exception e) {
       Log.e("ReactNative", "Caught Exception: " + e.getMessage());
     }
@@ -353,6 +370,86 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
         .emit("onDestroy", map);
+
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
+
+  private void onPlaybackFinished(PlayerEvent.PlaybackFinished event) {
+    WritableMap map = Arguments.createMap();
+    map.putString("message", "onPlaybackFinished");
+    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
+    map.putString("duration", Double.valueOf(player.getDuration()).toString());
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onPlaybackFinished", map);
+
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
+
+  private void onReady(PlayerEvent.Ready event) {
+    WritableMap map = Arguments.createMap();
+    List<SubtitleTrack> subtitles = player.getAvailableSubtitles();
+      WritableArray app_list = new WritableNativeArray();
+      for (SubtitleTrack subtitleTrack : subtitles) {
+        try {
+          WritableMap track = new WritableNativeMap();
+          track.putString("id", subtitleTrack.getId());
+          track.putString("label", subtitleTrack.getLabel());
+          track.putString("url", subtitleTrack.getUrl());
+          app_list.pushMap(track);
+        } catch (Exception ex) {
+          System.err.println("Exception: " + ex.getMessage());
+        }
+      }
+    duration = Double.valueOf(player.getDuration());
+    map.putString("message", "ready");
+    map.putString("duration", String.valueOf(duration));
+    map.putArray("subtitles", app_list);
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onReady", map);
+
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
+
+  private void onError(SourceEvent.Error event) {
+    WritableMap map = Arguments.createMap();
+    map.putString("message", "error");
+    map.putString("errMessage", event.getMessage());
+    map.putString("errCode", String.valueOf(event.getCode().getValue()));
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onError", map);
+
+    } catch (Exception e) {
+      Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+    }
+  }
+
+  private void onSubtitleChanged(SourceEvent.SubtitleChanged event) {
+    WritableMap map = Arguments.createMap();
+    SubtitleTrack newSubtitleTrack = event.getNewSubtitleTrack();
+    SubtitleTrack oldSubtitleTrack = event.getOldSubtitleTrack();
+    map.putString("message", "subtitleChanged");
+    if (newSubtitleTrack != null) {
+      map.putString("newSubtitleId", newSubtitleTrack.getId());
+    }
+    if (oldSubtitleTrack != null) {
+      map.putString("oldSubtitleId", oldSubtitleTrack.getId());
+    }
+    try {
+      reactContext
+        .getJSModule(RCTDeviceEventEmitter.class)
+        .emit("onSubtitleChanged", map);
 
     } catch (Exception e) {
       Log.e("ReactNative", "Caught Exception: " + e.getMessage());

@@ -1,11 +1,10 @@
 //Content Screens
 import SearchScreen from '@screens/SearchScreen';
-import HomeScreen from '@screens/HomeScreen';
 import BalletDanceScreen from '@screens/BalletDanceScreen';
 import LiveStreamScreen from '@screens/LiveStreamScreen';
 import MyListScreen from '@screens/MyListScreen';
 import OperaMusicScreen from '@screens/OperaMusicScreen';
-import SettingsScreen from '@screens/SettingsScreen';
+// import SettingsScreen from '@screens/SettingsScreen';
 
 import EventDetailsScreen from '@screens/EventDetailsScreen';
 import HomePageScreen from '@screens/HomePageScreen';
@@ -81,15 +80,15 @@ export const routes: TRoutes = [
     isDefault: false,
     ScreenComponent: MyListScreen,
   },
-  {
-    navMenuScreenName: 'settings',
-    SvgIconActiveComponent: SettingsActiveIcon,
-    SvgIconInActiveComponent: SettingsInActiveIcon,
-    navMenuTitle: 'Account & Settings',
-    position: 7,
-    isDefault: false,
-    ScreenComponent: SettingsScreen,
-  },
+  // {
+  //   navMenuScreenName: 'settings',
+  //   SvgIconActiveComponent: SettingsActiveIcon,
+  //   SvgIconInActiveComponent: SettingsInActiveIcon,
+  //   navMenuTitle: 'Account & Settings',
+  //   position: 7,
+  //   isDefault: false,
+  //   ScreenComponent: SettingsScreen,
+  // },
 ];
 
 export const additionalRoutesWithoutNavMenuNavigation = {
