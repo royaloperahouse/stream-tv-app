@@ -74,7 +74,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
     return (
     <View style={styles.root}>
       <RohText style={styles.rootText} bold>
-        iOS bitmoving player coming soon
+        iOS bitmovin player coming soon
       </RohText>
     </View> 
     // <Player
