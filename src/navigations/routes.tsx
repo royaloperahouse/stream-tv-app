@@ -103,5 +103,3 @@ export const allRoutes = [
   ...routes,
   ...Object.values(additionalRoutesWithoutNavMenuNavigation),
 ];
-
-// export const allRoutes = routes;
