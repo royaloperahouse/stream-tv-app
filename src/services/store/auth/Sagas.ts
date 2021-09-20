@@ -44,13 +44,6 @@ function* loginLoopWatcher(): any {
 }
 
 function* loginLoopWorker(): any {
-  // let runLoop: boolean = false;
-  // yield put(getEventListLoopStart());
-  // yield put(
-  //   checkDeviceSuccess({
-  //     data: { attributes: { customerId: 1, devicePin: '8C86725D-1AD4-49CF-BC4F-B8E8EFD5F133'}}
-  //   }),
-  // );
   let runLoop: boolean = true;
   while (runLoop) {
     yield put(checkDeviceStart());
