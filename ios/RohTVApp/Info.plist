@@ -53,6 +53,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+  <!-- This is the key for the ROH fonts to be embedded in an iOS/tvOS app. -->
 	<key>UIAppFonts</key>
 	<array>
 		<string>GothamSSm-Black.otf</string>
