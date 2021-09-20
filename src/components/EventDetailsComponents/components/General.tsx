@@ -10,7 +10,6 @@ import Watch from '@assets/svg/eventDetails/Watch.svg';
 import AddToMyList from '@assets/svg/eventDetails/AddToMyList.svg';
 import Subtitles from '@assets/svg/eventDetails/Subtitles.svg';
 import Trailer from '@assets/svg/eventDetails/Trailer.svg';
-import AudioDescription from '@assets/svg/eventDetails/AudioDescription.svg';
 import ActionButtonList, {
   EActionButtonListType,
 } from '../commonControls/ActionButtonList';
@@ -82,7 +81,15 @@ const General: React.FC<Props> = ({
           key: 'WatchNow',
           text: 'Watch now',
           hasTVPreferredFocus: true,
-          onPress: showPlayer,
+          onPress: () =>
+            showPlayer({
+              videoId: event.id,
+              url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
+              title,
+              poster:
+                'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+              subtitle: title,
+            }),
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },

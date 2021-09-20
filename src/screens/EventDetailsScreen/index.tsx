@@ -8,22 +8,48 @@ import collectionOfEventDetailsSections, {
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
+import {
+  getBitMovinSavedPosition,
+  savePosition,
+} from '@services/bitMovinPlayer';
+import { TBMPlayerShowingData } from '@services/types/bitmovinPlayer';
+
+import { useFocusEffect } from '@react-navigation/native';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
   'eventDetails'
 >;
+
 const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
-  const [isBMPlayerShowing, setIsBMPlayerShowing] = useState<boolean>(false);
+  const [bMPlayerShowingData, setIsBMPlayerShowing] =
+    useState<TBMPlayerShowingData | null>(null);
+  const isBMPlayerShowingRef = useRef<boolean>(false);
   const { event } = route.params;
   const scrollViewRef = useRef<ScrollView>(null);
-  const showPlayer = useCallback(() => {
-    setIsBMPlayerShowing(true);
+  const eventDetailsScreenMounted = useRef<boolean>(false);
+  const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
+    getBitMovinSavedPosition(playerItem.videoId).then(restoredItem => {
+      if (!isBMPlayerShowingRef.current && eventDetailsScreenMounted.current) {
+        setIsBMPlayerShowing({
+          ...playerItem,
+          position: restoredItem?.position,
+        });
+        isBMPlayerShowingRef.current = true;
+      }
+    });
   }, []);
-  const closePlayer = useCallback(time => {
-    console.log(time, ' time');
-    setIsBMPlayerShowing(false);
-  }, []);
+
+  const closePlayer = (time: string) => {
+    savePosition({
+      id: bMPlayerShowingData?.videoId || '',
+      position: time,
+    }).finally(() => {
+      setIsBMPlayerShowing(null);
+      isBMPlayerShowingRef.current = false;
+    });
+  };
+
   const sectionsFactory = useCallback(
     (item: TEventDitailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
@@ -37,7 +63,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
               key={item?.key || index}
               event={event}
               showPlayer={showPlayer}
-              isBMPlayerShowing={isBMPlayerShowing}
+              isBMPlayerShowing={bMPlayerShowingData !== null}
               nextScreenText={item.nextSectionTitle}
               scrollToMe={() => {
                 scrollViewRef.current?.scrollTo({
@@ -65,32 +91,35 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
         }
       }
     },
-    [isBMPlayerShowing, event, showPlayer],
+    [bMPlayerShowingData, event, showPlayer],
   );
 
-  if (isBMPlayerShowing) {
+  useFocusEffect(
+    useCallback(() => {
+      eventDetailsScreenMounted.current = true;
+      return () => {
+        if (eventDetailsScreenMounted?.current) {
+          eventDetailsScreenMounted.current = false;
+        }
+      };
+    }, []),
+  );
+
+  if (bMPlayerShowingData !== null) {
     return (
       <Player
         autoPlay
         configuration={{
-          url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
-          poster:
-            'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+          url: bMPlayerShowingData.url,
+          poster: bMPlayerShowingData.poster,
+          offset: bMPlayerShowingData.position,
         }}
-        title="event title"
-        subtitle="some event subtitle"
+        title={bMPlayerShowingData.title}
+        subtitle={bMPlayerShowingData.subtitle}
         onClose={closePlayer}
         analytics={{
-          videoId: 'blahblahblah',
-          title: 'Some video title',
-          experiment: 'ROH TV app',
-          customData1: '',
-          customData2: '',
-          customData3: '',
-          customData4: '',
-          customData5: '',
-          customData6: '',
-          customData7: '',
+          videoId: bMPlayerShowingData.videoId,
+          title: bMPlayerShowingData.title,
         }}
       />
     );

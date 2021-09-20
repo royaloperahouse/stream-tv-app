@@ -18,11 +18,11 @@ import { Colors, PlayerIcons } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 
 import ControlButton from './ControlButton';
-import TouchableHighlightWrapper, {
-  TTouchableHighlightWrapperRef,
-} from '@components/TouchableHighlightWrapper';
+import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
 import RohText from '@components/RohText';
-
+import { useAndroidBackHandler } from 'react-navigation-backhandler';
+import SubtitlesItem from './SubtitlesItem';
+import ArrowDropdown from '@assets/svg/player/ArrowDropdownForPlayer.svg';
 type TPlayerControlsProps = {
   duration: number;
   playerLoaded: boolean;
@@ -35,19 +35,21 @@ type TPlayerControlsProps = {
   onPausePress: () => void;
   onClose: () => void;
   setSubtitle: (trackId: string) => void;
+  autoPlay: boolean;
 };
 
 export type TPlayerControlsRef = {
   setCurrentTime?: (time: number) => void;
   setPlay?: (isPlaying: boolean) => void;
   loadSubtitleList?: (subtitles: TSubtitles) => void;
+  controlFadeIn?: () => void;
+  controlFadeOut?: () => void;
 };
 
 const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
   (props, ref) => {
     const {
       duration,
-      playerLoaded,
       title,
       subtitle,
       onPlayPress,
@@ -113,8 +115,23 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
             subtitlesRef.current.setsubtitleList(subtitles);
           }
         },
+        controlFadeIn: () => {
+          isPlayingRef.current = true;
+          Animated.timing(activeAnimation, {
+            toValue: 0,
+            useNativeDriver: true,
+            duration: 5000,
+          }).start();
+        },
+        controlFadeOut: () => {
+          Animated.timing(activeAnimation, {
+            toValue: 1,
+            useNativeDriver: true,
+            duration: 500,
+          }).start();
+        },
       }),
-      [],
+      [activeAnimation],
     );
 
     useLayoutEffect(() => {
@@ -167,7 +184,9 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
       };
     }, []);
-
+    useLayoutEffect(() => {
+      console.log('control render');
+    });
     return (
       <SafeAreaView style={styles.root}>
         <Animated.View style={[styles.container, { opacity: activeAnimation }]}>
@@ -176,48 +195,60 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               icon={PlayerIcons.close}
               onPress={onClose}
               text="Exit"
-              expand
+              visibleAnimation={activeAnimation}
             />
-            {playerLoaded && (
-              <ControlButton
-                icon={PlayerIcons.restart}
-                onPress={onRestartPress}
-                text="Restart"
-                expand
-              />
-            )}
+            <ControlButton
+              icon={PlayerIcons.restart}
+              onPress={onRestartPress}
+              text="Restart"
+              visibleAnimation={activeAnimation}
+            />
           </View>
           <View style={styles.titleContainer}>
-            <RohText style={styles.title}>{title}</RohText>
-            <RohText style={styles.subtitle}>{subtitle}</RohText>
+            <RohText
+              style={styles.title}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {title}
+            </RohText>
+            {Boolean(subtitle) && (
+              <RohText
+                style={styles.subtitle}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {subtitle}
+              </RohText>
+            )}
           </View>
           <ProgressBar duration={duration} ref={progressBarRef} />
-          {playerLoaded && (
-            <View style={styles.controlContainer}>
-              <View style={styles.centralControls}>
-                <ControlButton
-                  icon={PlayerIcons.seekBackward}
-                  onPress={onSeekBackwardPress}
-                />
-                <ControlButton
-                  icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
-                  onPress={isPlaying ? onPausePress : onPlayPress}
-                  hasTVPreferredFocus
-                />
-                <ControlButton
-                  icon={PlayerIcons.seekForward}
-                  onPress={onSeekForwardPress}
-                />
-              </View>
-              <View style={styles.rightControls}>
-                <ControlButton
-                  ref={subtitleButtonRef}
-                  icon={PlayerIcons.subtitles}
-                  onPress={openSubtitleListHandler}
-                />
-              </View>
+          <View style={styles.controlContainer}>
+            <View style={styles.centralControls}>
+              <ControlButton
+                icon={PlayerIcons.seekBackward}
+                onPress={onSeekBackwardPress}
+                visibleAnimation={activeAnimation}
+              />
+              <ControlButton
+                icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
+                onPress={isPlaying ? onPausePress : onPlayPress}
+                hasTVPreferredFocus
+                visibleAnimation={activeAnimation}
+              />
+              <ControlButton
+                icon={PlayerIcons.seekForward}
+                onPress={onSeekForwardPress}
+                visibleAnimation={activeAnimation}
+              />
             </View>
-          )}
+            <View style={styles.rightControls}>
+              <ControlButton
+                ref={subtitleButtonRef}
+                icon={PlayerIcons.subtitles}
+                onPress={openSubtitleListHandler}
+                visibleAnimation={activeAnimation}
+              />
+            </View>
+          </View>
         </Animated.View>
         <Subtitles
           focusToSutitleButton={focusToSutitleButton}
@@ -310,12 +341,9 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
   const subtitleContainerAnimation = useRef(new Animated.Value(0)).current;
   const [subtitleList, setSubtitleList] = useState<TSubtitles>([]);
   const [showList, setShowList] = useState<boolean>(false);
-  const showListPrevState = useRef<boolean>(showList);
-  const firstItemRef = useRef<TTouchableHighlightWrapperRef | null>(null);
+  const subtitlesActiveItemRef = useRef<string | null>(null);
   const subtitlesMountedRef = useRef<boolean>(false);
-
-  const onPressHandler = (trackId: string) => {
-    setSubtitle(trackId);
+  const hideSubtitles = () => {
     if (typeof focusToSutitleButton === 'function') {
       focusToSutitleButton();
     }
@@ -339,6 +367,13 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
       });
     });
   };
+
+  const onPressHandler = (trackId: string) => {
+    subtitlesActiveItemRef.current = trackId;
+    setSubtitle(trackId);
+    hideSubtitles();
+  };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -381,21 +416,16 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
   );
 
   useLayoutEffect(() => {
-    if (
-      showList &&
-      typeof firstItemRef.current?.getRef === 'function' &&
-      firstItemRef.current.getRef()
-    ) {
-      firstItemRef.current
-        .getRef()
-        .current?.setNativeProps({ hasTVPreferredFocus: true });
-    }
-    showListPrevState.current = showList;
-  }, [showList]);
-
-  useLayoutEffect(() => {
     subtitlesMountedRef.current = true;
   }, []);
+
+  useAndroidBackHandler(() => {
+    if (showList) {
+      hideSubtitles();
+      return true;
+    }
+    return false;
+  });
   return (
     <SafeAreaView style={styles.subtitlesContainer}>
       <Animated.View
@@ -423,24 +453,27 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
               keyExtractor={item => item.id}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
+              style={styles.subtitlesFlatListContainer}
               renderItem={({ item, index }) => (
-                <TouchableHighlightWrapper
-                  ref={index === 0 ? firstItemRef : undefined}
+                <SubtitlesItem
+                  hasTVPreferredFocus={
+                    (subtitlesActiveItemRef.current === null && index === 0) ||
+                    subtitlesActiveItemRef.current === item.id
+                  }
                   onPress={() => onPressHandler(item.id)}
-                  canMoveUp={index !== 0}
-                  canMoveLeft={false}
-                  canMoveRight={false}
-                  canMoveDown={index !== subtitleList.length - 1}
-                  style={styles.subtitleItemContainer}
-                  styleFocused={{
-                    backgroundColor: Colors.defaultBlue,
-                  }}>
-                  <RohText style={styles.subtitleText}>
-                    {item.label + ' ' + item.id}
-                  </RohText>
-                </TouchableHighlightWrapper>
+                  currentIndex={index}
+                  itemsLength={subtitleList.length}
+                  text={
+                    item.label === 'off'
+                      ? `Subtitles ${item.label}`
+                      : item.label
+                  }
+                />
               )}
             />
+            <View style={styles.dropDownArrow}>
+              <ArrowDropdown width={scaleSize(50)} height={scaleSize(50)} />
+            </View>
           </View>
         )}
       </Animated.View>
@@ -537,8 +570,11 @@ const styles = StyleSheet.create({
   subtitlesContainerTitleText: {
     textTransform: 'uppercase',
     color: 'white',
-    fontSize: scaleSize(32),
-    marginVertical: scaleSize(15),
+    fontSize: scaleSize(24),
+    lineHeight: scaleSize(28),
+    letterSpacing: scaleSize(1),
+    paddingLeft: scaleSize(60),
+    paddingVertical: scaleSize(35),
   },
   subtitlesContainer: {
     flex: 1,
@@ -565,13 +601,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundColor,
     width: scaleSize(528),
     height: scaleSize(631),
-    alignItems: 'center',
   },
-  subtitleItemContainer: {
-    width: '100%',
-    paddingHorizontal: scaleSize(30),
-    flexDirection: 'row',
-    alignItems: 'center',
+  subtitlesFlatListContainer: {
+    flex: 1,
   },
   subtitleText: { color: 'white', fontSize: scaleSize(24) },
+  dropDownArrow: {
+    marginTop: scaleSize(16),
+    marginBottom: scaleSize(12),
+    alignItems: 'center',
+  },
 });

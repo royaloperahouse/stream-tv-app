@@ -12,30 +12,10 @@ import {
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
+import { TBitmoviPlayerNativeProps } from '@services/types/bitmovinPlayer';
 
-const NativeBitMovinPlayer: HostComponent<{
-  autoPlay?: boolean;
-  configuration: {
-    url: string;
-    poster?: string;
-    subtitles?: string;
-    offset?: string;
-  };
-  analytics?: {
-    videoId: string;
-    title?: string;
-    userId?: string;
-    experiment?: string;
-    customData1?: string;
-    customData2?: string;
-    customData3?: string;
-    customData4?: string;
-    customData5?: string;
-    customData6?: string;
-    customData7?: string;
-  };
-  style?: ViewProps['style'];
-}> = requireNativeComponent('ROHBitMovinPlayer');
+let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
+  requireNativeComponent('ROHBitMovinPlayer');
 
 const ROHBitmovinPlayerModule = NativeModules.ROHBitMovinPlayerControl;
 
@@ -90,17 +70,18 @@ type TPlayerProps = {
   onEvent?: (event: any) => void;
   onError?: (event: any) => void;
   title: string;
-  subtitle: string;
-  onClose?: (...args: any[]) => void;
+  subtitle?: string;
+  onClose?: (stoppedTime: string) => void;
   configuration: {
     url: string;
     poster?: string;
     subtitles?: string;
     configuration?: string;
+    offset?: string;
   };
   analytics?: {
     videoId: string;
-    title?: string;
+    title: string;
     userId?: string;
     experiment?: string;
     customData1?: string;
@@ -114,14 +95,31 @@ type TPlayerProps = {
 };
 
 const Player: React.FC<TPlayerProps> = props => {
-  const { onEvent, onClose, title, subtitle, configuration, analytics } = props;
+  const cloneProps = {
+    ...props,
+    configuration: {
+      ...props.configuration,
+    },
+    analytics: {
+      ...props.analytics,
+    },
+  };
+  const {
+    onEvent,
+    onClose,
+    title,
+    subtitle = '',
+    configuration,
+    analytics,
+    autoPlay = false,
+  } = cloneProps;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const controlRef = useRef<TPlayerControlsRef | null>(null);
 
-  const [playerLoaded, setLoaded] = useState(false);
+  const [playerReady, setReady] = useState(false);
   const [duration, setDuration] = useState(0.0);
 
-  const onLoad: TCallbackFunc = useCallback(data => {
+  const onReady: TCallbackFunc = useCallback(data => {
     const payload: TOnReadyPayload = data.nativeEvent;
     const initDuration = parseFloat(payload?.duration);
     if (
@@ -134,7 +132,7 @@ const Player: React.FC<TPlayerProps> = props => {
     if (!isNaN(initDuration)) {
       setDuration(initDuration);
     }
-    setLoaded(true);
+    setReady(true);
   }, []);
 
   const onPlaying: TCallbackFunc = _ => {
@@ -144,6 +142,7 @@ const Player: React.FC<TPlayerProps> = props => {
   };
 
   const onPause: TCallbackFunc = _ => {
+    console.log('pouse');
     if (typeof controlRef.current?.setPlay === 'function') {
       controlRef.current.setPlay(false);
     }
@@ -158,10 +157,13 @@ const Player: React.FC<TPlayerProps> = props => {
       return;
     }
     if (
-      parseFloat(floatTime.toFixed(1)) >= parseFloat(floatDuration.toFixed(1))
+      parseFloat(floatTime.toFixed()) >= parseFloat(floatDuration.toFixed())
     ) {
       ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
       ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), 0.0);
+      if (typeof controlRef.current?.controlFadeOut === 'function') {
+        controlRef.current.controlFadeOut();
+      }
       return;
     }
     if (typeof controlRef.current?.setCurrentTime === 'function') {
@@ -169,10 +171,10 @@ const Player: React.FC<TPlayerProps> = props => {
     }
   };
 
-  const onSeek: TCallbackFunc = data => {
-    const { time, message }: TOnSeekPayload = data.nativeEvent;
+  const onSeeked: TCallbackFunc = data => {
+    const { time }: TOnSeekPayload = data.nativeEvent;
     const floatTime = parseFloat(time);
-    if (isNaN(floatTime) || message !== 'seeked') {
+    if (isNaN(floatTime)) {
       return;
     }
     if (typeof controlRef.current?.setCurrentTime === 'function') {
@@ -183,6 +185,9 @@ const Player: React.FC<TPlayerProps> = props => {
   const setPlayer = (ref: any) => {
     playerRef.current = ref;
   };
+  const onPlaybackFinished = () => {
+    console.log('onPlaybackFinished');
+  };
 
   useLayoutEffect(() => {
     if (Platform.OS === 'android') {
@@ -192,7 +197,7 @@ const Player: React.FC<TPlayerProps> = props => {
         }
       });
       eventEmitter.addListener('onReady', (event: any) => {
-        onLoad({ nativeEvent: event });
+        onReady({ nativeEvent: event });
       });
       eventEmitter.addListener('onPlay', (event: any) =>
         onPlaying({ nativeEvent: event }),
@@ -203,20 +208,23 @@ const Player: React.FC<TPlayerProps> = props => {
       eventEmitter.addListener('onTimeChanged', (event: any) =>
         onTimeChanged({ nativeEvent: event }),
       );
-      eventEmitter.addListener('onSeek', (event: any) =>
-        onSeek({ nativeEvent: event }),
+      eventEmitter.addListener('onSeek', (event: any) => {
+        console.log('seek', event);
+      });
+      eventEmitter.addListener('onSeeked', (event: any) =>
+        onSeeked({ nativeEvent: event }),
       );
       eventEmitter.addListener('onDestroy', (event: TOnDestoyPayload) => {
         const initDuration = parseFloat(event?.duration);
         const floatTime = parseFloat(event?.time);
         const stoppedTimePoint =
           isNaN(floatTime) || isNaN(initDuration) || floatTime === initDuration
-            ? 0.0
+            ? '0.0'
             : floatTime;
-        onClose(stoppedTimePoint);
+        onClose(stoppedTimePoint.toString());
       });
-      eventEmitter.addListener('onPlaybackFinished', event => {
-        console.log(event, 'finish');
+      eventEmitter.addListener('onPlaybackFinished', () => {
+        onPlaybackFinished();
       });
       eventEmitter.addListener('onError', event => {
         console.log('error', event);
@@ -233,6 +241,7 @@ const Player: React.FC<TPlayerProps> = props => {
         eventEmitter.removeAllListeners('onPause');
         eventEmitter.removeAllListeners('onTimeChanged');
         eventEmitter.removeAllListeners('onSeek');
+        eventEmitter.removeAllListeners('onSeeked');
         eventEmitter.removeAllListeners('onForward');
         eventEmitter.removeAllListeners('onRewind');
         eventEmitter.removeAllListeners('onPlaybackFinished');
@@ -242,29 +251,47 @@ const Player: React.FC<TPlayerProps> = props => {
         eventEmitter.removeAllListeners('onSubtitleChanged');
       }
     };
-  }, [onEvent, onClose, onLoad]);
+  }, [onEvent, onClose, onReady]);
 
-  const actionPlay = () => {
+  const getCurrentTime = useCallback(
+    () =>
+      ROHBitmovinPlayerModule.getCurrentTime(findNodeHandle(playerRef.current)),
+    [],
+  );
+
+  const actionPlay = useCallback(() => {
+    if (!playerReady) {
+      return;
+    }
     ROHBitmovinPlayerModule.play(findNodeHandle(playerRef.current));
-  };
+  }, [playerReady]);
 
-  const actionPause = () => {
+  const actionPause = useCallback(() => {
+    if (!playerReady) {
+      return;
+    }
     ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
-  };
+  }, [playerReady]);
 
-  const actionSeekForward = async () => {
+  const actionSeekForward = useCallback(async () => {
+    if (!playerReady) {
+      return;
+    }
     const currentTime = await getCurrentTime();
     if (currentTime === duration) {
       return;
     }
     let seekTime = currentTime + 10.0;
     if (seekTime > duration) {
-      seekTime = duration;
+      seekTime = duration - 1;
     }
     ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), seekTime);
-  };
+  }, [playerReady, duration, getCurrentTime]);
 
-  const actionSeekBackward = async () => {
+  const actionSeekBackward = useCallback(async () => {
+    if (!playerReady) {
+      return;
+    }
     const currentTime = await getCurrentTime();
     if (currentTime === 0.0) {
       return;
@@ -274,32 +301,26 @@ const Player: React.FC<TPlayerProps> = props => {
       seekTime = 0.0;
     }
     ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), seekTime);
-  };
+  }, [playerReady, getCurrentTime]);
 
-  const actionRestart = () => {
+  const actionRestart = useCallback(() => {
+    if (!playerReady) {
+      return;
+    }
     ROHBitmovinPlayerModule.restart(findNodeHandle(playerRef.current));
-  };
+  }, [playerReady]);
 
-  const actionDestroy = () => {
+  const actionDestroy = useCallback(() => {
+    if (!playerReady) {
+      return;
+    }
     ROHBitmovinPlayerModule.destroy(findNodeHandle(playerRef.current));
-  };
+  }, [playerReady]);
 
-  const actionClose = () => {
+  const actionClose = useCallback(() => {
     actionPause();
     actionDestroy();
-  };
-
-  const getCurrentTime = () =>
-    ROHBitmovinPlayerModule.getCurrentTime(findNodeHandle(playerRef.current));
-
-  const getDuration = () =>
-    ROHBitmovinPlayerModule.getDuration(findNodeHandle(playerRef.current));
-
-  const isPaused = () =>
-    ROHBitmovinPlayerModule.isPaused(findNodeHandle(playerRef.current));
-
-  const isStalled = () =>
-    ROHBitmovinPlayerModule.isStalled(findNodeHandle(playerRef.current));
+  }, [actionPause, actionDestroy]);
 
   const setSubtitle = useCallback(
     (trackID: string) =>
@@ -313,21 +334,30 @@ const Player: React.FC<TPlayerProps> = props => {
     actionClose();
     return true;
   });
-
+  useLayoutEffect(() => {
+    if (
+      playerReady &&
+      autoPlay &&
+      typeof controlRef.current?.controlFadeIn === 'function'
+    ) {
+      controlRef.current.controlFadeIn();
+    }
+  }, [playerReady, autoPlay]);
   return (
     <SafeAreaView style={styles.defaultPlayerStyle}>
       <NativeBitMovinPlayer
         ref={setPlayer}
         configuration={configuration}
         analytics={analytics}
-        style={[playerLoaded ? styles.playerLoaded : {}]}
+        style={[playerReady ? styles.playerLoaded : {}]}
+        autoPlay={autoPlay}
       />
       <PlayerControls
         ref={controlRef}
         title={title}
         subtitle={subtitle}
         duration={duration}
-        playerLoaded={playerLoaded}
+        playerLoaded={playerReady}
         onPlayPress={actionPlay}
         onPausePress={actionPause}
         onSeekForwardPress={actionSeekForward}
@@ -335,6 +365,7 @@ const Player: React.FC<TPlayerProps> = props => {
         onRestartPress={actionRestart}
         onClose={actionClose}
         setSubtitle={setSubtitle}
+        autoPlay={autoPlay}
       />
     </SafeAreaView>
   );
