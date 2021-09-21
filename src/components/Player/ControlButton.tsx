@@ -1,5 +1,5 @@
-import React, { useState, forwardRef } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import React, { useState, forwardRef, useLayoutEffect, useRef } from 'react';
+import { View, Image, StyleSheet, Animated } from 'react-native';
 
 import { scaleSize } from '@utils/scaleSize';
 
@@ -10,10 +10,10 @@ import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 type Props = {
   icon: any;
   text?: string;
-  expand?: boolean;
   onPress?: (val: boolean) => void;
   onFocus?: () => void;
   hasTVPreferredFocus?: boolean;
+  visibleAnimation: Animated.Value;
 };
 
 const ControlButton = forwardRef<any, Props>((props, ref) => {
@@ -21,10 +21,10 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
   const {
     icon,
     text,
-    expand,
     onPress,
     onFocus,
     hasTVPreferredFocus = false,
+    visibleAnimation,
   } = props;
   const onFocusHandler = () => {
     setFocus(true);
@@ -32,21 +32,30 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
       onFocus();
     }
   };
-
+  const isButtonVisible = useRef<boolean>(true);
   const onBlurHandler = () => setFocus(false);
 
   const onPressHandler = () => {
-    if (typeof onPress === 'function') {
+    if (typeof onPress === 'function' && isButtonVisible.current) {
       onPress(true);
     }
   };
-
+  useLayoutEffect(() => {
+    const id = visibleAnimation.addListener(({ value }) => {
+      isButtonVisible.current = value === 1;
+    });
+    return () => {
+      visibleAnimation.removeListener(id);
+    };
+  }, [visibleAnimation]);
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
         ref={ref}
         style={styles.button}
-        styleFocused={expand ? styles.buttonActiveExpand : styles.buttonActive}
+        styleFocused={
+          text ? styles.buttonActiveWithPadding : styles.buttonActive
+        }
         hasTVPreferredFocus={hasTVPreferredFocus}
         onFocus={onFocusHandler}
         onBlur={onBlurHandler}
@@ -76,25 +85,15 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: scaleSize(72),
+    minWidth: scaleSize(72),
     height: scaleSize(72),
   },
   buttonActive: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: scaleSize(72),
-    height: scaleSize(72),
     backgroundColor: '#6990ce',
-    paddingLeft: scaleSize(30),
-    paddingRight: scaleSize(30),
   },
-  buttonActiveExpand: {
+  buttonActiveWithPadding: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: undefined,
-    height: scaleSize(72),
     backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),
     paddingRight: scaleSize(30),

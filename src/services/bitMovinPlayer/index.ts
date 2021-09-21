@@ -69,7 +69,7 @@ export const removeItemsFromSavedPositionList = async (
   }
 };
 
-export const clearMyList = (): Promise<void> =>
+export const clearListOfBitmovinSavedPosition = (): Promise<void> =>
   AsyncStorage.removeItem(bitMovinPlayerKey);
 
 export const getBitMovinSavedPosition = async (
