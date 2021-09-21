@@ -7,7 +7,8 @@ export const Colors = Object.freeze({
   defaultTextColor: '#F1F1F1',
   searchDisplayBackgroundColor: '#4B5B7A',
   midGrey: '#7E91B4',
-  title: '#FFFFFF'
+  title: '#FFFFFF',
+  subtitlesActiveBackground: '#1866DC',
 });
 
 export const Images = Object.freeze({

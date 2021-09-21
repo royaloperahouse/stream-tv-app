@@ -63,6 +63,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   private boolean customSeek = false;
   private double stoppedTime = 0.0;
   private double duration = 0.0;
+  private boolean mustAutoPlay = false;
 
   @Override
   public String getName() {
@@ -99,8 +100,8 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   @ReactProp(name = "autoPlay")
   public void setAutoPlay(PlayerView view, Boolean autoPlay) {
-    if (autoPlay != null && autoPlay == true) {
-      // do something
+    if (autoPlay != null) {
+      mustAutoPlay = autoPlay;
     }
   }
 
@@ -257,9 +258,8 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
   private void onPlay(PlayerEvent.Playing event) {
     WritableMap map = Arguments.createMap();
     map.putString("message", "play");
-    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
-    map.putString("duration", Double.valueOf(player.getDuration()).toString());
-    stoppedTime = Double.valueOf(player.getCurrentTime());
+    map.putString("time", String.valueOf(stoppedTime));
+    map.putString("duration", String.valueOf(duration));
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -272,9 +272,10 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onTimeChanged(PlayerEvent.TimeChanged event) {
     WritableMap map = Arguments.createMap();
+    stoppedTime = Double.valueOf(player.getCurrentTime());
     map.putString("message", "timeChanged");
-    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
-    map.putString("duration", Double.valueOf(player.getDuration()).toString());
+    map.putString("time", String.valueOf(stoppedTime));
+    map.putString("duration", String.valueOf(duration));
     stoppedTime = Double.valueOf(player.getCurrentTime());
     try {
       reactContext
@@ -291,7 +292,7 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     stoppedTime = Double.valueOf(player.getCurrentTime());
     map.putString("message", "pause");
     map.putString("time", String.valueOf(stoppedTime));
-    map.putString("duration", Double.valueOf(player.getDuration()).toString());
+    map.putString("duration", String.valueOf(duration));
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -304,23 +305,9 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onLoad(SourceEvent.Loaded event) {
     WritableMap map = Arguments.createMap();
-    List<SubtitleTrack> subtitles = player.getAvailableSubtitles();
-      WritableArray app_list = new WritableNativeArray();
-      for (SubtitleTrack subtitleTrack : subtitles) {
-        try {
-          WritableMap track = new WritableNativeMap();
-          track.putString("id", subtitleTrack.getId());
-          track.putString("label", subtitleTrack.getLabel());
-          track.putString("url", subtitleTrack.getUrl());
-          app_list.pushMap(track);
-        } catch (Exception ex) {
-          System.err.println("Exception: " + ex.getMessage());
-        }
-      }
     duration = Double.valueOf(player.getDuration());
     map.putString("message", "load");
     map.putString("duration", String.valueOf(duration));
-    map.putArray("subtitles", app_list);
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
@@ -348,14 +335,14 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
 
   private void onSeeked(PlayerEvent.Seeked event) {
     WritableMap map = Arguments.createMap();
-    map.putString("message", "seeked");
-    map.putString("time", Double.valueOf(player.getCurrentTime()).toString());
-    map.putString("duration", Double.valueOf(player.getDuration()).toString());
     stoppedTime = Double.valueOf(player.getCurrentTime());
+    map.putString("message", "seeked");
+    map.putString("time", String.valueOf(stoppedTime));
+    map.putString("duration", String.valueOf(duration));
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
-        .emit("onSeek", map);
+        .emit("onSeeked", map);
     } catch (Exception e) {
       Log.e("ReactNative", "Caught Exception: " + e.getMessage());
     }
@@ -410,11 +397,13 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
     map.putString("message", "ready");
     map.putString("duration", String.valueOf(duration));
     map.putArray("subtitles", app_list);
+    if (mustAutoPlay == true) {
+      player.play();
+    }
     try {
       reactContext
         .getJSModule(RCTDeviceEventEmitter.class)
         .emit("onReady", map);
-
     } catch (Exception e) {
       Log.e("ReactNative", "Caught Exception: " + e.getMessage());
     }
