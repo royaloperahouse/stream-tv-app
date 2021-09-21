@@ -9,6 +9,7 @@ import {
   Platform,
   HostComponent,
   ViewProps,
+  View,
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';

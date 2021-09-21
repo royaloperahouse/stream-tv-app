@@ -31,15 +31,15 @@
     "prismic-reactjs": "^1.3.4",
     "promise.allsettled": "^1.0.4",
     "react": "16.13.1",
-    "react-native": "0.63.4",
+    "react-native": "npm:react-native-tvos@0.63.4",
     "react-native-device-info": "^8.1.3",
     "react-native-fast-image": "^8.3.7",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-qrcode-svg": "^6.1.1",
     "react-native-reanimated": "^1.13.3",
     "react-native-safe-area-context": "^3.2.0",
-    "react-native-screens": "^3.4.0",
-    "react-native-svg": "^12.1.1",
+    "react-native-screens": "^3.7.0",
+    "react-native-svg": "^12.2.0",
     "react-navigation-backhandler": "^2.0.1",
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
@@ -63,7 +63,7 @@
     "metro-react-native-babel-preset": "^0.59.0",
     "react-native-svg-transformer": "^0.14.3",
     "react-test-renderer": "16.13.1",
-    "typescript": "^3.8.3"
+    "typescript": "^4.1.0"
   },
   "resolutions": {
     "@types/react": "^16"

@@ -1,9 +1,13 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+# This is a fairly static and thus safe master branch. (In the unlikely event that that changes, fork ;) )
+source 'https://github.com/react-native-tvos/react-native-tvos-podspecs.git'
+source 'https://cdn.cocoapods.org/'
 
 target 'RohTVApp' do
+
+  platform :ios, '10.0'
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
@@ -25,9 +29,16 @@ end
 
 target 'RohTVApp-tvOS' do
   # Pods for RohTVApp-tvOS
+  platform :tvos, '12.0'
+
+  config = use_native_modules!
+
+  # Hermes not yet available on tvOS
+  use_react_native!(:path => config["reactNativePath"])
 
   target 'RohTVApp-tvOSTests' do
-    inherit! :search_paths
+    inherit! :complete
     # Pods for testing
   end
+
 end

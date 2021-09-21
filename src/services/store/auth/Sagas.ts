@@ -1,4 +1,4 @@
-import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit';
+import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit/src/createAction';
 import {
   startLoginLoop,
   endLoginLoop,

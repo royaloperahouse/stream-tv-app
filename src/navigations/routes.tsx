@@ -1,6 +1,5 @@
 //Content Screens
 import SearchScreen from '@screens/SearchScreen';
-import HomeScreen from '@screens/HomeScreen';
 import BalletDanceScreen from '@screens/BalletDanceScreen';
 import LiveStreamScreen from '@screens/LiveStreamScreen';
 import MyListScreen from '@screens/MyListScreen';

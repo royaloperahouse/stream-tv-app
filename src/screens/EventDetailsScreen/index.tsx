@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
 
 export default EventDetailsScreen;
