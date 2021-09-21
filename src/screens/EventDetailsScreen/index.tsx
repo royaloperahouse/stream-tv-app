@@ -8,8 +8,6 @@ import collectionOfEventDetailsSections, {
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
-import RohText from '@components/RohText';
-import { scaleSize } from '@utils/scaleSize';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },

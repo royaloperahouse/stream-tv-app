@@ -6671,7 +6671,7 @@ react-native-svg-transformer@^0.14.3:
     path-dirname "^1.0.2"
     semver "^5.6.0"
 
-react-native-svg@^12.2.1:
+react-native-svg@^12.2.0:
   version "12.2.0"
   resolved "https://registry.npmjs.org/react-native-svg/-/react-native-svg-12.2.0.tgz#42273c7a1af804224b8ef97d936fab7df6a5e949"
   integrity sha512-gtmdnH0XwCJk6x8lD6VvqQQI5B/fS2qG/GTpAZzSGZqEYLnY9NzWpPbzD4lJGCacVUDUxkZgwiiqqSE3JTi7WQ==
