@@ -67,3 +67,4 @@ buck-out/
 
 #tmp
 /imgForStore
+/android_build_keystore
