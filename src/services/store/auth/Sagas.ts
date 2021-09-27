@@ -5,6 +5,7 @@ import {
   checkDeviceSuccess,
   checkDeviceError,
   checkDeviceStart,
+  switchOnIntroScreen,
 } from '@services/store/auth/Slices';
 import {
   getEventListLoopStart,
@@ -16,6 +17,7 @@ import { all, call, cancel, delay, fork, put, take } from 'redux-saga/effects';
 import { verifyDevice } from '@services/apiClient';
 import { logError } from '@utils/loger';
 import { TAuthResponseError } from '@services/types/authReqResp';
+import { authBreakingTime } from '@configs/globalConfig';
 
 export default function* authRootSagas() {
   yield all([call(loginLoopWatcher)]);
@@ -44,8 +46,14 @@ function* loginLoopWatcher(): any {
 }
 
 function* loginLoopWorker(): any {
+  const delayTimeInMS = 10000; // 10 sec
   let runLoop: boolean = true;
+  let countOfLoopDuration: number = 0;
   while (runLoop) {
+    if (countOfLoopDuration >= authBreakingTime) {
+      yield put(switchOnIntroScreen());
+      break;
+    }
     yield put(checkDeviceStart());
     try {
       const response: any = yield call(verifyDevice);
@@ -53,14 +61,8 @@ function* loginLoopWorker(): any {
         runLoop = false;
         yield put(getEventListLoopStart());
         yield put(checkDeviceSuccess(response.data));
-      } else if (
-        response?.data?.errors?.some(
-          (error: TAuthResponseError) => error.detail,
-        )
-      ) {
-        const errObj: TAuthResponseError = response.data.errors.find(
-          (error: TAuthResponseError) => error.detail,
-        );
+      } else if (response?.data?.errors?.length) {
+        const errObj: TAuthResponseError = response.data.errors[0];
         yield put(checkDeviceError(errObj));
       } else {
         throw Error();
@@ -69,6 +71,7 @@ function* loginLoopWorker(): any {
       logError('something went wrong', err);
       yield put(checkDeviceError({}));
     }
-    yield delay(10000);
+    yield delay(delayTimeInMS);
+    countOfLoopDuration += delayTimeInMS;
   }
 }

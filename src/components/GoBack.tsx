@@ -10,7 +10,7 @@ type TGoBackProps = {};
 
 const GoBack: React.FC<TGoBackProps> = () => {
   const navigation = useNavigation();
-  const onPressHandler = () => {
+  const onFocusHandler = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
       navMenuManager.showNavMenu();
@@ -22,7 +22,7 @@ const GoBack: React.FC<TGoBackProps> = () => {
   });
   return (
     <TouchableHighlightWrapper
-      onPress={onPressHandler}
+      onFocus={onFocusHandler}
       style={styles.wrapperStyle}
       styleFocused={styles.wrapperStyleActive}>
       <View style={styles.container}>

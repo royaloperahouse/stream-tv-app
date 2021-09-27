@@ -40,7 +40,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       );
     const onPressHandler = () => {
       navMenuManager.hideNavMenu();
-      navigation.push(
+      navigation.navigate(
         additionalRoutesWithoutNavMenuNavigation.eventDetais.navMenuScreenName,
         { event },
       );
@@ -55,6 +55,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           style={styles.imageContainer}
           onFocus={() => {
             ref?.current?.setDigigtalEvent(event);
+            navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
             }

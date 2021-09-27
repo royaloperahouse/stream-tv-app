@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { Colors } from '@themes/Styleguide';
@@ -6,20 +6,20 @@ import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import WithLogo from '@components/WithLogo';
 import WithBackground from '@components/WithBackground';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import { startLoginLoop } from '@services/store/auth/Slices';
-import { devicePinSelector } from '@services/store/auth/Selectors';
+import { useSelector, shallowEqual } from 'react-redux';
+import {
+  devicePinSelector,
+  deviceAuthenticatedErrorSelector,
+} from '@services/store/auth/Selectors';
 
 type TLoginScreenProps = {};
 
 const LoginScreen: React.FC<TLoginScreenProps> = () => {
-  const dispatch = useDispatch();
-
   const devicePin = useSelector(devicePinSelector, shallowEqual);
-
-  useEffect(() => {
-    dispatch(startLoginLoop());
-  }, [dispatch]);
+  const deviceAuthenticatedError = useSelector(
+    deviceAuthenticatedErrorSelector,
+    shallowEqual,
+  );
 
   return (
     <WithBackground>
@@ -51,15 +51,22 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
                 Then enter the activation code when prompted
               </RohText>
 
-              <RohText style={styles.pin}>{devicePin}</RohText>
+              <RohText style={styles.pin}>
+                {devicePin || 'pin did not found'}
+              </RohText>
+              <RohText style={styles.regular}>
+                {deviceAuthenticatedError}
+              </RohText>
             </View>
           </View>
           <View style={styles.rightContainer}>
-            <QRCode
-              quietZone={5}
-              size={scaleSize(380)}
-              value={'https://roh.org.uk/pin?value=' + devicePin}
-            />
+            {Boolean(devicePin) && (
+              <QRCode
+                quietZone={5}
+                size={scaleSize(380)}
+                value={'https://roh.org.uk/pin?value=' + devicePin}
+              />
+            )}
           </View>
         </View>
       </WithLogo>

@@ -85,6 +85,7 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   const focusHandler = () => {
     dispatch(saveSearchResultQuery());
     toggleFocus();
+    navMenuManager.setNavMenuAccessible();
   };
   return (
     <View style={styles.itemContainer}>
@@ -202,6 +203,7 @@ const PreviousSearchListItemComponent: React.FC<TPreviousSearchListItemComponent
   ({ text, canMoveUp }) => {
     const dispatch = useDispatch();
     const onPressHandler = () => {
+      navMenuManager.setNavMenuNotAccessible();
       dispatch(setFullSearchQuery({ searchQuery: text }));
     };
     return (

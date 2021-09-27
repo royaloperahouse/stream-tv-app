@@ -6,3 +6,7 @@ export const deviceAuthenticatedSelector = (store: { [key: string]: any }) =>
 
 export const devicePinSelector = (store: { [key: string]: any }) =>
   store.auth.devicePin;
+
+export const deviceAuthenticatedErrorSelector = (store: {
+  [key: string]: any;
+}) => store.auth.errorString;
