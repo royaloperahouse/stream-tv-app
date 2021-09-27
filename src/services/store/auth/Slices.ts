@@ -6,6 +6,7 @@ interface AuthState {
   devicePin: null | string;
   customerId: null | number;
   showIntroScreen: boolean;
+  errorString: string;
 }
 
 const initialState: AuthState = {
@@ -14,6 +15,7 @@ const initialState: AuthState = {
   devicePin: null,
   customerId: null,
   showIntroScreen: true,
+  errorString: '',
 };
 
 const appSlice = createSlice({
@@ -36,10 +38,14 @@ const appSlice = createSlice({
       state.customerId = payload.data.attributes.customerId;
       state.devicePin = payload.data.attributes.deviceId;
       state.isLoading = false;
+      state.showIntroScreen = false;
+      state.errorString = '';
     },
     checkDeviceError: (state, { payload }) => {
-      if (payload?.detail) {
-        state.devicePin = payload?.detail;
+      state.devicePin = payload?.detail || '';
+      state.showIntroScreen = false;
+      if (payload.status !== 401) {
+        state.errorString = `${payload.status} - ${payload?.title}`;
       }
       state.isLoading = false;
     },

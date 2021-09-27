@@ -52,6 +52,8 @@ const navMenuRef = createRef<
     showNavMenu: () => void;
     hideNavMenu: () => void;
     setNavMenuBlur: () => void;
+    setNavMenuAccessible: () => void;
+    setNavMenuNotAccessible: () => void;
   }>
 >();
 
@@ -69,6 +71,16 @@ export const navMenuManager = Object.freeze({
   setNavMenuBlur: () => {
     if (typeof navMenuRef.current?.setNavMenuBlur === 'function') {
       navMenuRef.current.setNavMenuBlur();
+    }
+  },
+  setNavMenuAccessible: () => {
+    if (typeof navMenuRef.current?.setNavMenuAccessible === 'function') {
+      navMenuRef.current.setNavMenuAccessible();
+    }
+  },
+  setNavMenuNotAccessible: () => {
+    if (typeof navMenuRef.current?.setNavMenuNotAccessible === 'function') {
+      navMenuRef.current.setNavMenuNotAccessible();
     }
   },
 });
@@ -135,14 +147,15 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
 
   const onBlurRef = useRef<boolean>(false);
   const activeItemRef = useRef<TouchableHighlight | null>(null);
+  const [isMenuAccessible, setMenuAccessible] = useState<boolean>(true);
   useImperativeHandle(
     navMenuRef,
     () => ({
       showNavMenu: () => {
-        setIsMenuFocused(true);
         setIsMenuVisible(true);
       },
       hideNavMenu: () => {
+        setMenuAccessible(false);
         setIsMenuVisible(false);
       },
       setNavMenuBlur: () => {
@@ -150,6 +163,12 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           setIsMenuFocused(false);
           onBlurRef.current = false;
         }
+      },
+      setNavMenuAccessible: () => {
+        setMenuAccessible(true);
+      },
+      setNavMenuNotAccessible: () => {
+        setMenuAccessible(false);
       },
     }),
     [],
@@ -186,6 +205,28 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     },
     [],
   );
+  useLayoutEffect(() => {
+    if (
+      !navMenuMountedRef.current ||
+      menuVisibleAnimationInProcess.current ||
+      menuFocusAnimationInProcess.current
+    ) {
+      return;
+    }
+    menuVisibleAnimationInProcess.current = true;
+    Animated.timing(menuAnimation, {
+      toValue: isMenuVisible ? breakPointWithOutFocus : breakPointInvisble,
+      duration: visibleAnimationDuration,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (!finished) {
+        menuAnimation.setValue(
+          isMenuVisible ? breakPointInvisble : breakPointWithOutFocus,
+        );
+      }
+      menuVisibleAnimationInProcess.current = false;
+    });
+  }, [isMenuVisible, menuAnimation]);
 
   useLayoutEffect(() => {
     if (
@@ -209,29 +250,6 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
       menuFocusAnimationInProcess.current = false;
     });
   }, [isMenuFocused, menuAnimation]);
-
-  useLayoutEffect(() => {
-    if (
-      !navMenuMountedRef.current ||
-      menuVisibleAnimationInProcess.current ||
-      menuFocusAnimationInProcess.current
-    ) {
-      return;
-    }
-    menuVisibleAnimationInProcess.current = true;
-    Animated.timing(menuAnimation, {
-      toValue: isMenuVisible ? breakPointWithOutFocus : breakPointInvisble,
-      duration: visibleAnimationDuration,
-      useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (!finished) {
-        menuAnimation.setValue(
-          isMenuVisible ? breakPointInvisble : breakPointWithOutFocus,
-        );
-      }
-      menuVisibleAnimationInProcess.current = false;
-    });
-  }, [isMenuVisible, menuAnimation]);
 
   useLayoutEffect(() => {
     navMenuMountedRef.current = true;
@@ -277,7 +295,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
               setActiveMunuItemRef={setActiveMunuItemRef}
               labelOpacityValue={menuItemInterpolation}
               iconOpacityValue={menuItemIconInterpolation}
-              isVisible={isMenuVisible}
+              isVisible={isMenuVisible && isMenuAccessible}
             />
           )}
         />

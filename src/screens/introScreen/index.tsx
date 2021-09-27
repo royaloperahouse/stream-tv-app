@@ -10,14 +10,14 @@ import { useDispatch } from 'react-redux';
 import { Colors, Images } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import { switchOffIntroScreen } from '@services/store/auth/Slices';
+import { startLoginLoop } from '@services/store/auth/Slices';
 
 type TIntroScreenProps = {};
 
 const IntroScreen: React.FC<TIntroScreenProps> = () => {
   const dispatch = useDispatch();
   const getStarted = () => {
-    dispatch(switchOffIntroScreen());
+    dispatch(startLoginLoop());
   };
   return (
     <ImageBackground

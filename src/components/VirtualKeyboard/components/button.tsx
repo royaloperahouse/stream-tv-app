@@ -10,6 +10,7 @@ import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
+import { navMenuManager } from '@components/NavMenu';
 
 type TButtonProps = TouchableHighlightProps & {
   text?: string;
@@ -51,6 +52,9 @@ const Button = forwardRef<any, TButtonProps>(
         styleFocused={[styleFocused, styles.styleFocused]}
         {...restProps}
         hasTVPreferredFocus={hasTVPreferredFocus}
+        onFocus={() => {
+          navMenuManager.setNavMenuAccessible();
+        }}
         onPress={onClick}>
         <View style={styles.viewContainer}>
           {text !== undefined && text !== '' && (
