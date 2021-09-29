@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -10,15 +10,10 @@ import { Colors } from '@themes/Styleguide';
 
 type SynopsisProps = {
   event: TEventContainer;
-  scrollToMe: () => void;
   nextScreenText: string;
 };
 
-const Synopsis: React.FC<SynopsisProps> = ({
-  event,
-  scrollToMe,
-  nextScreenText,
-}) => {
+const Synopsis: React.FC<SynopsisProps> = ({ event, nextScreenText }) => {
   const synopsis = get(event.data, ['vs_event_details', 'productions'], []).map(
     production => (
       <RohText style={styles.synopsis} key={production.id}>
@@ -27,14 +22,14 @@ const Synopsis: React.FC<SynopsisProps> = ({
     ),
   );
   return (
-    <TouchableHighlightWrapper>
+    <TouchableHighlightWrapper canMoveDown={false} canMoveRight={false}>
       <View style={styles.generalContainer}>
         <View style={styles.wrapper}>
           <RohText style={styles.title}>Synopsis</RohText>
           <View style={styles.synopsisContainer}>{synopsis}</View>
         </View>
         <View style={styles.downContainer}>
-          <GoDown text={nextScreenText} scrollToMe={scrollToMe} />
+          <GoDown text={nextScreenText} />
         </View>
       </View>
     </TouchableHighlightWrapper>

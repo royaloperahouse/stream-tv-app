@@ -3,21 +3,17 @@ import { View, StyleSheet } from 'react-native';
 import Down from '@assets/svg/eventDetails/Down.svg';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 
 type Props = {
-  text: string;
-  scrollToMe: () => void;
+  text?: string;
 };
 
-const GoDown: React.FC<Props> = ({ text = '', scrollToMe }) => {
+const GoDown: React.FC<Props> = ({ text = '' }) => {
   return (
-    <TouchableHighlightWrapper onFocus={scrollToMe}>
-      <View style={styles.container}>
-        <Down width={scaleSize(50)} height={scaleSize(50)} />
-        <RohText style={styles.text}>{text?.toUpperCase()}</RohText>
-      </View>
-    </TouchableHighlightWrapper>
+    <View style={styles.container}>
+      <Down width={scaleSize(50)} height={scaleSize(50)} />
+      <RohText style={styles.text}>{text?.toUpperCase()}</RohText>
+    </View>
   );
 };
 
