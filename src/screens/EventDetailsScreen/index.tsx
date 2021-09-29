@@ -1,6 +1,12 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
-import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  VirtualizedList,
+  ViewToken,
+} from 'react-native';
 import { TEventContainer } from '@services/types/models';
 import collectionOfEventDetailsSections, {
   eventDetailsSectionsConfig,
@@ -26,7 +32,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
     useState<TBMPlayerShowingData | null>(null);
   const isBMPlayerShowingRef = useRef<boolean>(false);
   const { event } = route.params;
-  const scrollViewRef = useRef<ScrollView>(null);
+  const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
   const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
     getBitMovinSavedPosition(playerItem.videoId).then(restoredItem => {
@@ -65,12 +71,6 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
               showPlayer={showPlayer}
               isBMPlayerShowing={bMPlayerShowingData !== null}
               nextScreenText={item.nextSectionTitle}
-              scrollToMe={() => {
-                scrollViewRef.current?.scrollTo({
-                  animated: true,
-                  y: (index || 0) * Dimensions.get('window').height,
-                });
-              }}
             />
           );
         }
@@ -80,12 +80,6 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
               key={item?.key || index}
               event={event}
               nextScreenText={item?.nextSectionTitle}
-              scrollToMe={() =>
-                scrollViewRef.current?.scrollTo({
-                  animated: true,
-                  y: (index || 0) * Dimensions.get('window').height,
-                })
-              }
             />
           );
         }
@@ -127,9 +121,40 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   return (
     <View style={styles.rootContainer}>
       <GoBack />
-      <ScrollView ref={scrollViewRef} style={styles.scrollView}>
-        {collectionOfEventDetailsSections.map(sectionsFactory)}
-      </ScrollView>
+      <VirtualizedList
+        ref={VirtualizedListRef}
+        style={styles.scrollView}
+        keyExtractor={(item, index) => item[index].key}
+        initialNumToRender={0}
+        data={collectionOfEventDetailsSections}
+        renderItem={({ item, index }) => {
+          return sectionsFactory(item[index], index);
+        }}
+        getItemCount={data => data?.length || 0}
+        windowSize={Dimensions.get('window').height}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 5,
+        }}
+        onViewableItemsChanged={info => {
+          console.log(info, 'info');
+          let itemForScrolling: ViewToken | undefined;
+          if (
+            info.viewableItems.length > 1 &&
+            info.changed.length &&
+            (itemForScrolling = info.changed.find(item => item.isViewable)) !==
+              undefined &&
+            itemForScrolling.index !== null
+          ) {
+            VirtualizedListRef.current?.scrollToIndex({
+              animated: true,
+              index: itemForScrolling.index,
+            });
+          }
+        }}
+        getItem={data => [...data]}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };

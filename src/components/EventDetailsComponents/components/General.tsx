@@ -22,7 +22,6 @@ import {
 
 type Props = {
   event: TEventContainer;
-  scrollToMe: () => void;
   nextScreenText: string;
   isBMPlayerShowing: boolean;
   showPlayer: (...args: any[]) => void;
@@ -30,7 +29,6 @@ type Props = {
 
 const General: React.FC<Props> = ({
   event,
-  scrollToMe = () => {},
   showPlayer,
   nextScreenText = 'Some Screen',
 }) => {
@@ -149,7 +147,7 @@ const General: React.FC<Props> = ({
           </View>
         </View>
         <View style={styles.downContainer}>
-          <GoDown text={nextScreenText} scrollToMe={scrollToMe} />
+          <GoDown text={nextScreenText} />
         </View>
       </View>
       <View style={styles.snapshotContainer}>
