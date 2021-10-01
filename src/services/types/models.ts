@@ -72,7 +72,9 @@ export type TVSTitle = {
 
 export type TVSVideo = {
   video: {
+    id: string;
     link_type: string;
+    isBroken: boolean;
   };
 };
 

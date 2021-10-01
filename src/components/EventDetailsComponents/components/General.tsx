@@ -54,7 +54,24 @@ const General: React.FC<Props> = ({
     '',
   );
 
-  const addOrRemoveItemIdFromMyListHandler = () => {
+  const videos = get(event.data,
+    'vs_videos', []);
+  console.log('vids: ', videos);
+  const vidIsBroken = get(event.data,
+    ['vs_videos', '0', 'video', 'isBroken'],
+    false);
+  console.log('vidIsBroken is', vidIsBroken);
+  
+  const vidUrl = get(event.data,
+    ['vs_videos', '0', 'video', 'id'],
+    '');
+  console.log('vidUrl is', vidUrl);
+
+  const finalUrl = (vidUrl != '' && !vidIsBroken) ? 
+    'https://roh-stagev2.global.ssl.fastly.net/api/video-source?id=' + vidUrl :  
+    'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
+  
+    const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
       return;
     }
@@ -82,14 +99,16 @@ const General: React.FC<Props> = ({
           text: 'Watch now',
           hasTVPreferredFocus: true,
           onPress: () =>
+          {
             showPlayer({
               videoId: event.id,
-              url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
+              url: finalUrl,
               title,
               poster:
                 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
               subtitle: title,
-            }),
+            });
+          },
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },
