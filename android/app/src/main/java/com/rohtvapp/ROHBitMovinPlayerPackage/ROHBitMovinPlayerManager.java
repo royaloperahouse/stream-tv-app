@@ -249,10 +249,6 @@ public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerView> {
       subtitleView.setUserDefaultTextSize();
       player.setVolume(100);
     }
-
-    if (configuration != null && configuration.getString("heartbeat") != null) {
-      heartbeat = Integer.parseInt(configuration.getString("hearbeat"));
-    }
   }
 
   private void onPlay(PlayerEvent.Playing event) {

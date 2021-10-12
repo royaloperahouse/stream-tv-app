@@ -46,7 +46,7 @@ function* loginLoopWatcher(): any {
 }
 
 function* loginLoopWorker(): any {
-  const delayTimeInMS = 10000; // 10 sec
+  const delayTimeInMS = 5000; // 5 sec
   let runLoop: boolean = true;
   let countOfLoopDuration: number = 0;
   while (runLoop) {
@@ -67,7 +67,7 @@ function* loginLoopWorker(): any {
       } else {
         throw Error();
       }
-    } catch (err) {
+    } catch (err: any) {
       logError('something went wrong', err);
       yield put(checkDeviceError({}));
     }

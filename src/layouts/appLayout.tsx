@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import { useSelector, shallowEqual, useDispatch } from 'react-redux';
 import {
   introScreenShowSelector,
@@ -7,11 +7,12 @@ import {
 import IntroScreen from '@screens/introScreen';
 import LoginScreen from '@screens/loginScreen';
 import MainLayout from '@layouts/mainLayout';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import {
   getEventListLoopStart,
   getEventListLoopStop,
 } from '@services/store/events/Slices';
+import RNBootSplash from 'react-native-bootsplash';
 
 type TAppLayoutProps = {};
 const AppLayout: React.FC<TAppLayoutProps> = () => {
@@ -46,6 +47,17 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
       AppState.removeEventListener('change', _handleAppStateChange);
     };
   }, [dispatch, isAuthenticated]);
+
+  useLayoutEffect(() => {
+    // we need to setup splashscreen for tvOS(iOS)
+    if (Platform.OS === 'android') {
+      RNBootSplash.getVisibilityStatus().then(status => {
+        if (status !== 'hidden') {
+          RNBootSplash.hide({ fade: true });
+        }
+      });
+    }
+  });
   if (showIntroScreen) {
     return <IntroScreen />;
   }

@@ -106,7 +106,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
         configuration={{
           url: bMPlayerShowingData.url,
           poster: bMPlayerShowingData.poster,
-          offset: bMPlayerShowingData.position,
+          offset: bMPlayerShowingData.position || '0.0',
         }}
         title={bMPlayerShowingData.title}
         subtitle={bMPlayerShowingData.subtitle}
@@ -114,6 +114,15 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
         analytics={{
           videoId: bMPlayerShowingData.videoId,
           title: bMPlayerShowingData.title,
+          userId: '',
+          experiment: '',
+          customData1: '',
+          customData2: '',
+          customData3: '',
+          customData4: '',
+          customData5: '',
+          customData6: '',
+          customData7: '',
         }}
       />
     );
@@ -131,9 +140,11 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
           return sectionsFactory(item[index], index);
         }}
         getItemCount={data => data?.length || 0}
-        windowSize={Dimensions.get('window').height}
+        windowSize={2}
         viewabilityConfig={{
-          itemVisiblePercentThreshold: 5,
+          itemVisiblePercentThreshold: 1,
+          waitForInteraction: false,
+          minimumViewTime: 100, //In milliseconds
         }}
         onViewableItemsChanged={info => {
           console.log(info, 'info');
