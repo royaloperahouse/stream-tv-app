@@ -84,7 +84,7 @@ type TPlayerProps = {
   };
   analytics?: {
     videoId: string;
-    title: string;
+    title?: string;
     userId?: string;
     experiment?: string;
     customData1?: string;

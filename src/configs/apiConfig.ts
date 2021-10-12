@@ -4,7 +4,7 @@ const upgradeEnv='https://roh-upgrade.global.ssl.fastly.net/api';
 const stagingEnv='https://roh-stagev2.global.ssl.fastly.net/api';
 
 export const ApiConfig = Object.freeze({
-  host: 'https://roh.org.uk/api/',
+  host: 'https://roh.org.uk/api',
   deviceId: getUniqueId(),
   manifestURL: stagingEnv,
   routes: {
