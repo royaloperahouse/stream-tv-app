@@ -19,6 +19,9 @@ import {
   removeIdFromMyList,
   addToMyList,
 } from '@services/myList';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPerformanceVideoURL } from '@services/store/videos/Slices';
+import { performanceVideoURLHasLoadedSelector, performanceVideoURLSelector } from '@services/store/videos/Selectors';
 
 type Props = {
   event: TEventContainer;
@@ -37,6 +40,10 @@ const General: React.FC<Props> = ({
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
+  const dispatch = useDispatch();
+  const perfVidURLhasLoaded = useSelector(performanceVideoURLHasLoadedSelector);
+  const perfVidURL = useSelector(performanceVideoURLSelector);
+
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
       /(<([^>]+)>)/gi,
@@ -53,25 +60,19 @@ const General: React.FC<Props> = ({
     ['vs_background', '0', 'vs_background_image', 'url'],
     '',
   );
-
-  const videos = get(event.data,
-    'vs_videos', []);
-  console.log('vids: ', videos);
-  const vidIsBroken = get(event.data,
-    ['vs_videos', '0', 'video', 'isBroken'],
-    false);
-  console.log('vidIsBroken is', vidIsBroken);
   
-  const vidUrl = get(event.data,
-    ['vs_videos', '0', 'video', 'id'],
-    '');
-  console.log('vidUrl is', vidUrl);
-
-  const finalUrl = (vidUrl != '' && !vidIsBroken) ? 
-    'https://roh-stagev2.global.ssl.fastly.net/api/video-source?id=' + vidUrl :  
-    'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
+  if(!perfVidURLhasLoaded) {
+    const videos = get(event.data,
+      'vs_videos', []);
+    const result = videos.find(({video}) => !video.isBroken)
+    let vidId='';
+    if(result && result.video.id) {
+      vidId = result.video.id;
+      dispatch(getPerformanceVideoURL(vidId))
+    }
+  }
   
-    const addOrRemoveItemIdFromMyListHandler = () => {
+  const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
       return;
     }
@@ -102,7 +103,9 @@ const General: React.FC<Props> = ({
           {
             showPlayer({
               videoId: event.id,
-              url: finalUrl,
+              url: perfVidURLhasLoaded ? 
+                perfVidURL :
+                'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
               title,
               poster:
                 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
