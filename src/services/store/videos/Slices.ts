@@ -1,32 +1,44 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { PayloadAction } from '@reduxjs/toolkit/src/createAction';
 
-interface VideoURLsState {
+interface VideoState {
   performanceVideoURLhasLoaded: boolean;
   performanceVideoURL: string;
   performanceVideoURLErrorString: string;
+  videosLoaded: boolean;
   // TODO: if necessary, handle other types of videos
   // Currently available: trailers and behind-the-scenes videos
 }
 
-const initialState: VideoURLsState = {
+const initialState: VideoState = {
   performanceVideoURLhasLoaded: false,
   performanceVideoURL: '',
-  performanceVideoURLErrorString: ''
+  performanceVideoURLErrorString: '',
+  videosLoaded: false
 };
 
 const videoURLsSlice = createSlice({
   name: 'videoURLs',
   initialState,
   reducers: {
-    getPerformanceVideoURL: (state: VideoURLsState, action: PayloadAction<string>) => {
-      (state: VideoURLsState) => state
+    getVideoListLoopStart: (state: VideoState) => {
+      (state: VideoState) => state
     },
-    performanceVideoURLReceived: (state: VideoURLsState, action: PayloadAction<string>) => {
+    getVideoListLoopStop: (state: VideoState) => {
+      (state: VideoState) => state
+    },
+    getVideoListLoopSuccess: (state: VideoState, action: PayloadAction<string>)  => {
+      console.log("payload action: ", action.payload);
+      state.videosLoaded = true;
+    },
+    getPerformanceVideoURL: (state: VideoState, action: PayloadAction<string>) => {
+      (state: VideoState) => state
+    },
+    performanceVideoURLReceived: (state: VideoState, action: PayloadAction<string>) => {
       state.performanceVideoURL = action.payload;
       state.performanceVideoURLhasLoaded = true;
     },
-    getPerformanceVideoURLError: (state: VideoURLsState, action: PayloadAction<string>) => {
+    getPerformanceVideoURLError: (state: VideoState, action: PayloadAction<string>) => {
       state.performanceVideoURLErrorString = action.payload;
       state.performanceVideoURLhasLoaded = false;
     },
@@ -34,6 +46,9 @@ const videoURLsSlice = createSlice({
 });
 
 export const {
+  getVideoListLoopStart,
+  getVideoListLoopSuccess,
+  getVideoListLoopStop,
   getPerformanceVideoURL,
   performanceVideoURLReceived,
   getPerformanceVideoURLError,

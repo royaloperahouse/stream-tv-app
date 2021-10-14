@@ -12,6 +12,10 @@ import {
   getEventListLoopStart,
   getEventListLoopStop,
 } from '@services/store/events/Slices';
+import {
+  getVideoListLoopStart,
+  getVideoListLoopStop
+} from '@services/store/videos/Slices';
 
 type TAppLayoutProps = {};
 const AppLayout: React.FC<TAppLayoutProps> = () => {
@@ -30,6 +34,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
         isAuthenticated
       ) {
         dispatch(getEventListLoopStart());
+        dispatch(getVideoListLoopStart());
       }
       if (
         appState.current === 'active' &&
@@ -37,6 +42,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
         isAuthenticated
       ) {
         dispatch(getEventListLoopStop());
+        dispatch(getVideoListLoopStop());
       }
       appState.current = nextAppState;
     };

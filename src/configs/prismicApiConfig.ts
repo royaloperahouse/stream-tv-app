@@ -5,9 +5,11 @@ export const prismicApiAccessToken =
 
 type TDocumentTypeList = {
   digitalEventDetails: string;
+  digitalEventVideo: string;
 };
 export const documentTypes: TDocumentTypeList = Object.freeze({
   digitalEventDetails: 'digital_event_details',
+  digitalEventVideo: 'digital_event_video'
 });
 
 export const refLabelOfPublishing = 'Staging';
