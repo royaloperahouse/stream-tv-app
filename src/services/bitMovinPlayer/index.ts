@@ -59,7 +59,7 @@ export const removeItemsFromSavedPositionList = async (
     );
   } catch (error) {
     logError(
-      'Something went wromg with removing from BitMovinPlayerSavedPositionList',
+      'Something went wrong with removing from BitMovinPlayerSavedPositionList',
       error,
     );
   } finally {

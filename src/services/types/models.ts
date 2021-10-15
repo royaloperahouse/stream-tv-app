@@ -199,3 +199,9 @@ export type TBitMovinPlayerSavedPosition = {
   position: string;
   eventId?: string;
 };
+
+export type TEventVideo = {
+  id: string;
+  video_type: 'performance' | 'trailer' | 'behind_the_scenes';
+  performanceVideoURL: string;
+};

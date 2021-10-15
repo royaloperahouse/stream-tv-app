@@ -8,4 +8,8 @@ export const performanceVideoURLSelector = (store: {
 
 export const performanceVideoURLErrorSelector = (store: {
   [key: string]: any;
-}) => store.videoURLs.performanceVideoURLErrorString
+}) => store.videoURLs.performanceVideoURLErrorString;
+
+export const videoListSelector = (store: {
+  [key: string]: any;
+}) => store.videoURLs.eventVideoList;

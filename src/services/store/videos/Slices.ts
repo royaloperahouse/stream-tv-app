@@ -1,19 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { PayloadAction } from '@reduxjs/toolkit/src/createAction';
+import { TEventVideo } from '@services/types/models';
 
 interface VideoState {
-  performanceVideoURLhasLoaded: boolean;
-  performanceVideoURL: string;
   performanceVideoURLErrorString: string;
-  videosLoaded: boolean;
   // TODO: if necessary, handle other types of videos
   // Currently available: trailers and behind-the-scenes videos
+  eventVideoList: Array<TEventVideo>; // Get the event type from here 
+  videosLoaded: boolean;
 }
 
 const initialState: VideoState = {
-  performanceVideoURLhasLoaded: false,
-  performanceVideoURL: '',
   performanceVideoURLErrorString: '',
+  eventVideoList: [],
   videosLoaded: false
 };
 
@@ -27,20 +26,19 @@ const videoURLsSlice = createSlice({
     getVideoListLoopStop: (state: VideoState) => {
       (state: VideoState) => state
     },
-    getVideoListLoopSuccess: (state: VideoState, action: PayloadAction<string>)  => {
-      console.log("payload action: ", action.payload);
+    getVideoListLoopSuccess: (state: VideoState, action: PayloadAction<Array<TEventVideo>>)  => {
+      state.eventVideoList = action.payload;
       state.videosLoaded = true;
     },
     getPerformanceVideoURL: (state: VideoState, action: PayloadAction<string>) => {
       (state: VideoState) => state
     },
-    performanceVideoURLReceived: (state: VideoState, action: PayloadAction<string>) => {
-      state.performanceVideoURL = action.payload;
-      state.performanceVideoURLhasLoaded = true;
+    performanceVideoURLReceived: (state: VideoState, action: PayloadAction<{url: string, id: string}>) => {
+      console.log('url is ', action.payload.url, ' id is ', action.payload.id);
+      // TODO: update list item with url
     },
     getPerformanceVideoURLError: (state: VideoState, action: PayloadAction<string>) => {
       state.performanceVideoURLErrorString = action.payload;
-      state.performanceVideoURLhasLoaded = false;
     },
   }
 });

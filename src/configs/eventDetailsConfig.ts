@@ -5,14 +5,14 @@ import {
   Synopsis,
 } from '@components/EventDetailsComponents/';
 
-export type TEventDitailsSection = {
+export type TEventDetailsSection = {
   key: string;
   nextSectionTitle: string;
   Component: React.FC<any>;
 };
 
 export const eventDetailsSectionsConfig: {
-  [key: string]: TEventDitailsSection;
+  [key: string]: TEventDetailsSection;
 } = {
   general: {
     key: 'general',
@@ -36,7 +36,7 @@ export const eventDetailsSectionsConfig: {
   },
 };
 
-const collectionOfEventDetailsSections: Array<TEventDitailsSection> =
+const collectionOfEventDetailsSections: Array<TEventDetailsSection> =
   Object.values(eventDetailsSectionsConfig);
 
 export default collectionOfEventDetailsSections;

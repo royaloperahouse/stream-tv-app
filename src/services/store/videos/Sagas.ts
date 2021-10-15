@@ -23,6 +23,7 @@ import { Task } from 'redux-saga';
 import { bigDelay } from '@utils/bigDelay';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { getVideoDetails } from '@services/prismicApiClient';
+import { TEventVideo } from '@services/types/models';
 
 export default function* getVideoURLRootSagas() {
   yield all([
@@ -59,9 +60,14 @@ function* getVideoListLoopWatcher() {
 
 function* getVideoURLWorker(action: PayloadAction<string>) {
   try {
-    const response: any = yield call(fetchVideoURL, action.payload);
+    const id = action.payload;
+    const response: any = yield call(fetchVideoURL, id);
     if (response?.data?.data?.attributes?.hlsManifestUrl) {
-      yield put(performanceVideoURLReceived(response?.data?.data?.attributes?.hlsManifestUrl));
+      yield put(performanceVideoURLReceived(
+        {
+          url: response?.data?.data?.attributes?.hlsManifestUrl,
+          id
+        }));
     } else if (response?.data?.errors?.length) {
       const errString = response.data.errors[0].title;
       yield put(getPerformanceVideoURLError(errString));
@@ -75,24 +81,75 @@ function* getVideoURLWorker(action: PayloadAction<string>) {
 }
 
 function* getVideoListLoopWorker(): any {
-  console.log('enter loop');
   while (true) {
-    console.log('Working!');  
-    const result = [];  
+    const result = [];
+    const eventVideoList: Array<TEventVideo> = [];
     try {
       const initialResponse: ApiSearchResponse = yield call(
         getVideoDetails,
       );
-      console.log("Got video details!");
       result.push(...initialResponse.results);
+      // TODO - identical page handling code to events, factor out...
+      if (initialResponse.total_pages != initialResponse.page) {
+        const allPagesRequestsResult: Array<
+          PromiseSettledResult<ApiSearchResponse>
+        > = yield call(
+          eventPromiseFill,
+          initialResponse.page + 1,
+          initialResponse.total_pages,
+        );
+        result.push(
+          ...allPagesRequestsResult.reduce<Array<any>>( //todo create type for prismicResult
+            (
+              acc,
+              pageRequestsResult: PromiseSettledResult<ApiSearchResponse>,
+            ) => {
+              if (pageRequestsResult.status === 'fulfilled') {
+                acc.push(...pageRequestsResult.value.results);
+              }
+              return acc;
+            },
+            [],
+          ),
+        );
+
+      }
     } catch (err) {
       logError('Something went wrong with the Prismic request')
     }
     if(result.length) {
+      console.log('vids result: ', result);
+      eventVideoList.push(
+        ...result.reduce((acc: Array<TEventVideo>, video: any, index) => {
+          if(video.data?.video?.video_type) {
+            const vid = {
+              id: video.id,
+              video_type: video.data?.video?.video_type,
+              performanceVideoURL: ''
+            } as TEventVideo;
+            acc.push(vid);
+          }
+          return acc;
+        }, []),
+      );
+
       yield put(
-        getVideoListLoopSuccess("Just testing!")
+        getVideoListLoopSuccess(eventVideoList)
       );
     }
     yield call(bigDelay, 30 * 60 * 1000);
   }
+
+  function eventPromiseFill(
+    from: number,
+    to: number,
+  ): Promise<PromiseSettledResult<ApiSearchResponse>[]> {
+    const allPromises: Array<Promise<ApiSearchResponse>> = [];
+    for (let i = from; i <= to; i++) {
+      allPromises.push(getVideoDetails({ queryOptions: { page: i } }));
+    }
+    return Promise.allSettled(allPromises);
+  }
+  
 }
+

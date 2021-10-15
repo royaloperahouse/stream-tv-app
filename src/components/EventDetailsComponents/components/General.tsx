@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import FastImage from 'react-native-fast-image';
-import { TEventContainer } from '@services/types/models';
+import { TEventContainer, TEventVideo } from '@services/types/models';
 import get from 'lodash.get';
 import GoDown from '../commonControls/GoDown';
 import Watch from '@assets/svg/eventDetails/Watch.svg';
@@ -21,7 +21,7 @@ import {
 } from '@services/myList';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPerformanceVideoURL } from '@services/store/videos/Slices';
-import { performanceVideoURLHasLoadedSelector, performanceVideoURLSelector } from '@services/store/videos/Selectors';
+import { performanceVideoURLHasLoadedSelector, performanceVideoURLSelector, videoListSelector } from '@services/store/videos/Selectors';
 
 type Props = {
   event: TEventContainer;
@@ -41,8 +41,8 @@ const General: React.FC<Props> = ({
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const dispatch = useDispatch();
-  const perfVidURLhasLoaded = useSelector(performanceVideoURLHasLoadedSelector);
   const perfVidURL = useSelector(performanceVideoURLSelector);
+  const videoList: Array<TEventVideo> = useSelector(videoListSelector);
 
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
@@ -61,17 +61,25 @@ const General: React.FC<Props> = ({
     '',
   );
   
-  if(!perfVidURLhasLoaded) {
-    const videos = get(event.data,
-      'vs_videos', []);
-    const result = videos.find(({video}) => !video.isBroken)
-    let vidId='';
-    if(result && result.video.id) {
-      vidId = result.video.id;
-      dispatch(getPerformanceVideoURL(vidId))
-    }
+  const videos = get(event.data,
+    'vs_videos', []);
+  const unbrokenVideos = videos.filter(({video}) => !video.isBroken);
+  console.log('unbrokenVids', unbrokenVideos);
+  console.log('videoList', videoList);
+  const perfVids = videoList.filter(videoListVideo =>
+    (unbrokenVideos.find(({video}) => 
+      video.id === videoListVideo.id) !== undefined) && videoListVideo.video_type === 'performance');
+  console.log('perfVids', perfVids);
+
+  // Not sure if there can be several performance videos in the final data
+  // (there are in the test data) and how to choose which if so. Take first for now.
+  if(perfVids.length && perfVids[0].performanceVideoURL === '') { 
+    dispatch(getPerformanceVideoURL(perfVids[0].id))
   }
+
+  let defaultPerfVidUrl = 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
   
+
   const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
       return;
@@ -103,7 +111,7 @@ const General: React.FC<Props> = ({
           {
             showPlayer({
               videoId: event.id,
-              url: perfVidURLhasLoaded ? 
+              url: perfVidURL != '' ? 
                 perfVidURL :
                 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
               title,
