@@ -9,7 +9,7 @@
     "reset-cache-start": "yarn start --reset-cache",
     "clear-release-android": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && rm -rf ./android/app/src/main/res/drawable-* && rm -rf ./android/app/src/main/res/raw && rm -rf ./android/app/build && rm -rf ~/.gradle/caches/",
     "run-dev-mode-android": "adb shell input keyevent 82",
-    "clear-project-cache": "npx react-native-clean-project",
+    "clear-cache-and-reinstal-modules": "./clear-cache.sh",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
