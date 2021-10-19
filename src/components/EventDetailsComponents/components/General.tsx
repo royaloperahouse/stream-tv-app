@@ -73,8 +73,8 @@ const General: React.FC<Props> = ({
       videoListVideo.video_type === 'performance');
 
   let perfVidURL = '';
-  // Not sure if there can be several performance videos in the final data
-  // (there are in the test data) and how to choose which if so. Take first for now.
+  // We will receive a list, but there will only be one performance in the live 
+  // environment, so we can just take the first item.
   if(perfVids.length && perfVids[0].performanceVideoURL === '') { 
     dispatch(getPerformanceVideoURL(perfVids[0].id))
     selectedVideoId.current = perfVids[0].id;
