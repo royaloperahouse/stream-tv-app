@@ -21,7 +21,9 @@ import {
 } from '@services/myList';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPerformanceVideoURL } from '@services/store/videos/Slices';
-import { performanceVideoURLHasLoadedSelector, performanceVideoURLSelector, videoListSelector } from '@services/store/videos/Selectors';
+import { videoListSelector, videoListItemSelector } from '@services/store/videos/Selectors';
+
+let defaultPerfVidUrl = 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
 
 type Props = {
   event: TEventContainer;
@@ -41,7 +43,8 @@ const General: React.FC<Props> = ({
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const dispatch = useDispatch();
-  const perfVidURL = useSelector(performanceVideoURLSelector);
+  let selectedVideoId = useRef('');
+  const videoListItem: TEventVideo = useSelector(videoListItemSelector(selectedVideoId.current));
   const videoList: Array<TEventVideo> = useSelector(videoListSelector);
 
   const title: string =
@@ -64,21 +67,22 @@ const General: React.FC<Props> = ({
   const videos = get(event.data,
     'vs_videos', []);
   const unbrokenVideos = videos.filter(({video}) => !video.isBroken);
-  console.log('unbrokenVids', unbrokenVideos);
-  console.log('videoList', videoList);
   const perfVids = videoList.filter(videoListVideo =>
     (unbrokenVideos.find(({video}) => 
-      video.id === videoListVideo.id) !== undefined) && videoListVideo.video_type === 'performance');
-  console.log('perfVids', perfVids);
+      video.id === videoListVideo.id) !== undefined) && 
+      videoListVideo.video_type === 'performance');
 
+  let perfVidURL = '';
   // Not sure if there can be several performance videos in the final data
   // (there are in the test data) and how to choose which if so. Take first for now.
   if(perfVids.length && perfVids[0].performanceVideoURL === '') { 
     dispatch(getPerformanceVideoURL(perfVids[0].id))
+    selectedVideoId.current = perfVids[0].id;
   }
 
-  let defaultPerfVidUrl = 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
-  
+  if(videoListItem && videoListItem.performanceVideoURL !== '') {
+    perfVidURL = videoListItem.performanceVideoURL;
+  }
 
   const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
@@ -111,7 +115,7 @@ const General: React.FC<Props> = ({
           {
             showPlayer({
               videoId: event.id,
-              url: perfVidURL != '' ? 
+              url: perfVidURL !== '' ? 
                 perfVidURL :
                 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
               title,

@@ -1,10 +1,4 @@
-export const performanceVideoURLHasLoadedSelector = (store: {
-  [key: string]: any 
-}) => store.videoURLs.performanceVideoURLhasLoaded;
-
-export const performanceVideoURLSelector = (store: {
-  [key: string]: any 
-}) => store.videoURLs.performanceVideoURL;
+import { TEventVideo } from "@services/types/models";
 
 export const performanceVideoURLErrorSelector = (store: {
   [key: string]: any;
@@ -13,3 +7,9 @@ export const performanceVideoURLErrorSelector = (store: {
 export const videoListSelector = (store: {
   [key: string]: any;
 }) => store.videoURLs.eventVideoList;
+
+export const videoListItemSelector =
+  (id: string) => (store: { [key: string]: any }) => {
+    const eventVideo = store.videoURLs.eventVideoList.find((eventVideo: TEventVideo) => eventVideo.id === id);
+    return eventVideo;
+  }

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, isDraft } from '@reduxjs/toolkit';
 import { PayloadAction } from '@reduxjs/toolkit/src/createAction';
 import { TEventVideo } from '@services/types/models';
 
@@ -34,8 +34,22 @@ const videoURLsSlice = createSlice({
       (state: VideoState) => state
     },
     performanceVideoURLReceived: (state: VideoState, action: PayloadAction<{url: string, id: string}>) => {
-      console.log('url is ', action.payload.url, ' id is ', action.payload.id);
-      // TODO: update list item with url
+      const { id, url } = action.payload;
+      
+      state.eventVideoList = state.eventVideoList.map((eventVideo, _index) => {
+        if(eventVideo.id !== id) {
+          return eventVideo;
+        }
+        const newEventVideo = {
+          id,
+          performanceVideoURL: url,
+          video_type: eventVideo.video_type
+        };
+        return {
+          ...eventVideo,
+          ...newEventVideo
+        }
+      });
     },
     getPerformanceVideoURLError: (state: VideoState, action: PayloadAction<string>) => {
       state.performanceVideoURLErrorString = action.payload;

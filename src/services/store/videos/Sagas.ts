@@ -118,7 +118,6 @@ function* getVideoListLoopWorker(): any {
       logError('Something went wrong with the Prismic request')
     }
     if(result.length) {
-      console.log('vids result: ', result);
       eventVideoList.push(
         ...result.reduce((acc: Array<TEventVideo>, video: any, index) => {
           if(video.data?.video?.video_type) {
