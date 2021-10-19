@@ -9,6 +9,7 @@ export const Colors = Object.freeze({
   midGrey: '#7E91B4',
   title: '#FFFFFF',
   subtitlesActiveBackground: '#1866DC',
+  streamPrimary: '#1866DC',
 });
 
 export const Images = Object.freeze({
