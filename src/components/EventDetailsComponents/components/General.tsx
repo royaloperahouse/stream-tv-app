@@ -117,7 +117,7 @@ const General: React.FC<Props> = ({
               videoId: event.id,
               url: perfVidURL !== '' ? 
                 perfVidURL :
-                'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
+                defaultPerfVidUrl,
               title,
               poster:
                 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
