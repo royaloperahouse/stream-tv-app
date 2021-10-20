@@ -22,12 +22,12 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
   const runningOnceRef = useRef<boolean>(false);
   useLayoutEffect(() => {
     if (
-      typeof previewRef.current?.setDigigtalEvent === 'function' &&
+      typeof previewRef.current?.setDigitalEvent === 'function' &&
       data.length &&
       !runningOnceRef.current
     ) {
       runningOnceRef.current = true;
-      previewRef.current.setDigigtalEvent(data[0]?.data[0]);
+      previewRef.current.setDigitalEvent(data[0]?.data[0]);
     }
   }, [data]);
   if (!data.length) {

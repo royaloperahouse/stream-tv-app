@@ -10,7 +10,7 @@ import {
 import { TEventContainer } from '@services/types/models';
 import collectionOfEventDetailsSections, {
   eventDetailsSectionsConfig,
-  TEventDitailsSection,
+  TEventDetailsSection,
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
@@ -57,7 +57,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   };
 
   const sectionsFactory = useCallback(
-    (item: TEventDitailsSection, index: number): JSX.Element | null => {
+    (item: TEventDetailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
       if (Component === undefined) {
         return null;

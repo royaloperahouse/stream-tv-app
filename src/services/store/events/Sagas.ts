@@ -11,7 +11,6 @@ import {
   all,
   call,
   cancel,
-  delay,
   fork,
   put,
   select,
@@ -22,6 +21,7 @@ import { logError } from '@utils/loger';
 import { getDigitalEventDetails } from '@services/prismicApiClient';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { addItemToPrevSearchList } from '@services/previousSearch';
+import { bigDelay } from '@utils/bigDelay';
 
 export default function* eventRootSagas() {
   yield all([
@@ -166,11 +166,4 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
       eventGroups: {},
     },
   );
-}
-
-function* bigDelay(seconds: number) {
-  const sec: number = Math.ceil(seconds / 10000);
-  for (let i = 0; i < sec; i++) {
-    yield delay(10000);
-  }
 }

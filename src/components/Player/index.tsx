@@ -14,6 +14,8 @@ import {
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
 import { TBitmoviPlayerNativeProps } from '@services/types/bitmovinPlayer';
+import RohText from '@components/RohText';
+import { scaleSize } from '@utils/scaleSize';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
@@ -368,6 +370,9 @@ const Player: React.FC<TPlayerProps> = props => {
         setSubtitle={setSubtitle}
         autoPlay={autoPlay}
       />
+      {configuration.url === '' && (
+        <RohText style={styles.textDescription}>Video not provided</RohText>
+      )}
     </SafeAreaView>
   );
 };
@@ -387,6 +392,14 @@ const styles = StyleSheet.create({
   controlsContainer: {
     position: 'absolute',
     bottom: 0,
+  },
+  textDescription: {
+    position: 'absolute',
+    flex: 1,
+    alignSelf: 'center',
+    top: scaleSize(180),
+    fontSize: scaleSize(80),
+    color: 'red',
   },
 });
 

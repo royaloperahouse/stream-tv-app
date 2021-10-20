@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import FastImage from 'react-native-fast-image';
-import { TEventContainer } from '@services/types/models';
+import { TEventContainer, TEventVideo } from '@services/types/models';
 import get from 'lodash.get';
 import GoDown from '../commonControls/GoDown';
 import Watch from '@assets/svg/eventDetails/Watch.svg';
@@ -19,6 +19,15 @@ import {
   removeIdFromMyList,
   addToMyList,
 } from '@services/myList';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPerformanceVideoURL } from '@services/store/videos/Slices';
+import {
+  videoListSelector,
+  videoListItemSelector,
+} from '@services/store/videos/Selectors';
+
+let defaultPerfVidUrl =
+  'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
 
 type Props = {
   event: TEventContainer;
@@ -35,6 +44,13 @@ const General: React.FC<Props> = ({
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
+  const dispatch = useDispatch();
+  let selectedVideoId = useRef('');
+  const videoListItem: TEventVideo = useSelector(
+    videoListItemSelector(selectedVideoId.current),
+  );
+  const videoList: Array<TEventVideo> = useSelector(videoListSelector);
+
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
       /(<([^>]+)>)/gi,
@@ -51,6 +67,26 @@ const General: React.FC<Props> = ({
     ['vs_background', '0', 'vs_background_image', 'url'],
     '',
   );
+
+  const videos = get(event.data, 'vs_videos', []);
+  const unbrokenVideos = videos.filter(({ video }) => !video.isBroken);
+  const perfVids = videoList.filter(
+    videoListVideo =>
+      unbrokenVideos.find(({ video }) => video.id === videoListVideo.id) !==
+        undefined && videoListVideo.video_type === 'performance',
+  );
+
+  let perfVidURL = '';
+  // We will receive a list, but there will only be one performance in the live
+  // environment, so we can just take the first item.
+  if (perfVids.length && perfVids[0].performanceVideoURL === '') {
+    dispatch(getPerformanceVideoURL(perfVids[0].id));
+    selectedVideoId.current = perfVids[0].id;
+  }
+
+  if (videoListItem && videoListItem.performanceVideoURL !== '') {
+    perfVidURL = videoListItem.performanceVideoURL;
+  }
 
   const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
@@ -79,15 +115,16 @@ const General: React.FC<Props> = ({
           key: 'WatchNow',
           text: 'Watch now',
           hasTVPreferredFocus: true,
-          onPress: () =>
+          onPress: () => {
             showPlayer({
               videoId: event.id,
-              url: 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8',
+              url: perfVidURL,
               title,
               poster:
                 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
               subtitle: title,
-            }),
+            });
+          },
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },

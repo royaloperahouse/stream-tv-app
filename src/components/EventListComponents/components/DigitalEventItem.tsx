@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { TEventContainer } from '@services/types/models';
+import { TEventContainer, TEventVideo } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
@@ -54,7 +54,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           styleFocused={styles.imageContainerActive}
           style={styles.imageContainer}
           onFocus={() => {
-            ref?.current?.setDigigtalEvent(event);
+            ref?.current?.setDigitalEvent(event);
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
