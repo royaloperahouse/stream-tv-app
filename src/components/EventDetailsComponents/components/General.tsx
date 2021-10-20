@@ -115,9 +115,7 @@ const General: React.FC<Props> = ({
           {
             showPlayer({
               videoId: event.id,
-              url: perfVidURL !== '' ? 
-                perfVidURL :
-                defaultPerfVidUrl,
+              url: perfVidURL,
               title,
               poster:
                 'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
