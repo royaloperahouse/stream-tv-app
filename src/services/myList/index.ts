@@ -84,7 +84,7 @@ export const getMyList = async (): Promise<Array<string>> => {
       : JSON.parse(savedMyList);
     return parsedMyList;
   } catch (error) {
-    logError('Something went wromg with getting MyList', error);
+    logError('Something went wrong with getting MyList', error);
     return [];
   }
 };

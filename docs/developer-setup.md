@@ -137,3 +137,5 @@ There are also many full-featured feature flag services available such as [flags
      * updates every 30 mins
      * continues throughout app lifetime
      * fetches new content 
+
+Please note that we fetch a list of videos from Prismic in `store\videos\Sagas.ts`(`getVideoListLoopWorker()`). This list is filtered first by selecting videos from the Events store and selecting those with `isBroken` set to false, then further cross-referenced to the fetched list of videos filtered on video_type "performance". (In `General.tsx`). This result will be an array. In production the array should only contain one "performance" video, so we fetch the first element. There may be extra "performance" videos in the staging environment however.
