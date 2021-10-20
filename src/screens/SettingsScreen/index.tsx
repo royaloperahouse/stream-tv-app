@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions, FlatList } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
@@ -13,10 +13,12 @@ import {
   marginRightWithOutFocus,
   marginLeftStop,
 } from '@configs/navMenuConfig';
+import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
 
 type TSettingsScreenProps = {};
 const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   const [activeContentKey, setActiveContentKey] = useState<string>('');
+  const activeItemRef = useRef<TTouchableHighlightWrapperRef>();
   const contentFactory = (contentKey: string) => {
     if (
       !contentKey ||
@@ -39,15 +41,20 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <SettingsNavMenuItem
+                isActive={item.key === activeContentKey}
                 title={item.navMenuItemTitle}
                 canMoveDown={index !== collectionOfSettingsSections.length - 1}
                 canMoveUp={index !== 0}
+                onFocus={touchableRef => {
+                  activeItemRef.current = touchableRef.current;
+                  setActiveContentKey(item.key);
+                }}
               />
             )}
           />
         </View>
-        <View>
-          <Content />
+        <View style={styles.contentContainer}>
+          <Content listItemGetNode={activeItemRef.current?.getNode} />
         </View>
       </View>
     </View>
@@ -77,6 +84,9 @@ const styles = StyleSheet.create({
     width:
       Dimensions.get('window').width -
       (widthWithOutFocus + marginRightWithOutFocus + marginLeftStop),
+  },
+  contentContainer: {
+    flex: 1,
   },
 });
 

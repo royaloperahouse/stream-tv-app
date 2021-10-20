@@ -1,37 +1,51 @@
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 type TSettingsNavMenuItemProps = {
   title: string;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  onFocus: (
+    ref: React.MutableRefObject<TTouchableHighlightWrapperRef | undefined>,
+  ) => void;
+  isActive: boolean;
+  hasTVPreferredFocus?: boolean;
 };
 const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
-  const { title, canMoveUp, canMoveDown } = props;
-  const [hasFocus, setHasFocus] = useState(false);
-
+  const {
+    title,
+    canMoveUp,
+    canMoveDown,
+    onFocus,
+    isActive,
+    hasTVPreferredFocus,
+  } = props;
+  const touchableRef = useRef<TTouchableHighlightWrapperRef>();
   const focusHandler = () => {
-    setHasFocus(true);
-  };
-
-  const blurHandler = () => {
-    setHasFocus(false);
+    if (typeof onFocus === 'function') {
+      onFocus(touchableRef);
+    }
   };
 
   return (
     <TouchableHighlightWrapper
+      ref={touchableRef}
       onFocus={focusHandler}
-      onBlur={blurHandler}
       canMoveUp={canMoveUp}
       canMoveDown={canMoveDown}
-      style={styles.muButtonInActive}
-      styleFocused={styles.menuButtonActive}>
+      hasTVPreferredFocus={hasTVPreferredFocus}
+      style={styles.menuButtonInActive}
+      styleBlured={isActive ? styles.menuButtonActiveWithoutFocus : undefined}
+      styleFocused={styles.menuButtonActiveWithFocus}>
       <View style={styles.root}>
-        <RohText style={hasFocus ? styles.buttonTitle : styles.inActiveTitle}>
+        <RohText
+          style={[styles.buttonTitle, isActive ? {} : styles.inActiveTitle]}>
           {title}
         </RohText>
       </View>
@@ -47,15 +61,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: scaleSize(25),
   },
-  menuButtonActive: {
+  menuButtonActiveWithFocus: {
     backgroundColor: Colors.streamPrimary,
     paddingLeft: scaleSize(20),
   },
-  menuButtonBlur: {
-    backgroundColor: Colors.midGrey,
+  menuButtonActiveWithoutFocus: {
+    //backgroundColor: Colors.tVMidGrey,
     paddingLeft: scaleSize(20),
   },
-  muButtonInActive: {
+  menuButtonInActive: {
     paddingLeft: scaleSize(25),
   },
   buttonTitle: {
