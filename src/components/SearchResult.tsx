@@ -246,6 +246,7 @@ const styles = StyleSheet.create({
   imageStyle: {
     width: scaleSize(358),
     height: scaleSize(200),
+    zIndex: 0
   },
   itemTextDescriptionContainer: {
     height: '100%',
