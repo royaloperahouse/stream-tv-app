@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
+import { Colors } from '@themes/Styleguide';
 
 type DigitalEventItemProps = {
   event: TEventContainer;
@@ -95,11 +96,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: scaleSize(377),
     height: scaleSize(220),
-    backgroundColor: '#6990ce',
+    backgroundColor: Colors.defaultBlue
   },
   image: {
     width: scaleSize(357),
     height: scaleSize(200),
+    zIndex: 0
   },
 });
 
