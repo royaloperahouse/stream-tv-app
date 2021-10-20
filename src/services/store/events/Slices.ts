@@ -151,6 +151,7 @@ const eventsSlice = createSlice({
       state.searchQueryString = { ...initialState }.searchQueryString;
     },
     saveSearchResultQuery: state => state,
+    clearEventState: () => ({ ...initialState }),
   },
 });
 
@@ -162,6 +163,7 @@ export const {
   clearSearchQuery,
   setFullSearchQuery,
   saveSearchResultQuery,
+  clearEventState,
 } = eventsSlice.actions;
 
 export const { reducer, name } = eventsSlice;

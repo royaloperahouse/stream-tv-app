@@ -1,9 +1,11 @@
+import { SignOut } from '@components/SettingsComponents';
+
 export const settingsTitle = 'SETTINGS';
 
 export type TSettingsSection = {
   key: string;
   navMenuItemTitle: string;
-  ContentComponent: React.FC<any>;
+  ContentComponent: React.FC<{ listItemGetNode?: () => number }>;
 };
 
 export const settingsSectionsConfig: {
@@ -17,7 +19,7 @@ export const settingsSectionsConfig: {
   signOut: {
     key: 'signOut',
     navMenuItemTitle: 'SIGN OUT',
-    ContentComponent: () => null,
+    ContentComponent: SignOut,
   },
 };
 

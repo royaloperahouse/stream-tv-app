@@ -23,7 +23,12 @@ type TTouchableHighlightWrapperProps = TouchableHighlightProps & {
   canMoveRight?: boolean;
   canMoveDown?: boolean;
   styleFocused?: TouchableHighlightProps['style'];
+  styleBlured?: TouchableHighlightProps['style'];
   children: React.ReactNode;
+  nextFocusLeft?: number;
+  nextFocusUp?: number;
+  nextFocusRight?: number;
+  nextFocusDown?: number;
 };
 
 export type TTouchableHighlightWrapperRef = {
@@ -47,6 +52,7 @@ const TouchableHighlightWrapper = forwardRef<
     onPress,
     style = {},
     accessible = true,
+    styleBlured = {},
     ...restProps
   } = props;
   const [focused, setFocused] = useState(false);
@@ -135,7 +141,7 @@ const TouchableHighlightWrapper = forwardRef<
       ref={touchableHighlightRef}
       onFocus={onFocusHandler}
       onBlur={onBlurHandler}
-      style={[style, focused && styleFocused]}>
+      style={[style, focused ? styleFocused : styleBlured]}>
       {children}
     </TouchableHighlight>
   );

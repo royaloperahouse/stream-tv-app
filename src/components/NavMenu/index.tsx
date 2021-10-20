@@ -12,7 +12,6 @@ import {
   Dimensions,
   TouchableHighlight,
   Animated,
-  View,
 } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import NavMenuItem from '@components/NavMenu/components/NavMenuItem';
@@ -37,9 +36,7 @@ import {
   marginLeftStop,
   marginRightInvisble,
 } from '@configs/navMenuConfig';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
-import RohText from '@components/RohText';
-import { Colors } from '@themes/Styleguide';
+
 type TNavMenuProps = {
   navMenuConfig: Array<{
     navMenuScreenName: TRoute['navMenuScreenName'];
