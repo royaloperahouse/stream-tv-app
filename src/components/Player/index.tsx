@@ -346,7 +346,6 @@ const Player: React.FC<TPlayerProps> = props => {
       controlRef.current.controlFadeIn();
     }
   }, [playerReady, autoPlay]);
-  console.log('url!!!!! is ', configuration.url);
   return (
     <SafeAreaView style={styles.defaultPlayerStyle}>
       <NativeBitMovinPlayer
@@ -372,7 +371,7 @@ const Player: React.FC<TPlayerProps> = props => {
         autoPlay={autoPlay}
       />
       {configuration.url === '' && 
-        <RohText style={styles.textDescription}>Video not available</RohText>
+        <RohText style={styles.textDescription}>Video not provided</RohText>
       }
     </SafeAreaView>
   );
