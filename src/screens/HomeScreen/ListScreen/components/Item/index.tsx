@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: scaleSize(377),
     height: scaleSize(220),
-    backgroundColor: Colors.defaultBlue,
   },
   image: {
     width: scaleSize(357),

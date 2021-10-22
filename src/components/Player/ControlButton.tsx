@@ -92,11 +92,9 @@ const styles = StyleSheet.create({
   },
   buttonActive: {
     flexDirection: 'row',
-    backgroundColor: Colors.defaultBlue,
   },
   buttonActiveWithPadding: {
     flexDirection: 'row',
-    backgroundColor: Colors.defaultBlue,
     paddingLeft: scaleSize(30),
     paddingRight: scaleSize(30),
   },

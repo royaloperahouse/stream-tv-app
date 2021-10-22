@@ -64,7 +64,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonActive: {
-    backgroundColor: Colors.defaultBlue,
     paddingLeft: scaleSize(30),
     opacity: 1,
   },

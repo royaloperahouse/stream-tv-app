@@ -50,7 +50,7 @@ const Button = forwardRef<any, TButtonProps>(
         underlayColor={Colors.defaultBlue}
         ref={ref}
         style={[styles.touchContainer, style]}
-        styleFocused={[styleFocused, styles.styleFocused]}
+        styleFocused={styleFocused}
         {...restProps}
         hasTVPreferredFocus={hasTVPreferredFocus}
         onFocus={() => {
@@ -83,9 +83,6 @@ const styles = StyleSheet.create({
     fontSize: scaleSize(38),
     lineHeight: scaleSize(44),
     letterSpacing: scaleSize(1),
-  },
-  styleFocused: {
-    backgroundColor: Colors.defaultBlue,
   },
 });
 

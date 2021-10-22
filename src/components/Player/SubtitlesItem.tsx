@@ -42,7 +42,6 @@ const SubbtitlesItem = forwardRef<any, Props>((props, ref) => {
       underlayColor={Colors.subtitlesActiveBackground}
       ref={ref}
       style={styles.subtitleItemContainer}
-      styleFocused={styles.styleFocused}
       hasTVPreferredFocus={hasTVPreferredFocus}
       onFocus={onFocusHandler}
       canMoveLeft={false}
@@ -90,9 +89,6 @@ const styles = StyleSheet.create({
     fontSize: scaleSize(24),
     lineHeight: scaleSize(30),
     opacity: 0.7,
-  },
-  styleFocused: {
-    backgroundColor: Colors.subtitlesActiveBackground,
   },
 });
 
