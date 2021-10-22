@@ -286,9 +286,9 @@ PODS:
     - React-Core
   - RNCMaskedView (0.2.6):
     - React-Core
-  - RNDeviceInfo (8.3.1):
+  - RNDeviceInfo (8.3.3):
     - React-Core
-  - RNFastImage (8.5.4):
+  - RNFastImage (8.5.8):
     - React-Core
     - SDWebImage (~> 5.11.1)
     - SDWebImageWebPCoder (~> 0.8.4)
@@ -507,8 +507,8 @@ SPEC CHECKSUMS:
   ReactCommon: d8af14f3e586d78c8e8443e32fedb4c2eb745402
   RNCAsyncStorage: e8b8d6320a0dd90eb610fb0d0b1ef90596697c69
   RNCMaskedView: c298b644a10c0c142055b3ae24d83879ecb13ccd
-  RNDeviceInfo: 7b82d1467b87f7e74d1c7ba9439a9a57d0c68ee9
-  RNFastImage: fabf8a5a75c6425cc16ee420167a8e827861d52b
+  RNDeviceInfo: cc7de0772378f85d8f36ae439df20f05c590a651
+  RNFastImage: adef7f9c9a7aeca0141807ee5a8be8a3eb240dd8
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNReanimated: 514a11da3a2bcc6c3dfd9de32b38e2b9bf101926
   RNScreens: 2a71d74b4e530f051f5684c8111d7591176722cf
@@ -522,4 +522,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 0ea27eab541a78b1f14fcc554e7c2ae84208e9ec
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2
