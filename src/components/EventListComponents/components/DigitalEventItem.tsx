@@ -49,6 +49,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     return (
       <View style={styles.container}>
         <TouchableHighlightWrapper
+          underlayColor={Colors.defaultBlue}
           hasTVPreferredFocus={hasTVPreferredFocus}
           canMoveUp={canMoveUp}
           canMoveRight={canMoveRight}
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: scaleSize(377),
     height: scaleSize(220),
-    backgroundColor: Colors.defaultBlue
+    backgroundColor: Colors.defaultBlue,
   },
   image: {
     width: scaleSize(357),

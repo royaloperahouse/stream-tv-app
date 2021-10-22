@@ -39,6 +39,7 @@ const SubbtitlesItem = forwardRef<any, Props>((props, ref) => {
   };
   return (
     <TouchableHighlightWrapper
+      underlayColor={Colors.subtitlesActiveBackground}
       ref={ref}
       style={styles.subtitleItemContainer}
       styleFocused={styles.styleFocused}

@@ -11,6 +11,7 @@ import { Colors, Images } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import { startLoginLoop } from '@services/store/auth/Slices';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type TIntroScreenProps = {};
 
@@ -35,6 +36,7 @@ const IntroScreen: React.FC<TIntroScreenProps> = () => {
           </RohText>
         </View>
         <TouchableHighlight
+          underlayColor={Colors.defaultBlue}
           onPress={getStarted}
           style={styles.button}
           hasTVPreferredFocus>

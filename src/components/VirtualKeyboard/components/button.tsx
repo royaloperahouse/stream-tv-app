@@ -47,6 +47,7 @@ const Button = forwardRef<any, TButtonProps>(
     };
     return (
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         ref={ref}
         style={[styles.touchContainer, style]}
         styleFocused={[styleFocused, styles.styleFocused]}

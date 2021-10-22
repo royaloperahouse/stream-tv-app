@@ -90,6 +90,7 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   return (
     <View style={styles.itemContainer}>
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         onPress={touchableHandler}
         styleFocused={styles.itemImageContainerActive}
         onBlur={toggleFocus}
@@ -210,6 +211,7 @@ const PreviousSearchListItemComponent: React.FC<TPreviousSearchListItemComponent
       <View style={styles.searchesResultItemContainer}>
         <View>
           <TouchableHighlightWrapper
+            underlayColor={Colors.defaultBlue}
             onPress={onPressHandler}
             canMoveUp={canMoveUp}
             style={styles.searchesResultItemWrapperContainer}
