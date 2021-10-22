@@ -139,3 +139,6 @@ There are also many full-featured feature flag services available such as [flags
      * fetches new content 
 
 Please note that we fetch a list of videos from Prismic in `store\videos\Sagas.ts`(`getVideoListLoopWorker()`). This list is filtered first by selecting videos from the Events store and selecting those with `isBroken` set to false, then further cross-referenced to the fetched list of videos filtered on video_type "performance". (In `General.tsx`). This result will be an array. In production the array should only contain one "performance" video, so we fetch the first element. There may be extra "performance" videos in the staging environment however.
+
+NB: There is currently an issue with sizing of images in FastImage when running react-native-tvos (as opposed to the standard react-native repo, which doesn't exhibit the issue). To work around it,
+add a style of `zindex: 0` to your FastImage component instance. See [here](https://github.com/react-native-tvos/react-native-tvos/issues/226).
