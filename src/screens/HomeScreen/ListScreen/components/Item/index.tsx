@@ -5,6 +5,7 @@ import { EventModel } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import { useRef } from 'react';
+import { Colors } from '@themes/Styleguide';
 type Props = {
   event: EventModel;
   selectEvent: (event: EventModel) => void;
@@ -23,6 +24,7 @@ const Item: React.FC<Props> = ({
   return (
     <View style={styles.container}>
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         hasTVPreferredFocus={hasTVPreferredFocus}
         canMoveUp={canMoveUp}
         styleFocused={styles.imageContainerActive}
@@ -64,7 +66,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: scaleSize(377),
     height: scaleSize(220),
-    backgroundColor: '#6990ce',
   },
   image: {
     width: scaleSize(357),

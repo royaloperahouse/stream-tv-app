@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   snapshotContainer: {
     width: scaleSize(975),
     height: Dimensions.get('window').height,
+    zIndex: 0,
   },
   pageTitle: {
     color: 'white',
