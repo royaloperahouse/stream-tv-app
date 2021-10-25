@@ -14,7 +14,7 @@ import FastImage from 'react-native-fast-image';
 import { Colors } from '@themes/Styleguide';
 
 export type TPreviewRef = {
-  setDigigtalEvent?: (digitalEvent: TEventContainer) => void;
+  setDigitalEvent?: (digitalEvent: TEventContainer) => void;
 };
 
 type TPreviewProps = {};
@@ -26,7 +26,7 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   useImperativeHandle(
     ref,
     () => ({
-      setDigigtalEvent: (digitalEvent: TEventContainer) => {
+      setDigitalEvent: (digitalEvent: TEventContainer) => {
         if (mountedRef.current) {
           setEvent(digitalEvent.data);
         }
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   previewImage: {
     width: scaleSize(975),
     height: scaleSize(600),
+    zIndex: 0,
   },
 });
 

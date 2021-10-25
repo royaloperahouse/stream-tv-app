@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { TEventContainer } from '@services/types/models';
+import { TEventContainer, TEventVideo } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
+import { Colors } from '@themes/Styleguide';
 
 type DigitalEventItemProps = {
   event: TEventContainer;
@@ -48,13 +49,14 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     return (
       <View style={styles.container}>
         <TouchableHighlightWrapper
+          underlayColor={Colors.defaultBlue}
           hasTVPreferredFocus={hasTVPreferredFocus}
           canMoveUp={canMoveUp}
           canMoveRight={canMoveRight}
           styleFocused={styles.imageContainerActive}
           style={styles.imageContainer}
           onFocus={() => {
-            ref?.current?.setDigigtalEvent(event);
+            ref?.current?.setDigitalEvent(event);
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
@@ -95,11 +97,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: scaleSize(377),
     height: scaleSize(220),
-    backgroundColor: '#6990ce',
   },
   image: {
     width: scaleSize(357),
     height: scaleSize(200),
+    zIndex: 0
   },
 });
 

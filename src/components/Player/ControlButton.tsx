@@ -6,6 +6,7 @@ import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import { Colors } from '@themes/Styleguide';
 
 type Props = {
   icon: any;
@@ -51,6 +52,7 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         ref={ref}
         style={styles.button}
         styleFocused={
@@ -90,11 +92,9 @@ const styles = StyleSheet.create({
   },
   buttonActive: {
     flexDirection: 'row',
-    backgroundColor: '#6990ce',
   },
   buttonActiveWithPadding: {
     flexDirection: 'row',
-    backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),
     paddingRight: scaleSize(30),
   },

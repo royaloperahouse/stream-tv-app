@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import { Colors } from '@themes/Styleguide';
 
 type Props = {
   Icon: any;
@@ -22,6 +23,7 @@ const ExpandableButton: React.FC<Props> = ({
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         canMoveRight={false}
         hasTVPreferredFocus={hasTVPreferredFocus}
         style={styles.button}
@@ -62,7 +64,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonActive: {
-    backgroundColor: '#6990ce',
     paddingLeft: scaleSize(30),
     opacity: 1,
   },

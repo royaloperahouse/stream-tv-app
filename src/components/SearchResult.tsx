@@ -90,8 +90,8 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   return (
     <View style={styles.itemContainer}>
       <TouchableHighlightWrapper
+        underlayColor={Colors.defaultBlue}
         onPress={touchableHandler}
-        styleFocused={styles.itemImageContainerActive}
         onBlur={toggleFocus}
         onFocus={focusHandler}
         canMoveUp={canMoveUp}
@@ -210,6 +210,7 @@ const PreviousSearchListItemComponent: React.FC<TPreviousSearchListItemComponent
       <View style={styles.searchesResultItemContainer}>
         <View>
           <TouchableHighlightWrapper
+            underlayColor={Colors.defaultBlue}
             onPress={onPressHandler}
             canMoveUp={canMoveUp}
             style={styles.searchesResultItemWrapperContainer}
@@ -240,12 +241,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  itemImageContainerActive: {
-    backgroundColor: Colors.defaultBlue,
-  },
   imageStyle: {
     width: scaleSize(358),
     height: scaleSize(200),
+    zIndex: 0
   },
   itemTextDescriptionContainer: {
     height: '100%',
@@ -292,7 +291,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   searchesResultItemWrapperActive: {
-    backgroundColor: Colors.defaultBlue,
     paddingHorizontal: scaleSize(25),
     opacity: 1,
   },

@@ -70,4 +70,19 @@ export const getDigitalEventDetails = (
     queryOptions: queryObj.queryOptions,
   });
 
+  export const getVideoDetails = (
+    queryObj: TQueryObj = {},
+  ): Promise<ApiSearchResponse> =>
+    commonQuery({
+      queryPredicates: [
+        Prismic.Predicates.at('document.type', documentTypes.digitalEventVideo),
+        ...[
+          ...(Array.isArray(queryObj.queryPredicates)
+            ? queryObj.queryPredicates
+            : []),
+        ],
+      ],
+      queryOptions: queryObj.queryOptions,
+    });
+
 export default prismicApiClient;

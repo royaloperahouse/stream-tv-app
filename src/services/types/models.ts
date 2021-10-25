@@ -72,7 +72,9 @@ export type TVSTitle = {
 
 export type TVSVideo = {
   video: {
+    id: string;
     link_type: string;
+    isBroken: boolean;
   };
 };
 
@@ -196,4 +198,10 @@ export type TBitMovinPlayerSavedPosition = {
   id: string;
   position: string;
   eventId?: string;
+};
+
+export type TEventVideo = {
+  id: string;
+  video_type: 'performance' | 'trailer' | 'behind_the_scenes';
+  performanceVideoURL: string;
 };
