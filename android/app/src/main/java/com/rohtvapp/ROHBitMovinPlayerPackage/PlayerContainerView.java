@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
+import com.bitmovin.analytics.BitmovinAnalyticsConfig;
+import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
 import com.bitmovin.player.PlayerView;
 import com.bitmovin.player.SubtitleView;
 import com.bitmovin.player.api.Player;
@@ -20,6 +22,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.rohtvapp.R;
 
 import java.util.List;
@@ -37,9 +40,10 @@ public class PlayerContainerView extends RelativeLayout {
     private double duration = 0.0;
     private boolean mustAutoPlay = false;
 
-    public PlayerContainerView(Context context) {
+    public PlayerContainerView(ThemedReactContext context) {
         super(context);
         this.context = context;
+        this.init();
     }
 
     public void init() {
@@ -66,10 +70,6 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(PlayerEvent.Ready.class, this::onReady);
         player.on(SourceEvent.Error.class, this::onError);
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
-    }
-
-    private void configure(Source source) {
-        player.load(source);
 
         RelativeLayout playerContainer = findViewById(R.id.player_container);
 
@@ -84,6 +84,23 @@ public class PlayerContainerView extends RelativeLayout {
         // Add the PlayerView to the layout as first position (so it is the behind the SubtitleView)
         playerContainer.addView(playerView, 0);
         player.setVolume(100);
+    }
+
+    public void configure(Source source) {
+        player.load(source);
+    }
+
+    public void setAutoPlay(Boolean autoplay) {
+        mustAutoPlay = autoplay;
+    }
+
+    public void setAnalytics(BitmovinAnalyticsConfig bitmovinAnalyticsConfig, ThemedReactContext reactContext) {
+        BitmovinPlayerCollector analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, reactContext);
+        analyticsCollector.attachPlayer(player);
+    }
+
+    public PlayerView getPlayerView() {
+        return playerView;
     }
 
     private void onPlay(PlayerEvent.Playing event) {
