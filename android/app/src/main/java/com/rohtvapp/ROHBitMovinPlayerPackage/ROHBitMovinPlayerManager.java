@@ -4,8 +4,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ApplicationInfo;
 
 import android.util.Log;
-import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
 import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
@@ -38,10 +36,6 @@ import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-import org.json.JSONObject;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
 
 public class ROHBitMovinPlayerManager extends SimpleViewManager<PlayerContainerView> {

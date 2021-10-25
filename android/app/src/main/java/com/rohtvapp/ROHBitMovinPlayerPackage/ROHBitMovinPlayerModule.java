@@ -8,14 +8,6 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.bridge.WritableNativeArray;
-import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
-import java.util.List;
-import java.util.ArrayList;
 
 public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
