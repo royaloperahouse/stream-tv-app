@@ -8,14 +8,6 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.bridge.WritableNativeArray;
-import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
-import java.util.List;
-import java.util.ArrayList;
 
 public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
@@ -34,10 +26,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void play(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
-    if (playerView instanceof PlayerView) {
-      if (((PlayerView) playerView).getPlayer().getCurrentTime() < ((PlayerView) playerView).getPlayer().getDuration()) {
-        ((PlayerView) playerView).getPlayer().play();
+    View playerContainerView = getCurrentActivity().findViewById(tag);
+    if (playerContainerView instanceof PlayerContainerView) {
+      if (((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().getCurrentTime() < ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().getDuration()) {
+        ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().play();
       }
     } else {
       throw new ClassCastException(String.format("Cannot play: view with tag #%d is not a ROHBitMovinPlayer", tag));
@@ -46,10 +38,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void pause(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().pause();
+    if (playerContainerView instanceof PlayerContainerView) {
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().pause();
     } else {
       throw new ClassCastException(String.format("Cannot pause: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
@@ -57,10 +49,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void seek(int tag, double time) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().seek(time);
+    if (playerContainerView instanceof PlayerContainerView) {
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().seek(time);
     } else {
       throw new ClassCastException(String.format("Cannot seek: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
@@ -68,10 +60,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getCurrentTime(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      double currentTime = ((PlayerView) playerView).getPlayer().getCurrentTime();
+    if (playerContainerView instanceof PlayerContainerView) {
+      double currentTime = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().getCurrentTime();
 
       promise.resolve(currentTime);
     } else {
@@ -81,10 +73,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getDuration(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      double duration = ((PlayerView) playerView).getPlayer().getDuration();
+    if (playerContainerView instanceof PlayerContainerView) {
+      double duration = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().getDuration();
 
       promise.resolve(duration);
     } else {
@@ -94,10 +86,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isMuted(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      boolean isMuted = ((PlayerView) playerView).getPlayer().isMuted();
+    if (playerContainerView instanceof PlayerContainerView) {
+      boolean isMuted = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().isMuted();
 
       promise.resolve(isMuted);
     } else {
@@ -107,10 +99,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isPaused(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      boolean isPaused = ((PlayerView) playerView).getPlayer().isPaused();
+    if (playerContainerView instanceof PlayerContainerView) {
+      boolean isPaused = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().isPaused();
 
       promise.resolve(isPaused);
     } else {
@@ -120,10 +112,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isStalled(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      boolean isStalled = ((PlayerView) playerView).getPlayer().isStalled();
+    if (playerContainerView instanceof PlayerContainerView) {
+      boolean isStalled = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().isStalled();
 
       promise.resolve(isStalled);
     } else {
@@ -133,10 +125,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isPlaying(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      boolean isPlaying = ((PlayerView) playerView).getPlayer().isPlaying();
+    if (playerContainerView instanceof PlayerContainerView) {
+      boolean isPlaying = ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().isPlaying();
 
       promise.resolve(isPlaying);
     } else {
@@ -146,21 +138,21 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void destroy(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().destroy();
+    if (playerContainerView instanceof PlayerContainerView) {
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().destroy();
     } else {
       throw new ClassCastException(String.format("Cannot destroy: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
   }
   @ReactMethod
   public void restart(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().seek(0.0);
-      ((PlayerView) playerView).getPlayer().play();
+    if (playerContainerView instanceof PlayerContainerView) {
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().seek(0.0);
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().play();
     } else {
       throw new ClassCastException(String.format("Cannot seek: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }
@@ -168,10 +160,10 @@ public class ROHBitMovinPlayerModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void setSubtitle(int tag, String trackId) {
-    View playerView = getCurrentActivity().findViewById(tag);
+    View playerContainerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof PlayerView) {
-      ((PlayerView) playerView).getPlayer().setSubtitle(trackId);
+    if (playerContainerView instanceof PlayerContainerView) {
+      ((PlayerContainerView) playerContainerView).getPlayerView().getPlayer().setSubtitle(trackId);
     } else {
       throw new ClassCastException(String.format("Cannot setSubtitle: view with tag #%d is not a ROHBitMovinPlayer", tag));
     }

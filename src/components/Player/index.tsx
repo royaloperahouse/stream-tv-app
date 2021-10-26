@@ -145,7 +145,7 @@ const Player: React.FC<TPlayerProps> = props => {
   };
 
   const onPause: TCallbackFunc = _ => {
-    console.log('pouse');
+    console.log('pause');
     if (typeof controlRef.current?.setPlay === 'function') {
       controlRef.current.setPlay(false);
     }
