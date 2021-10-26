@@ -22,13 +22,15 @@ type TTouchableHighlightWrapperProps = TouchableHighlightProps & {
   canMoveLeft?: boolean;
   canMoveRight?: boolean;
   canMoveDown?: boolean;
-  styleFocused?: TouchableHighlightProps['style'];
+  styleFocused?: { [key: string]: any };
   styleBlured?: TouchableHighlightProps['style'];
   children: React.ReactNode;
   nextFocusLeft?: number;
   nextFocusUp?: number;
   nextFocusRight?: number;
   nextFocusDown?: number;
+  canCollapseNavMenu?: boolean;
+  style?: { [key: string]: any } | Array<{ [key: string]: any }>;
 };
 
 export type TTouchableHighlightWrapperRef = {
@@ -53,6 +55,8 @@ const TouchableHighlightWrapper = forwardRef<
     style = {},
     accessible = true,
     styleBlured = {},
+    canCollapseNavMenu = true,
+    underlayColor,
     ...restProps
   } = props;
   const [focused, setFocused] = useState(false);
@@ -97,13 +101,15 @@ const TouchableHighlightWrapper = forwardRef<
   }
   const onFocusHandler = useCallback(
     (event: NativeSyntheticEvent<TargetedEvent>): void => {
-      navMenuManager.setNavMenuBlur();
+      if (canCollapseNavMenu) {
+        navMenuManager.setNavMenuBlur();
+      }
       setFocused(true);
       if (typeof onFocus === 'function') {
         onFocus(event);
       }
     },
-    [onFocus],
+    [onFocus, canCollapseNavMenu],
   );
 
   const onBlurHandler = useCallback(
@@ -132,6 +138,28 @@ const TouchableHighlightWrapper = forwardRef<
     },
     [onPress],
   );
+
+  const underlayColorFromStyle = style
+    ? Array.isArray(style)
+      ? style.reduce<undefined | string>((acc, styleObj) => {
+          if (styleObj.backgroundColor) {
+            acc = styleObj.backgroundColor;
+          }
+          return acc;
+        }, undefined)
+      : style.backgroundColor
+    : undefined;
+
+  const underlayColorFromStyleFocused = styleFocused
+    ? Array.isArray(styleFocused)
+      ? styleFocused.reduce<undefined | string>((acc, styleObj) => {
+          if (styleObj.backgroundColor) {
+            acc = styleObj.backgroundColor;
+          }
+          return acc;
+        }, undefined)
+      : styleFocused.backgroundColor
+    : undefined;
   return (
     <TouchableHighlight
       {...restProps}
@@ -141,6 +169,12 @@ const TouchableHighlightWrapper = forwardRef<
       ref={touchableHighlightRef}
       onFocus={onFocusHandler}
       onBlur={onBlurHandler}
+      underlayColor={
+        underlayColorFromStyleFocused ||
+        underlayColorFromStyle ||
+        underlayColor ||
+        'transperent'
+      }
       style={[style, focused ? styleFocused : styleBlured]}>
       {children}
     </TouchableHighlight>

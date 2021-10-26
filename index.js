@@ -11,5 +11,7 @@ if (!__DEV__) {
 }
 
 // TODO - remove when persistent storage issues is solved on tvOS!
-LogBox.ignoreLogs(['Persistent storage is not supported on tvOS, your data may be removed at any point.']);
+LogBox.ignoreLogs([
+  'Persistent storage is not supported on tvOS, your data may be removed at any point.',
+]);
 AppRegistry.registerComponent(appName, () => App);

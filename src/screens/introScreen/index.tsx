@@ -11,7 +11,7 @@ import { Colors, Images } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import { startLoginLoop } from '@services/store/auth/Slices';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 
 type TIntroScreenProps = {};
 
@@ -35,13 +35,13 @@ const IntroScreen: React.FC<TIntroScreenProps> = () => {
             library of opera and ballet
           </RohText>
         </View>
-        <TouchableHighlight
-          underlayColor={Colors.defaultBlue}
+        <TouchableHighlightWrapper
           onPress={getStarted}
           style={styles.button}
+          canCollapseNavMenu={false}
           hasTVPreferredFocus>
           <RohText style={styles.buttonText}>Get started</RohText>
-        </TouchableHighlight>
+        </TouchableHighlightWrapper>
       </View>
     </ImageBackground>
   );

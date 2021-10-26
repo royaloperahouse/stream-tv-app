@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, StyleSheet, Dimensions, BackHandler } from 'react-native';
 import { navMenuManager } from '@components/NavMenu';
 import { scaleSize } from '@utils/scaleSize';
 import { useNavigation } from '@react-navigation/native';
 import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
-import { useAndroidBackHandler } from 'react-navigation-backhandler';
+import { globalModalManager } from '@components/GlobalModal';
+
 type TGoBackProps = {};
 
 const GoBack: React.FC<TGoBackProps> = () => {
@@ -16,10 +17,23 @@ const GoBack: React.FC<TGoBackProps> = () => {
       navMenuManager.showNavMenu();
     }
   };
-  useAndroidBackHandler(() => {
-    navMenuManager.showNavMenu();
-    return false;
-  });
+  useLayoutEffect(() => {
+    const handleBackButtonClick = () => {
+      if (globalModalManager.isModalOpen()) {
+        return true;
+      }
+      navMenuManager.showNavMenu();
+      return false;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, []);
+
   return (
     <TouchableHighlightWrapper
       onFocus={onFocusHandler}

@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { TEventContainer, TEventVideo } from '@services/types/models';
+import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   image: {
     width: scaleSize(357),
     height: scaleSize(200),
-    zIndex: 0
+    zIndex: 0,
   },
 });
 

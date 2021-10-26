@@ -38,6 +38,15 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
   const data: Array<{ role: string; name: string }> = Object.entries(
     listOfEvalableCasts,
   ).map(([role, name]) => ({ role, name }));
+  for (let i = 0; i < 40; i++) {
+    if (!data.length) {
+      break;
+    }
+    data.push({
+      role: data[0].role + '-' + i,
+      name: data[0].name,
+    });
+  }
 
   return (
     <View style={styles.generalContainer}>

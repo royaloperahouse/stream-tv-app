@@ -10,3 +10,6 @@ export const devicePinSelector = (store: { [key: string]: any }) =>
 export const deviceAuthenticatedErrorSelector = (store: {
   [key: string]: any;
 }) => store.auth.errorString;
+
+export const subscribedModeSelector = (store: { [key: string]: any }) =>
+  store.auth.fullSubscription;

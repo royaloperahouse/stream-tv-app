@@ -9,6 +9,7 @@ import { routes } from '@navigations/routes';
 import RohText from '@components/RohText';
 import { buildInfo } from '@configs/globalConfig';
 import { scaleSize } from '@utils/scaleSize';
+import GlobalModal from '@components/GlobalModal';
 type TMainLayoutProps = {};
 
 const MainLayout: React.FC<TMainLayoutProps> = () => {
@@ -23,23 +24,26 @@ const MainLayout: React.FC<TMainLayoutProps> = () => {
   return (
     <WithBackground>
       <WithLogo>
-        <NavigationContainer>
-          <View style={styles.root}>
-            <NavMenu navMenuConfig={navMenuConfig} />
-            <ContentLayout />
-            {__DEV__ && (
-              <View style={styles.buildInfo}>
-                <RohText
-                  bold
-                  style={styles.buildInfoText}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  {buildInfo}
-                </RohText>
-              </View>
-            )}
-          </View>
-        </NavigationContainer>
+        <View style={styles.root}>
+          <NavigationContainer>
+            <View style={styles.maninContentContainer}>
+              <NavMenu navMenuConfig={navMenuConfig} />
+              <ContentLayout />
+              {__DEV__ && (
+                <View style={styles.buildInfo}>
+                  <RohText
+                    bold
+                    style={styles.buildInfoText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail">
+                    {buildInfo}
+                  </RohText>
+                </View>
+              )}
+            </View>
+          </NavigationContainer>
+          <GlobalModal />
+        </View>
       </WithLogo>
     </WithBackground>
   );
@@ -47,6 +51,9 @@ const MainLayout: React.FC<TMainLayoutProps> = () => {
 
 const styles = StyleSheet.create({
   root: {
+    flex: 1,
+  },
+  maninContentContainer: {
     flex: 1,
     flexDirection: 'row',
   },
