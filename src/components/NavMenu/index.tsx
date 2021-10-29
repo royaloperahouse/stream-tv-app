@@ -36,6 +36,7 @@ import {
   marginLeftStop,
   marginRightInvisble,
 } from '@configs/navMenuConfig';
+
 type TNavMenuProps = {
   navMenuConfig: Array<{
     navMenuScreenName: TRoute['navMenuScreenName'];
@@ -264,42 +265,40 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           width: menuFocusInterpolate,
         },
       ]}>
-      {
-        <FlatList
-          ref={flatListRef}
-          data={navMenuConfig}
-          keyExtractor={item => item.navMenuScreenName}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          onScrollToIndexFailed={info => {
-            const wait = new Promise(resolve => setTimeout(resolve, 500));
-            wait.then(() => {
-              flatListRef.current?.scrollToIndex({
-                index: info.index !== -1 ? info.index : 0,
-                animated: false,
-              });
+      <FlatList
+        ref={flatListRef}
+        data={navMenuConfig}
+        keyExtractor={item => item.navMenuScreenName}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        onScrollToIndexFailed={info => {
+          const wait = new Promise(resolve => setTimeout(resolve, 500));
+          wait.then(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index !== -1 ? info.index : 0,
+              animated: false,
             });
-          }}
-          renderItem={({ item, index }) => (
-            <NavMenuItem
-              index={index}
-              id={item.navMenuScreenName}
-              isActive={item.navMenuScreenName === activeMenuId}
-              SvgIconActiveComponent={item.SvgIconActiveComponent}
-              SvgIconInActiveComponent={item.SvgIconInActiveComponent}
-              navMenuTitle={item.navMenuTitle}
-              onFocus={setMenuFocus}
-              onBlur={setMenuBlur}
-              isDefault={item.isDefault}
-              isLastItem={index === navMenuConfig.length - 1}
-              setActiveMunuItemRef={setActiveMunuItemRef}
-              labelOpacityValue={menuItemInterpolation}
-              iconOpacityValue={menuItemIconInterpolation}
-              isVisible={isMenuVisible && isMenuAccessible}
-            />
-          )}
-        />
-      }
+          });
+        }}
+        renderItem={({ item, index }) => (
+          <NavMenuItem
+            index={index}
+            id={item.navMenuScreenName}
+            isActive={item.navMenuScreenName === activeMenuId}
+            SvgIconActiveComponent={item.SvgIconActiveComponent}
+            SvgIconInActiveComponent={item.SvgIconInActiveComponent}
+            navMenuTitle={item.navMenuTitle}
+            onFocus={setMenuFocus}
+            onBlur={setMenuBlur}
+            isDefault={item.isDefault}
+            isLastItem={index === navMenuConfig.length - 1}
+            setActiveMunuItemRef={setActiveMunuItemRef}
+            labelOpacityValue={menuItemInterpolation}
+            iconOpacityValue={menuItemIconInterpolation}
+            isVisible={isMenuVisible && isMenuAccessible}
+          />
+        )}
+      />
     </Animated.View>
   );
 };
@@ -309,6 +308,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height - scaleSize(190),
     marginTop: scaleSize(190),
     overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
 });
 

@@ -49,6 +49,7 @@ const appSlice = createSlice({
       }
       state.isLoading = false;
     },
+    clearAuthState: () => ({ ...initialState }),
   },
 });
 
@@ -60,6 +61,7 @@ export const {
   switchOffIntroScreen,
   startLoginLoop,
   endLoginLoop,
+  clearAuthState,
 } = appSlice.actions;
 
 export const { reducer, name } = appSlice;
