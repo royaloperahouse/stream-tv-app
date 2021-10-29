@@ -1,21 +1,24 @@
 import React from 'react';
-import { ViewStyle, StyleSheet } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ViewStyle, StyleSheet, VirtualizedList } from 'react-native';
 import ExpandableButton from './ExpandableButton';
 export enum EActionButtonListType {
   common,
 }
 
+type TActionButton = {
+  text: string;
+  Icon: any;
+  onPress: (...args: Array<any>) => void;
+  onFocus: (...args: Array<any>) => void;
+  key: string;
+  hasTVPreferredFocus?: boolean;
+};
+
 type ActionButtonListProps = {
   type: EActionButtonListType;
-  buttonsFactory: (actionButtonListType: EActionButtonListType) => Array<{
-    text: string;
-    Icon: any;
-    onPress: (...args: Array<any>) => void;
-    onFocus: (...args: Array<any>) => void;
-    key: string;
-    hasTVPreferredFocus?: boolean;
-  }>;
+  buttonsFactory: (
+    actionButtonListType: EActionButtonListType,
+  ) => Array<TActionButton>;
   style?: ViewStyle;
 };
 
@@ -24,23 +27,28 @@ const ActionButtonList: React.FC<ActionButtonListProps> = ({
   buttonsFactory,
   style = {},
 }) => {
-  const data = buttonsFactory(type);
+  const buttonList = buttonsFactory(type);
   return (
-    <ScrollView
+    <VirtualizedList
+      listKey={'eventDetailsActionButtonList'}
       style={[styles.root, style]}
+      keyExtractor={(item, index) => item[index].key}
       showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}>
-      {data.map(item => (
+      showsVerticalScrollIndicator={false}
+      data={buttonList}
+      initialNumToRender={5}
+      renderItem={({ item, index }) => (
         <ExpandableButton
-          key={item.key}
-          text={item.text}
-          Icon={item.Icon}
-          hasTVPreferredFocus={item.hasTVPreferredFocus || false}
-          focusCallback={item.onFocus}
-          onPress={item.onPress}
+          text={item[index].text}
+          Icon={item[index].Icon}
+          hasTVPreferredFocus={item[index].hasTVPreferredFocus || false}
+          focusCallback={item[index].onFocus}
+          onPress={item[index].onPress}
         />
-      ))}
-    </ScrollView>
+      )}
+      getItemCount={(data: Array<TActionButton>) => data?.length || 0}
+      getItem={(data: Array<TActionButton>) => [...data]}
+    />
   );
 };
 
