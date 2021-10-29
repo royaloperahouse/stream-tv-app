@@ -45,7 +45,7 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
 
               <View style={styles.addressContainer}>
                 <RohText style={styles.regular}>Go to: </RohText>
-                <RohText style={styles.address}>ROH.ORG.UK/PIN</RohText>
+                <RohText style={styles.address}>ROH.ORG.UK/ACCOUNT/PIN</RohText>
               </View>
               <RohText style={styles.regular}>
                 Then enter the activation code when prompted
@@ -64,7 +64,7 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
               <QRCode
                 quietZone={5}
                 size={scaleSize(380)}
-                value={'https://roh.org.uk/pin?value=' + devicePin}
+                value="https://www.roh.org.uk/account/pin"
               />
             )}
           </View>
