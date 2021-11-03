@@ -6,6 +6,7 @@ import {
   Dimensions,
   VirtualizedList,
   ViewToken,
+  Platform,
 } from 'react-native';
 import { TEventContainer } from '@services/types/models';
 import collectionOfEventDetailsSections, {
@@ -34,6 +35,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   const { event } = route.params;
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
+  const [shouldShowBack, setShouldShowGoBack] = useState<boolean>(false);
   const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
     getBitMovinSavedPosition(playerItem.videoId).then(restoredItem => {
       if (!isBMPlayerShowingRef.current && eventDetailsScreenMounted.current) {
@@ -91,9 +93,11 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   useFocusEffect(
     useCallback(() => {
       eventDetailsScreenMounted.current = true;
+      setShouldShowGoBack(true);
       return () => {
         if (eventDetailsScreenMounted?.current) {
           eventDetailsScreenMounted.current = false;
+          setShouldShowGoBack(false);
         }
       };
     }, []),
@@ -129,7 +133,10 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   }
   return (
     <View style={styles.rootContainer}>
-      <GoBack />
+      {Platform.isTV &&
+        Platform.OS === 'ios' ?
+        shouldShowBack && <GoBack /> :
+        <GoBack/>}
       <VirtualizedList
         ref={VirtualizedListRef}
         style={styles.scrollView}
