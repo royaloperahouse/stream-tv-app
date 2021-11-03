@@ -1,15 +1,16 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, RefObject } from 'react';
+import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
-import { Colors } from '@themes/Styleguide';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 
 type Props = {
   Icon: any;
   text: string;
   focusCallback: () => void;
-  onPress?: (val: boolean) => void;
+  onPress?: (val?: RefObject<TouchableHighlight>) => void;
   hasTVPreferredFocus?: boolean;
 };
 
@@ -20,10 +21,11 @@ const ExpandableButton: React.FC<Props> = ({
   onPress,
   hasTVPreferredFocus = false,
 }) => {
+  const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
-        underlayColor={Colors.defaultBlue}
+        ref={buttonRef}
         canMoveRight={false}
         hasTVPreferredFocus={hasTVPreferredFocus}
         style={styles.button}
@@ -33,7 +35,11 @@ const ExpandableButton: React.FC<Props> = ({
         }}
         onPress={() => {
           if (typeof onPress === 'function') {
-            onPress(true);
+            onPress(
+              typeof buttonRef.current?.getRef === 'function'
+                ? buttonRef.current.getRef()
+                : undefined,
+            );
           }
         }}>
         <View style={styles.wrapper}>

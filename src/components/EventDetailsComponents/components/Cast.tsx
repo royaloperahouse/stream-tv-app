@@ -39,6 +39,21 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
     listOfEvalableCasts,
   ).map(([role, name]) => ({ role, name }));
 
+  /**
+  for testing multi-columns only.
+  will be useful for showing how it looks if we will have the count of items more than for three columns view
+  need to not forget to delete it in the future
+   */
+  for (let i = 0; i < 40; i++) {
+    if (!data.length) {
+      break;
+    }
+    data.push({
+      role: data[0].role + '-' + i,
+      name: data[0].name,
+    });
+  }
+  /** */
   return (
     <View style={styles.generalContainer}>
       <View style={styles.wrapper}>
