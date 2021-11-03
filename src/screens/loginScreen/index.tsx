@@ -64,7 +64,7 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
               <QRCode
                 quietZone={5}
                 size={scaleSize(380)}
-                value={`https://www.roh.org.uk/pin?pin=${devicePin}`}
+                value={`https://www.roh.org.uk/account/pin?pin=${devicePin}`}
               />
             )}
           </View>
