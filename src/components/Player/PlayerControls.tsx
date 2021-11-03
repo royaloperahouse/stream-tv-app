@@ -184,9 +184,6 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
       };
     }, []);
-    useLayoutEffect(() => {
-      console.log('control render');
-    });
     return (
       <SafeAreaView style={styles.root}>
         <Animated.View style={[styles.container, { opacity: activeAnimation }]}>

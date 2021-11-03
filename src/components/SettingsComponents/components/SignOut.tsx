@@ -10,6 +10,7 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
+import { pinUnlink } from '@services/apiClient';
 
 type TSignOutProps = {
   listItemGetNode?: () => number;
@@ -18,12 +19,16 @@ type TSignOutProps = {
 const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
   const dispatch = useDispatch();
   const signOutActionHandler = () =>
-    Promise.resolve().then(() => {
-      dispatch(getEventListLoopStop());
-      dispatch(endLoginLoop());
-      dispatch(clearAuthState());
-      dispatch(clearEventState());
-    });
+    pinUnlink()
+      .then(response => {
+        if (response.status === 204) {
+          dispatch(getEventListLoopStop());
+          dispatch(endLoginLoop());
+          dispatch(clearAuthState());
+          dispatch(clearEventState());
+        }
+      })
+      .catch(console.log);
   return (
     <View style={styles.root}>
       <View style={styles.titleContainer}>

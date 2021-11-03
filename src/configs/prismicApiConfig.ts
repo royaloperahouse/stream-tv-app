@@ -9,7 +9,7 @@ type TDocumentTypeList = {
 };
 export const documentTypes: TDocumentTypeList = Object.freeze({
   digitalEventDetails: 'digital_event_details',
-  digitalEventVideo: 'digital_event_video'
+  digitalEventVideo: 'digital_event_video',
 });
 
 export const refLabelOfPublishing = 'Staging';

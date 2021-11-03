@@ -147,7 +147,6 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
           minimumViewTime: 100, //In milliseconds
         }}
         onViewableItemsChanged={info => {
-          console.log(info, 'info');
           let itemForScrolling: ViewToken | undefined;
           if (
             info.viewableItems.length > 1 &&

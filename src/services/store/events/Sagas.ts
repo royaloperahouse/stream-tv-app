@@ -22,6 +22,7 @@ import { getDigitalEventDetails } from '@services/prismicApiClient';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { addItemToPrevSearchList } from '@services/previousSearch';
 import { bigDelay } from '@utils/bigDelay';
+import { TVSVideo } from '@services/types/models';
 
 export default function* eventRootSagas() {
   yield all([
@@ -62,7 +63,6 @@ function* saveSearchResultQueryWatcher() {
 function* getEventListLoopWorker(): any {
   while (true) {
     const result = [];
-    const eventIdsForHomePage: Array<string> = [];
     try {
       const initialResponse: ApiSearchResponse = yield call(
         getDigitalEventDetails,
@@ -95,17 +95,7 @@ function* getEventListLoopWorker(): any {
       logError('something went wrong with prismic request', err);
     }
     if (result.length) {
-      eventIdsForHomePage.push(
-        ...result.reduce((acc, event: any, index) => {
-          if (index % 2 === 0) {
-            acc.push(event.id);
-          }
-          return acc;
-        }, []),
-      );
       const resultForDigitalEventsDetailUpdate = groupDigitalEvents(result);
-      resultForDigitalEventsDetailUpdate.eventIdsForHomePage =
-        eventIdsForHomePage;
       yield put(
         getEventListSuccess({
           digitalEventDetailsList: resultForDigitalEventsDetailUpdate,
@@ -138,7 +128,12 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
       acc.allDigitalEventsDetail[digitalEventDetail.id] = {
         id: digitalEventDetail.id,
         last_publication_date: digitalEventDetail.last_publication_date,
-        data: digitalEventDetail.data,
+        data: {
+          ...digitalEventDetail.data,
+          vs_videos: digitalEventDetail.data.vs_videos.filter(
+            (videoObj: TVSVideo) => videoObj?.video?.isBroken === false,
+          ),
+        },
       };
       const tags: Array<any> = Array.isArray(
         digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
