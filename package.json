@@ -43,7 +43,8 @@
     "react-navigation-backhandler": "^2.0.1",
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
-    "redux-saga": "^1.1.3"
+    "redux-saga": "^1.1.3",
+    "coa": "2.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
@@ -66,7 +67,8 @@
     "typescript": "^4.1.0"
   },
   "resolutions": {
-    "@types/react": "^16"
+    "@types/react": "^16",
+    "coa": "2.0.2"
   },
   "jest": {
     "preset": "react-native",
