@@ -51,7 +51,10 @@ export const verifyDevice = () =>
   axiosClient.get(ApiConfig.routes.verifyDevice);
 
 export const fetchVideoURL = (id: string) =>
-  axiosClient.get(ApiConfig.routes.videoSource + id, {
+  axiosClient.get(ApiConfig.routes.videoSource, {
+    params: {
+      id,
+    },
     baseURL: ApiConfig.manifestURL,
   });
 
