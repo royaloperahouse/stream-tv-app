@@ -13,5 +13,6 @@ export const ApiConfig = Object.freeze({
     verifyDevice: '/auth/device',
     videoSource: '/video-source?id=',
     pinUnlink: '/auth/device/unlink',
+    subscriptionInfo: '/auth/device/subscription-info',
   },
 });
