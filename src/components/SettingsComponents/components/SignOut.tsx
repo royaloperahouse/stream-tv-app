@@ -10,6 +10,10 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
+import { pinUnlink } from '@services/apiClient';
+import { clearPrevSearchList } from '@services/previousSearch';
+import { clearListOfBitmovinSavedPosition } from '@services/bitMovinPlayer';
+import { clearMyList } from '@services/myList';
 
 type TSignOutProps = {
   listItemGetNode?: () => number;
@@ -18,12 +22,22 @@ type TSignOutProps = {
 const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
   const dispatch = useDispatch();
   const signOutActionHandler = () =>
-    Promise.resolve().then(() => {
-      dispatch(getEventListLoopStop());
-      dispatch(endLoginLoop());
-      dispatch(clearAuthState());
-      dispatch(clearEventState());
-    });
+    pinUnlink()
+      .then(response => {
+        if (response.status !== 204) {
+          throw Error('Something went wrong');
+        }
+        dispatch(getEventListLoopStop());
+        dispatch(endLoginLoop());
+        dispatch(clearAuthState());
+        dispatch(clearEventState());
+        return Promise.all([
+          clearPrevSearchList(),
+          clearListOfBitmovinSavedPosition(),
+          clearMyList(),
+        ]);
+      })
+      .catch(console.log);
   return (
     <View style={styles.root}>
       <View style={styles.titleContainer}>
