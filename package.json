@@ -23,6 +23,7 @@
     "@sentry/react-native": "^2.6.1",
     "@types/promise.allsettled": "^1.0.3",
     "axios": "^0.21.1",
+    "coa": "2.0.2",
     "flagged": "^2.0.1",
     "fuse.js": "^6.4.6",
     "html-entities": "^2.3.2",
@@ -66,7 +67,8 @@
     "typescript": "^4.1.0"
   },
   "resolutions": {
-    "@types/react": "^16"
+    "@types/react": "^16",
+    "coa": "2.0.2"
   },
   "jest": {
     "preset": "react-native",
