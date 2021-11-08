@@ -17,6 +17,10 @@
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* RohTVAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* RohTVAppTests.m */; };
+		44820ECC2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
+		44820ECD2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
+		44820ECE2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
+		44820ECF2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
 		449A0AF126F3459C00D440EC /* GothamSSm-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2586FE4ABBD409FB172EF5F /* GothamSSm-Black.otf */; };
 		449A0AF226F3459F00D440EC /* GothamSSm-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1FFC8B0DA9964121B0018168 /* GothamSSm-BlackItalic.otf */; };
 		449A0AF326F345A300D440EC /* GothamSSm-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 23604FEA4BFB470E89935858 /* GothamSSm-BoldItalic.otf */; };
@@ -84,6 +88,11 @@
 		3CF395C9D0F94D4B81286ECA /* GothamSSm-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GothamSSm-Light.otf"; path = "../src/assets/fonts/GothamSSm-Light.otf"; sourceTree = "<group>"; };
 		3DC9B4F39FC9E63866C6F65F /* Pods-RohTVApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp.debug.xcconfig"; path = "Target Support Files/Pods-RohTVApp/Pods-RohTVApp.debug.xcconfig"; sourceTree = "<group>"; };
 		412C7F544F97880DCFEDA94A /* Pods-RohTVApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp.release.xcconfig"; path = "Target Support Files/Pods-RohTVApp/Pods-RohTVApp.release.xcconfig"; sourceTree = "<group>"; };
+		44820EC72739AA7F00E50681 /* RohTVApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		44820EC82739AA7F00E50681 /* RohTVAppTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVAppTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		44820EC92739AA7F00E50681 /* RohTVApp-tvOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVApp-tvOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		44820ECA2739AA7F00E50681 /* RohTVApp-tvOSTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVApp-tvOSTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		44820ECB2739AA8000E50681 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		44BE5B85E6886743408A7DC1 /* Pods-RohTVApp-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp-tvOS.release.xcconfig"; path = "Target Support Files/Pods-RohTVApp-tvOS/Pods-RohTVApp-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		4B4CAF7AFC62D637DBD4214D /* Pods-RohTVApp-RohTVAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp-RohTVAppTests.debug.xcconfig"; path = "Target Support Files/Pods-RohTVApp-RohTVAppTests/Pods-RohTVApp-RohTVAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		505521AFA637466FA2F0521F /* GothamSSm-Book.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GothamSSm-Book.otf"; path = "../src/assets/fonts/GothamSSm-Book.otf"; sourceTree = "<group>"; };
@@ -167,6 +176,11 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				44820ECB2739AA8000E50681 /* ViewController.swift */,
+				44820EC72739AA7F00E50681 /* RohTVApp-Bridging-Header.h */,
+				44820EC82739AA7F00E50681 /* RohTVAppTests-Bridging-Header.h */,
+				44820EC92739AA7F00E50681 /* RohTVApp-tvOS-Bridging-Header.h */,
+				44820ECA2739AA7F00E50681 /* RohTVApp-tvOSTests-Bridging-Header.h */,
 			);
 			name = RohTVApp;
 			sourceTree = "<group>";
@@ -310,6 +324,7 @@
 				2D02E4791E0B4A5D006451C7 /* Resources */,
 				2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */,
 				AFECB663FEE3B6BB4D731BDB /* [CP] Copy Pods Resources */,
+				C471E9A853E768D818D1A371 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -329,6 +344,7 @@
 				2D02E48D1E0B4A5D006451C7 /* Frameworks */,
 				2D02E48E1E0B4A5D006451C7 /* Resources */,
 				234936E887E8B91649778EF4 /* [CP] Copy Pods Resources */,
+				C69CF6309FCE33BF6A64A0A0 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -350,17 +366,20 @@
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
+						LastSwiftMigration = 1310;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1310;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 1310;
 						ProvisioningStyle = Automatic;
 					};
 					2D02E48F1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 1310;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 2D02E47A1E0B4A5D006451C7;
 					};
@@ -588,6 +607,42 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RohTVApp-tvOS/Pods-RohTVApp-tvOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		C471E9A853E768D818D1A371 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RohTVApp-tvOS/Pods-RohTVApp-tvOS-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/BitmovinPlayer/BitmovinPlayer.framework/BitmovinPlayer",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BitmovinPlayer.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RohTVApp-tvOS/Pods-RohTVApp-tvOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C69CF6309FCE33BF6A64A0A0 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RohTVApp-tvOS-RohTVApp-tvOSTests/Pods-RohTVApp-tvOS-RohTVApp-tvOSTests-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/BitmovinPlayer/BitmovinPlayer.framework/BitmovinPlayer",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BitmovinPlayer.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RohTVApp-tvOS-RohTVApp-tvOSTests/Pods-RohTVApp-tvOS-RohTVApp-tvOSTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		E7AE0BA2CC0C8098759EEAB9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -713,6 +768,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ECD2739AA8000E50681 /* ViewController.swift in Sources */,
 				00E356F31AD99517003FC87E /* RohTVAppTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -721,6 +777,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ECC2739AA8000E50681 /* ViewController.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
@@ -730,6 +787,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ECE2739AA8000E50681 /* ViewController.swift in Sources */,
 				2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */,
 				2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */,
 			);
@@ -739,6 +797,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ECF2739AA8000E50681 /* ViewController.swift in Sources */,
 				2DCD954D1E0B4F2C00145EB5 /* RohTVAppTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -763,7 +822,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4B4CAF7AFC62D637DBD4214D /* Pods-RohTVApp-RohTVAppTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -778,6 +839,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVAppTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RohTVApp.app/RohTVApp";
 			};
 			name = Debug;
@@ -786,7 +850,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 673D73BEE7B00593A73DCA28 /* Pods-RohTVApp-RohTVAppTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = RohTVAppTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -798,6 +864,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVAppTests-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RohTVApp.app/RohTVApp";
 			};
 			name = Release;
@@ -811,6 +879,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = RohTVApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -819,6 +888,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = RohTVApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -833,6 +903,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = RohTVApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -841,6 +912,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = RohTVApp;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -853,6 +925,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -869,8 +942,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.0;
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Debug;
 		};
@@ -881,6 +957,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -897,8 +974,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOS-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 3;
-				TVOS_DEPLOYMENT_TARGET = 10.0;
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Release;
 		};
@@ -906,8 +985,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2B893F251053FC80AED4F38B /* Pods-RohTVApp-tvOS-RohTVApp-tvOSTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -924,6 +1005,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOSTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RohTVApp-tvOS.app/RohTVApp-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
@@ -933,8 +1017,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC02CF104E2741D5A7F4F103 /* Pods-RohTVApp-tvOS-RohTVApp-tvOSTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -951,6 +1037,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
+				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOSTests-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RohTVApp-tvOS.app/RohTVApp-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
