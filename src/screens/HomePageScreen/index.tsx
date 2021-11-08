@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForHomePageSelector } from '@services/store/events/Selectors';
 import {
@@ -15,6 +15,7 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { useMyList } from '@hooks/useMyList';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type THomePageScreenProps = {};
 const HomePageScreen: React.FC<THomePageScreenProps> = () => {
@@ -26,7 +27,11 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
   }
   return (
     <View style={styles.root}>
-      <Preview ref={previewRef} />
+      <TouchableOpacity 
+        onPress={() => {}}
+      >
+        <Preview ref={previewRef} />
+      </TouchableOpacity>
       <View>
         <RailSections
           containerStyle={styles.railContainerStyle}
