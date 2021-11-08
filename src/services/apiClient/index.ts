@@ -49,5 +49,9 @@ axiosClient.interceptors.response.use(
 export const verifyDevice = () =>
   axiosClient.get(ApiConfig.routes.verifyDevice);
 
-export const fetchVideoURL = (id: string) => 
-  axiosClient.get(ApiConfig.routes.videoSource + id, { baseURL: ApiConfig.manifestURL });
+export const fetchVideoURL = (id: string) =>
+  axiosClient.get(ApiConfig.routes.videoSource + id, {
+    baseURL: ApiConfig.manifestURL,
+  });
+
+export const pinUnlink = () => axiosClient.delete(ApiConfig.routes.pinUnlink);
