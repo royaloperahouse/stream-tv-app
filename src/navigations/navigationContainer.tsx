@@ -6,6 +6,8 @@ import {
   StackActions,
   DefaultTheme,
 } from '@react-navigation/native';
+import { TVMenuControl } from 'react-native';
+ import 'react-native/tvos-types.d';
 
 const navigationRef = createRef<NavigationContainerRef>();
 let isReady: boolean = false;
@@ -40,12 +42,14 @@ const ROHNavigationContainer: React.FC<TROHNavigationContainerProps> = ({
 
 export function navigate(name: string, params: { [key: string]: any } = {}) {
   if (isReady && navigationRef.current?.navigate) {
+    TVMenuControl.enableTVMenuKey();
     navigationRef.current.navigate(name, params);
   }
 }
 
 export function push(name: string, params: { [key: string]: any } = {}) {
   if (isReady && navigationRef.current?.dispatch) {
+    TVMenuControl.enableTVMenuKey();
     navigationRef.current.dispatch(StackActions.push(name, params));
   }
 }
@@ -57,6 +61,8 @@ export function goBack() {
     navigationRef.current?.canGoBack()
   ) {
     navigationRef.current.goBack();
+  } else {
+    TVMenuControl.disableTVMenuKey();
   }
 }
 
