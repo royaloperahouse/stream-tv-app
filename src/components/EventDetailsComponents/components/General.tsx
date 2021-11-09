@@ -19,18 +19,20 @@ import {
   removeIdFromMyList,
   addToMyList,
 } from '@services/myList';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getPerformanceVideoURL } from '@services/store/videos/Slices';
 import {
   videoListSelector,
   videoListItemSelector,
 } from '@services/store/videos/Selectors';
-import { toggleSubscriptionMode } from '@services/store/auth/Slices';
-import { subscribedModeSelector } from '@services/store/auth/Selectors';
+
 import { globalModalManager } from '@components/GlobalModal';
 import { NonSubscribedModeAlert } from '@components/GlobalModal/variants';
 
-let defaultPerfVidUrl = 'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
+import { getSubscribeInfo } from '@services/apiClient';
+
+let defaultPerfVidUrl =
+  'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
 
 type Props = {
   event: TEventContainer;
@@ -49,12 +51,10 @@ const General: React.FC<Props> = ({
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const dispatch = useDispatch();
   let selectedVideoId = useRef('');
-  const videoListItem: TEventVideo = useSelector(videoListItemSelector(selectedVideoId.current));
-  const videoList: Array<TEventVideo> = useSelector(videoListSelector);
-  const subscribedMode: string = useSelector(
-    subscribedModeSelector,
-    shallowEqual,
+  const videoListItem: TEventVideo = useSelector(
+    videoListItemSelector(selectedVideoId.current),
   );
+  const videoList: Array<TEventVideo> = useSelector(videoListSelector);
 
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
@@ -72,24 +72,24 @@ const General: React.FC<Props> = ({
     ['vs_background', '0', 'vs_background_image', 'url'],
     '',
   );
-  
-  const videos = get(event.data,
-    'vs_videos', []);
-  const unbrokenVideos = videos.filter(({video}) => !video.isBroken);
-  const perfVids = videoList.filter(videoListVideo =>
-    (unbrokenVideos.find(({video}) => 
-      video.id === videoListVideo.id) !== undefined) && 
-      videoListVideo.video_type === 'performance');
+
+  const videos = get(event.data, 'vs_videos', []);
+  const unbrokenVideos = videos.filter(({ video }) => !video.isBroken);
+  const perfVids = videoList.filter(
+    videoListVideo =>
+      unbrokenVideos.find(({ video }) => video.id === videoListVideo.id) !==
+        undefined && videoListVideo.video_type === 'performance',
+  );
 
   let perfVidURL = '';
-  // We will receive a list, but there will only be one performance in the live 
+  // We will receive a list, but there will only be one performance in the live
   // environment, so we can just take the first item.
-  if(perfVids.length && perfVids[0].performanceVideoURL === '') { 
-    dispatch(getPerformanceVideoURL(perfVids[0].id))
+  if (perfVids.length && perfVids[0].performanceVideoURL === '') {
+    dispatch(getPerformanceVideoURL(perfVids[0].id));
     selectedVideoId.current = perfVids[0].id;
   }
 
-  if(videoListItem && videoListItem.performanceVideoURL !== '') {
+  if (videoListItem && videoListItem.performanceVideoURL !== '') {
     perfVidURL = videoListItem.performanceVideoURL;
   }
 
@@ -121,29 +121,43 @@ const General: React.FC<Props> = ({
           text: 'Watch now',
           hasTVPreferredFocus: true,
           onPress: (ref?: RefObject<TouchableHighlight>) => {
-            if (subscribedMode) {
-              showPlayer({
-                videoId: event.id,
-                url: perfVidURL,
-                title,
-                poster:
-                  'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                subtitle: title,
-              });
-              return;
-            }
-            globalModalManager.openModal({
-              contentComponent: NonSubscribedModeAlert,
-              contentProps: {
-                confirmActionHandler: () => {
-                  globalModalManager.closeModal(() => {
-                    if (typeof ref?.current?.setNativeProps === 'function') {
-                      ref.current.setNativeProps({ hasTVPreferredFocus: true });
-                    }
+            getSubscribeInfo()
+              .then(response => {
+                if (
+                  response?.data?.data?.attributes?.isSubscriptionActive ===
+                  undefined
+                ) {
+                  throw Error('Something went wrong');
+                }
+                if (response.data.data.attributes.isSubscriptionActive) {
+                  showPlayer({
+                    videoId: event.id,
+                    url: perfVidURL,
+                    title,
+                    poster:
+                      'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+                    subtitle: title,
                   });
-                },
-              },
-            });
+                  return;
+                }
+                globalModalManager.openModal({
+                  contentComponent: NonSubscribedModeAlert,
+                  contentProps: {
+                    confirmActionHandler: () => {
+                      globalModalManager.closeModal(() => {
+                        if (
+                          typeof ref?.current?.setNativeProps === 'function'
+                        ) {
+                          ref.current.setNativeProps({
+                            hasTVPreferredFocus: true,
+                          });
+                        }
+                      });
+                    },
+                  },
+                });
+              })
+              .catch(console.log);
           },
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
@@ -168,14 +182,6 @@ const General: React.FC<Props> = ({
           onPress: () => console.log('Audio & Subtitles press'),
           onFocus: () => console.log('Audio & Subtitles focus'),
           Icon: Subtitles,
-        },
-        {
-          key: 'SubscribedMode',
-          text: `Switch to ${
-            subscribedMode ? 'non-subscribed' : 'subscribed'
-          } mode(only for testing)`,
-          onPress: () => dispatch(toggleSubscriptionMode()),
-          onFocus: () => console.log('Audio & Subtitles focus'),
         },
       ],
     };
