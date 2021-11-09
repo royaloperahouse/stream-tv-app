@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForBalletAndDanceSelector } from '@services/store/events/Selectors';
 import {
@@ -21,6 +21,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   const data = useSelector(digitalEventsForBalletAndDanceSelector);
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
+  const viewRef = useRef<View>(null);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -34,10 +35,14 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   if (!data.length) {
     return null;
   }
+  console.log('ballet & dance', viewRef.current);
   return (
-    <View style={styles.root}>
+    <TVFocusGuideView 
+      style={styles.root} 
+      destinations={[viewRef.current]}
+    >
       <Preview ref={previewRef} />
-      <View>
+      <View ref={viewRef}>
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
@@ -60,7 +65,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
           )}
         />
       </View>
-    </View>
+    </TVFocusGuideView>
   );
 };
 

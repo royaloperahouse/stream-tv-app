@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
+import React, { useRef } from 'react';
+import { View, StyleSheet, FlatList, Dimensions, TVFocusGuideView } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 import { useMyList } from '@hooks/useMyList';
@@ -18,8 +18,13 @@ type TMyListScreenProps = {};
 const MyListScreen: React.FC<TMyListScreenProps> = () => {
   const myList = useMyList();
   const data = useSelector(digitalEventsForMyListScreenSelector(myList));
+  const viewRef = useRef<View>(null);
+  console.log('myList', viewRef.current);
   return (
-    <View style={styles.root}>
+    <TVFocusGuideView 
+      style={styles.root} 
+      destinations={[viewRef.current]}
+    >
       <RohText style={styles.pageTitle}>{myListTitle}</RohText>
       {data.length ? (
         <FlatList
@@ -29,14 +34,16 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
           showsVerticalScrollIndicator={false}
           numColumns={countOfItemsPeerRail}
           renderItem={({ item, index }) => (
-            <DigitalEventItem
-              event={item}
-              canMoveUp={index >= countOfItemsPeerRail}
-              canMoveRight={
-                (index + 1) % countOfItemsPeerRail !== 0 &&
-                index !== data.length - 1
-              }
-            />
+            <View ref={viewRef}>
+              <DigitalEventItem
+                event={item}
+                canMoveUp={index >= countOfItemsPeerRail}
+                canMoveRight={
+                  (index + 1) % countOfItemsPeerRail !== 0 &&
+                  index !== data.length - 1
+                }
+              />
+            </View>
           )}
         />
       ) : (
@@ -46,7 +53,7 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
           </RohText>
         </View>
       )}
-    </View>
+    </TVFocusGuideView>
   );
 };
 

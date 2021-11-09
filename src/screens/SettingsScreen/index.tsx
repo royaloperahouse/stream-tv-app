@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions, FlatList } from 'react-native';
+import { View, StyleSheet, Dimensions, FlatList, TVFocusGuideView } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
@@ -19,6 +19,7 @@ type TSettingsScreenProps = {};
 const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   const [activeContentKey, setActiveContentKey] = useState<string>('');
   const activeItemRef = useRef<TTouchableHighlightWrapperRef>();
+  const viewRef = useRef<View>(null);
   const contentFactory = (contentKey: string) => {
     if (
       !contentKey ||
@@ -30,10 +31,14 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
     return settingsSectionsConfig[contentKey].ContentComponent;
   };
   const Content = contentFactory(activeContentKey);
+  console.log('settings', viewRef.current);
   return (
-    <View style={styles.root}>
+    <TVFocusGuideView
+      style={styles.root}
+      destinations={[viewRef.current]}
+    >
       <View style={styles.container}>
-        <View style={styles.navMenuContainer}>
+        <View ref={viewRef} style={styles.navMenuContainer}>
           <RohText style={styles.pageTitle}>{settingsTitle}</RohText>
           <FlatList
             data={collectionOfSettingsSections}
@@ -57,7 +62,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
           <Content listItemGetNode={activeItemRef.current?.getNode} />
         </View>
       </View>
-    </View>
+    </TVFocusGuideView>
   );
 };
 const styles = StyleSheet.create({
