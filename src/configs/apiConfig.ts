@@ -11,7 +11,7 @@ export const ApiConfig = Object.freeze({
   manifestURL: stagingEnv,
   routes: {
     verifyDevice: '/auth/device',
-    videoSource: '/video-source?id=',
+    videoSource: '/video-source',
     pinUnlink: '/auth/device/unlink',
     subscriptionInfo: '/auth/device/subscription-info',
   },

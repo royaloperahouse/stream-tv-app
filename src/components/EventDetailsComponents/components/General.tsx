@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions, TouchableHighlight } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import FastImage from 'react-native-fast-image';
-import { TEventContainer, TEventVideo } from '@services/types/models';
+import { TEventContainer } from '@services/types/models';
 import get from 'lodash.get';
 import GoDown from '../commonControls/GoDown';
 import Watch from '@assets/svg/eventDetails/Watch.svg';
@@ -19,20 +19,12 @@ import {
   removeIdFromMyList,
   addToMyList,
 } from '@services/myList';
-import { useDispatch, useSelector } from 'react-redux';
-import { getPerformanceVideoURL } from '@services/store/videos/Slices';
-import {
-  videoListSelector,
-  videoListItemSelector,
-} from '@services/store/videos/Selectors';
 
 import { globalModalManager } from '@components/GlobalModal';
 import { NonSubscribedModeAlert } from '@components/GlobalModal/variants';
-
-import { getSubscribeInfo } from '@services/apiClient';
-
-let defaultPerfVidUrl =
-  'https://video-ingestor-output-bucket.s3.eu-west-1.amazonaws.com/6565/manifest.m3u8';
+import Prismic from '@prismicio/client';
+import { getSubscribeInfo, fetchVideoURL } from '@services/apiClient';
+import { getVideoDetails } from '@services/prismicApiClient';
 
 type Props = {
   event: TEventContainer;
@@ -49,12 +41,6 @@ const General: React.FC<Props> = ({
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
-  const dispatch = useDispatch();
-  let selectedVideoId = useRef('');
-  const videoListItem: TEventVideo = useSelector(
-    videoListItemSelector(selectedVideoId.current),
-  );
-  const videoList: Array<TEventVideo> = useSelector(videoListSelector);
 
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
@@ -73,25 +59,97 @@ const General: React.FC<Props> = ({
     '',
   );
 
-  const videos = get(event.data, 'vs_videos', []);
-  const unbrokenVideos = videos.filter(({ video }) => !video.isBroken);
-  const perfVids = videoList.filter(
-    videoListVideo =>
-      unbrokenVideos.find(({ video }) => video.id === videoListVideo.id) !==
-        undefined && videoListVideo.video_type === 'performance',
-  );
+  const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
 
-  let perfVidURL = '';
-  // We will receive a list, but there will only be one performance in the live
-  // environment, so we can just take the first item.
-  if (perfVids.length && perfVids[0].performanceVideoURL === '') {
-    dispatch(getPerformanceVideoURL(perfVids[0].id));
-    selectedVideoId.current = perfVids[0].id;
-  }
+  const getPerformanceVideoUrl = async (
+    ref?: RefObject<TouchableHighlight>,
+  ) => {
+    try {
+      if (!videos.length) {
+        throw new Error('Something went wrong');
+      }
+      const result = await Promise.all([
+        getSubscribeInfo(),
+        getVideoDetails({
+          queryPredicates: [Prismic.predicates.any('document.id', videos)],
+        }),
+      ]);
+      if (
+        result[0].status >= 400 ||
+        result[0]?.data?.data?.attributes?.isSubscriptionActive === undefined
+      ) {
+        throw new Error('Something went wrong');
+      }
+      if (!result[0]?.data?.data?.attributes?.isSubscriptionActive) {
+        globalModalManager.openModal({
+          contentComponent: NonSubscribedModeAlert,
+          contentProps: {
+            confirmActionHandler: () => {
+              globalModalManager.closeModal(() => {
+                if (typeof ref?.current?.setNativeProps === 'function') {
+                  ref.current.setNativeProps({ hasTVPreferredFocus: true });
+                }
+              });
+            },
+          },
+        });
+        return;
+      }
 
-  if (videoListItem && videoListItem.performanceVideoURL !== '') {
-    perfVidURL = videoListItem.performanceVideoURL;
-  }
+      const videoFromPrismic = result[1].results.find(
+        prismicResponseResult =>
+          prismicResponseResult.data?.video?.video_type === 'performance',
+      );
+
+      if (videoFromPrismic === undefined) {
+        throw new Error('Something went wrong');
+      }
+
+      const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
+      if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
+        throw new Error('Something went wrong');
+      }
+      showPlayer({
+        videoId: videoFromPrismic.id,
+        url: manifestInfo.data.data.attributes.hlsManifestUrl,
+        title,
+        poster:
+          'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+        subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+      });
+    } catch (err) {}
+  };
+
+  const getTrailerVideoUrl = async () => {
+    try {
+      if (!videos.length) {
+        throw new Error('Something went wrong');
+      }
+      const prismicResponse = await getVideoDetails({
+        queryPredicates: [Prismic.predicates.any('document.id', videos)],
+      });
+
+      const videoFromPrismic = prismicResponse.results.find(
+        prismicResponseResult =>
+          prismicResponseResult.data?.video?.video_type === 'trailer',
+      );
+      if (videoFromPrismic === undefined) {
+        throw new Error('Something went wrong');
+      }
+      const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
+      if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
+        throw new Error('Something went wrong');
+      }
+      showPlayer({
+        videoId: videoFromPrismic.id,
+        url: manifestInfo.data.data.attributes.hlsManifestUrl,
+        title,
+        poster:
+          'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+        subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+      });
+    } catch (err) {}
+  };
 
   const addOrRemoveItemIdFromMyListHandler = () => {
     if (addOrRemoveBusyRef.current) {
@@ -120,52 +178,14 @@ const General: React.FC<Props> = ({
           key: 'WatchNow',
           text: 'Watch now',
           hasTVPreferredFocus: true,
-          onPress: (ref?: RefObject<TouchableHighlight>) => {
-            getSubscribeInfo()
-              .then(response => {
-                if (
-                  response?.data?.data?.attributes?.isSubscriptionActive ===
-                  undefined
-                ) {
-                  throw Error('Something went wrong');
-                }
-                if (response.data.data.attributes.isSubscriptionActive) {
-                  showPlayer({
-                    videoId: event.id,
-                    url: perfVidURL,
-                    title,
-                    poster:
-                      'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                    subtitle: title,
-                  });
-                  return;
-                }
-                globalModalManager.openModal({
-                  contentComponent: NonSubscribedModeAlert,
-                  contentProps: {
-                    confirmActionHandler: () => {
-                      globalModalManager.closeModal(() => {
-                        if (
-                          typeof ref?.current?.setNativeProps === 'function'
-                        ) {
-                          ref.current.setNativeProps({
-                            hasTVPreferredFocus: true,
-                          });
-                        }
-                      });
-                    },
-                  },
-                });
-              })
-              .catch(console.log);
-          },
+          onPress: getPerformanceVideoUrl,
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },
         {
           key: 'WatchTrailer',
           text: 'Watch trailer',
-          onPress: () => console.log('Watch trailer press'),
+          onPress: getTrailerVideoUrl,
           onFocus: () => console.log('Watch trailer focus'),
           Icon: Trailer,
         },

@@ -18,7 +18,6 @@ import { verifyDevice } from '@services/apiClient';
 import { logError } from '@utils/loger';
 import { TAuthResponseError } from '@services/types/authReqResp';
 import { authBreakingTime } from '@configs/globalConfig';
-import { getVideoListLoopStart } from '../videos/Slices';
 
 export default function* authRootSagas() {
   yield all([call(loginLoopWatcher)]);
@@ -61,7 +60,6 @@ function* loginLoopWorker(): any {
       if (response?.data?.data?.attributes?.customerId) {
         runLoop = false;
         yield put(getEventListLoopStart());
-        yield put(getVideoListLoopStart());
         yield put(checkDeviceSuccess(response.data));
       } else if (response?.data?.errors?.length) {
         const errObj: TAuthResponseError = response.data.errors[0];
