@@ -61,7 +61,9 @@ const General: React.FC<Props> = ({
 
   const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
 
-  const getPerformensVideoUrl = async (ref?: RefObject<TouchableHighlight>) => {
+  const getPerformanceVideoUrl = async (
+    ref?: RefObject<TouchableHighlight>,
+  ) => {
     try {
       if (!videos.length) {
         throw new Error('Something went wrong');
@@ -176,7 +178,7 @@ const General: React.FC<Props> = ({
           key: 'WatchNow',
           text: 'Watch now',
           hasTVPreferredFocus: true,
-          onPress: getPerformensVideoUrl,
+          onPress: getPerformanceVideoUrl,
           onFocus: () => console.log('Watch now focus'),
           Icon: Watch,
         },
