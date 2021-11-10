@@ -7396,7 +7396,7 @@ react-native-svg@^12.2.0:
     css-select "^2.1.0"
     css-tree "^1.0.0-alpha.39"
 
-"react-native@npm:react-native-tvos@0.64.2":
+"react-native@npm:react-native-tvos@0.64.2-4":
   version "0.64.2-4"
   resolved "https://registry.npmjs.org/react-native-tvos/-/react-native-tvos-0.64.2-4.tgz#7f17177415efd8d8dddb804f81a1a98c8d8ee8db"
   integrity sha512-eLkH1TtNm91YsC833OuChajmU6v+XwyVtER66Jg8tUpctyjz0tRo7Yw9zHNPIdtBtDd50rl27HcwezQkF+6lBQ==

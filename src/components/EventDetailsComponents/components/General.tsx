@@ -121,7 +121,9 @@ const General: React.FC<Props> = ({
           text: 'Watch now',
           hasTVPreferredFocus: true,
           onPress: (ref?: RefObject<TouchableHighlight>) => {
-            if (subscribedMode) {
+            // TODO: Important, restore before finalizing this PR!
+            // if (subscribedMode) {}
+            if (!subscribedMode) {
               showPlayer({
                 videoId: event.id,
                 url: perfVidURL,

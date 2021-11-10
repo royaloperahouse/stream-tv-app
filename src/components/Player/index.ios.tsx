@@ -9,6 +9,7 @@ import {
 import RohText from '@components/RohText';
 import GoBack from '@components/GoBack';
 import { scaleSize } from '@utils/scaleSize';
+import { useFocusEffect } from '@react-navigation/native';
 
 type TCallbackFunc = (data?: any) => void;
 
@@ -83,10 +84,25 @@ type TPlayerProps = {
 };
 
 const Player: React.FC<TPlayerProps> = props => {
+  const playerMounted = useRef<boolean>(false);
+  const [shouldShowBack, setShouldShowGoBack] = useState<boolean>(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      playerMounted.current = true;
+      setShouldShowGoBack(true);
+      return () => {
+        if (playerMounted?.current) {
+          playerMounted.current = false;
+          setShouldShowGoBack(false);
+        }
+      };
+    }, []),
+  );
 
   return (
     <View style={styles.rootContainer}>
-      <GoBack />
+      {shouldShowBack? <GoBack /> : null}
       <RohText style={styles.rootText} bold>
         iOS bitmovin player coming soon
       </RohText>
