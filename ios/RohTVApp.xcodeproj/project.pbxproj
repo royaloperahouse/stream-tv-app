@@ -21,6 +21,14 @@
 		44820ECD2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
 		44820ECE2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
 		44820ECF2739AA8000E50681 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ECB2739AA8000E50681 /* ViewController.swift */; };
+		44820ED1273BFA0300E50681 /* ROHBitMovinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */; };
+		44820ED2273BFA0300E50681 /* ROHBitMovinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */; };
+		44820ED3273BFA0400E50681 /* ROHBitMovinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */; };
+		44820ED4273BFA0400E50681 /* ROHBitMovinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */; };
+		44820ED6273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */; };
+		44820ED7273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */; };
+		44820ED8273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */; };
+		44820ED9273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */; };
 		449A0AF126F3459C00D440EC /* GothamSSm-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2586FE4ABBD409FB172EF5F /* GothamSSm-Black.otf */; };
 		449A0AF226F3459F00D440EC /* GothamSSm-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1FFC8B0DA9964121B0018168 /* GothamSSm-BlackItalic.otf */; };
 		449A0AF326F345A300D440EC /* GothamSSm-BoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 23604FEA4BFB470E89935858 /* GothamSSm-BoldItalic.otf */; };
@@ -93,6 +101,8 @@
 		44820EC92739AA7F00E50681 /* RohTVApp-tvOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVApp-tvOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		44820ECA2739AA7F00E50681 /* RohTVApp-tvOSTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RohTVApp-tvOSTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		44820ECB2739AA8000E50681 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROHBitMovinPlayer.swift; sourceTree = "<group>"; };
+		44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ROHBitMovinPlayer.m; sourceTree = "<group>"; };
 		44BE5B85E6886743408A7DC1 /* Pods-RohTVApp-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp-tvOS.release.xcconfig"; path = "Target Support Files/Pods-RohTVApp-tvOS/Pods-RohTVApp-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		4B4CAF7AFC62D637DBD4214D /* Pods-RohTVApp-RohTVAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RohTVApp-RohTVAppTests.debug.xcconfig"; path = "Target Support Files/Pods-RohTVApp-RohTVAppTests/Pods-RohTVApp-RohTVAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		505521AFA637466FA2F0521F /* GothamSSm-Book.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "GothamSSm-Book.otf"; path = "../src/assets/fonts/GothamSSm-Book.otf"; sourceTree = "<group>"; };
@@ -181,6 +191,8 @@
 				44820EC82739AA7F00E50681 /* RohTVAppTests-Bridging-Header.h */,
 				44820EC92739AA7F00E50681 /* RohTVApp-tvOS-Bridging-Header.h */,
 				44820ECA2739AA7F00E50681 /* RohTVApp-tvOSTests-Bridging-Header.h */,
+				44820ED0273BFA0300E50681 /* ROHBitMovinPlayer.swift */,
+				44820ED5273BFB2600E50681 /* ROHBitMovinPlayer.m */,
 			);
 			name = RohTVApp;
 			sourceTree = "<group>";
@@ -768,7 +780,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ED7273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */,
 				44820ECD2739AA8000E50681 /* ViewController.swift in Sources */,
+				44820ED2273BFA0300E50681 /* ROHBitMovinPlayer.swift in Sources */,
 				00E356F31AD99517003FC87E /* RohTVAppTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -777,6 +791,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ED1273BFA0300E50681 /* ROHBitMovinPlayer.swift in Sources */,
+				44820ED6273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */,
 				44820ECC2739AA8000E50681 /* ViewController.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
@@ -787,6 +803,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ED3273BFA0400E50681 /* ROHBitMovinPlayer.swift in Sources */,
+				44820ED8273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */,
 				44820ECE2739AA8000E50681 /* ViewController.swift in Sources */,
 				2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */,
 				2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */,
@@ -797,7 +815,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44820ED9273BFB2700E50681 /* ROHBitMovinPlayer.m in Sources */,
 				44820ECF2739AA8000E50681 /* ViewController.swift in Sources */,
+				44820ED4273BFA0400E50681 /* ROHBitMovinPlayer.swift in Sources */,
 				2DCD954D1E0B4F2C00145EB5 /* RohTVAppTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

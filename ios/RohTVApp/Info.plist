@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>BitmovinPlayerLicenseKey</key>
-  <string>1cb2ef33-6d56-4632-8d8b-1fdbf64b3511</string>
+	<key>BitmovinPlayerLicenseKey</key>
+	<string>1cb2ef33-6d56-4632-8d8b-1fdbf64b3511</string>
+	<key>BitmovinAnalyticsLicenseKey</key>
+	<string>45a0bac7-b900-4a0f-9d87-41a120744160</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
