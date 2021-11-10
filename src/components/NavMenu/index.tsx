@@ -12,6 +12,7 @@ import {
   Dimensions,
   TouchableHighlight,
   Animated,
+  TVFocusGuideView
 } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import NavMenuItem from '@components/NavMenu/components/NavMenuItem';
@@ -265,6 +266,8 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           width: menuFocusInterpolate,
         },
       ]}>
+      <TVFocusGuideView
+        destinations={[activeItemRef.current]}>
       <FlatList
         ref={flatListRef}
         data={navMenuConfig}
@@ -299,6 +302,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           />
         )}
       />
+    </TVFocusGuideView>
     </Animated.View>
   );
 };
