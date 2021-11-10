@@ -19,6 +19,7 @@ rm -rf app/build
 rm -rf ~/.gradle/caches
 ./gradlew cleanBuildCache
 ./gradlew clean
+./gradlew tasks
 cd ..
 echo "Clearing android gradle is finishing"
 echo "Clearing iOS pods is starting..."
