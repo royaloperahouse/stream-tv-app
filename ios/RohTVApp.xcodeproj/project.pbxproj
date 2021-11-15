@@ -959,7 +959,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "uk.org.roh.RohTVApp-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOS-Bridging-Header.h";
@@ -991,7 +991,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.RohTVApp-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "uk.org.roh.RohTVApp-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "RohTVApp-tvOS-Bridging-Header.h";
