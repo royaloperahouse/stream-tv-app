@@ -187,6 +187,8 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
         activeItemRef.current = ref.current;
         selectedItemIndexRef.current = index;
         return;
+      } else {
+        onBlurRef.current = true;
       }
       setIsMenuFocused(true);
       flatListRef.current?.scrollToIndex({
