@@ -19,9 +19,6 @@ final class ViewController: UIView {
   let playerConfig = PlayerConfig()
   let playbackConfig = PlaybackConfig()
   
-  var cssUrl:URL? = nil
-  var jsUrl:URL? = nil
-  
   @objc var hasZoom: Bool = false
   @objc var autoPlay: Bool = false
   @objc var configuration: NSDictionary? = nil
@@ -43,22 +40,11 @@ final class ViewController: UIView {
 
   override init(frame: CGRect) {
     super.init(frame: frame)
-    
-    var plistDictionary: NSDictionary?
-    if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
-        plistDictionary = NSDictionary(contentsOfFile: path)
-    }
-    
-    /**
-     * Go to https://github.com/bitmovin/bitmovin-player-ui to get started with creating a custom player UI.
-     */
-    
-    if (plistDictionary!["BitmovinPlayerCss"] != nil) {
-      self.cssUrl = URL(string: plistDictionary!["BitmovinPlayerCss"] as! String)!
-    }
-    if (plistDictionary!["BitmovinPlayerJs"] != nil) {
-      self.jsUrl = URL(string: plistDictionary!["BitmovinPlayerJs"] as! String)!
-    }
+    print("initting!")
+//    var plistDictionary: NSDictionary?
+//    if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
+//        plistDictionary = NSDictionary(contentsOfFile: path)
+//    }
     
 //
 //    config = BitmovinAnalyticsConfig(key: "45a0bac7-b900-4a0f-9d87-41a120744160")
@@ -149,7 +135,8 @@ final class ViewController: UIView {
           configAnalytics.videoId = self.analytics!["videoId"] as? String;
           configAnalytics.title = self.analytics!["title"] as? String;
           configAnalytics.customerUserId = self.analytics!["userId"] as? String;
-          configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
+          configAnalytics.cdnProvider = CdnProvider.bitmovin
+          //configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
           configAnalytics.customData1 = self.analytics!["customData1"] as? String;
           configAnalytics.customData2 = self.analytics!["customData2"] as? String;
           configAnalytics.customData3 = self.analytics!["customData3"] as? String;
@@ -160,8 +147,22 @@ final class ViewController: UIView {
 
           // Attach your player instance
           analyticsCollector!.attachPlayer(player: player!);
-      }
+        // Create player view and pass the player instance to it
+        let playerView = PlayerView(player: player!, frame: .zero)
 
+        // Listen to player events
+        player?.add(listener: self)
+
+        playerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        playerView.frame = self.bounds
+
+        player?.load(sourceConfig: sourceConfig)
+        // Make sure that the correct audio session category is set to allow for background playback.
+        handleAudioSessionCategorySetting()
+
+        self.addSubview(playerView)
+        self.bringSubviewToFront(playerView)
+    }
   }
   
   func play() -> Void {
@@ -206,7 +207,12 @@ final class ViewController: UIView {
           print("Setting category to AVAudioSessionCategoryPlayback failed.")
       }
   }
+}
 
+extension ViewController: PlayerListener {
+    func onEvent(_ event: Event, player: Player) {
+        dump(event, name: "[Player Event]", maxDepth: 1)
+    }
 }
 
 
