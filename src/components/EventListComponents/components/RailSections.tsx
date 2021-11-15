@@ -79,6 +79,7 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
                   item: sectionItem[itemIndex],
                   section: item[index],
                   scrollToRail: scrollToRail(index),
+                  isFirstRail: index === 0,
                 });
               }}
             />

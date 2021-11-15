@@ -15,7 +15,7 @@ import collectionOfEventDetailsSections, {
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
 import {
-  getBitMovinSavedPosition,
+  removeBitMovinSavedPositionByIdAndEventId,
   savePosition,
 } from '@services/bitMovinPlayer';
 import { TBMPlayerShowingData } from '@services/types/bitmovinPlayer';
@@ -35,25 +35,33 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
   const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
-    getBitMovinSavedPosition(playerItem.videoId).then(restoredItem => {
-      if (!isBMPlayerShowingRef.current && eventDetailsScreenMounted.current) {
-        setIsBMPlayerShowing({
-          ...playerItem,
-          position: restoredItem?.position,
-        });
-        isBMPlayerShowingRef.current = true;
-      }
-    });
+    if (!isBMPlayerShowingRef.current && eventDetailsScreenMounted.current) {
+      setIsBMPlayerShowing(playerItem);
+      isBMPlayerShowingRef.current = true;
+    }
   }, []);
 
-  const closePlayer = (time: string) => {
-    savePosition({
-      id: bMPlayerShowingData?.videoId || '',
-      position: time,
-    }).finally(() => {
-      setIsBMPlayerShowing(null);
-      isBMPlayerShowingRef.current = false;
-    });
+  const closePlayer = async (time: string) => {
+    if (bMPlayerShowingData === null) {
+      return;
+    }
+    const floatTime = parseFloat(time);
+    if (bMPlayerShowingData.savePosition) {
+      if (isNaN(floatTime) || floatTime === 0.0) {
+        await removeBitMovinSavedPositionByIdAndEventId(
+          bMPlayerShowingData.videoId,
+          bMPlayerShowingData.eventId,
+        );
+      } else {
+        await savePosition({
+          id: bMPlayerShowingData.videoId,
+          position: time,
+          eventId: bMPlayerShowingData.eventId,
+        });
+      }
+    }
+    setIsBMPlayerShowing(null);
+    isBMPlayerShowingRef.current = false;
   };
 
   const sectionsFactory = useCallback(

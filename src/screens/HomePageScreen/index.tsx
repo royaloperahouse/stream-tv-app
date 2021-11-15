@@ -15,11 +15,15 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { useMyList } from '@hooks/useMyList';
+import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
 
 type THomePageScreenProps = {};
 const HomePageScreen: React.FC<THomePageScreenProps> = () => {
   const myList = useMyList();
-  const data = useSelector(digitalEventsForHomePageSelector(myList));
+  const continueWatchingList = useContinueWatchingList();
+  const data = useSelector(
+    digitalEventsForHomePageSelector(myList, continueWatchingList),
+  );
   const previewRef = useRef(null);
   if (!data.length) {
     return null;
@@ -39,12 +43,12 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({ item, section, index, scrollToRail, isFirstRail }) => (
             <DigitalEventItem
               event={item}
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
-              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
+              canMoveUp={!isFirstRail}
+              hasTVPreferredFocus={isFirstRail && index === 0}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
             />
