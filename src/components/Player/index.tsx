@@ -13,11 +13,11 @@ import {
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
-import { TBitmoviPlayerNativeProps } from '@services/types/bitmovinPlayer';
+import { TBitmovinPlayerNativeProps } from '@services/types/bitmovinPlayer';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 
-let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
+let NativeBitMovinPlayer: HostComponent<TBitmovinPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
 
 const ROHBitmovinPlayerModule = NativeModules.ROHBitMovinPlayerControl;

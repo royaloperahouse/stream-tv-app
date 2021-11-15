@@ -5,11 +5,17 @@ import {
   ViewProps,
   Dimensions,
   View,
+  HostComponent,
+  requireNativeComponent,
 } from 'react-native';
 import RohText from '@components/RohText';
 import GoBack from '@components/GoBack';
 import { scaleSize } from '@utils/scaleSize';
 import { useFocusEffect } from '@react-navigation/native';
+import { TBitmovinPlayerNativeProps } from '@services/types/bitmovinPlayer';
+
+let NativeBitMovinPlayer: HostComponent<TBitmovinPlayerNativeProps> =
+  requireNativeComponent('ROHBitMovinPlayer');
 
 type TCallbackFunc = (data?: any) => void;
 
@@ -84,33 +90,78 @@ type TPlayerProps = {
 };
 
 const Player: React.FC<TPlayerProps> = props => {
+  const cloneProps = {
+    ...props,
+    configuration: {
+      ...props.configuration,
+    },
+    analytics: {
+      ...props.analytics,
+    },
+  };
+  const {
+    onEvent,
+    onClose,
+    title,
+    subtitle = '',
+    configuration,
+    analytics,
+    autoPlay = false,
+  } = cloneProps;
+  const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const playerMounted = useRef<boolean>(false);
-  const [shouldShowBack, setShouldShowGoBack] = useState<boolean>(false);
+  const [playerReady, setReady] = useState(false);
+
 
   useFocusEffect(
     useCallback(() => {
       playerMounted.current = true;
-      setShouldShowGoBack(true);
       return () => {
         if (playerMounted?.current) {
           playerMounted.current = false;
-          setShouldShowGoBack(false);
         }
       };
     }, []),
   );
 
+  const setPlayer = (ref: any) => {
+    playerRef.current = ref;
+  };
+
+  console.log('config is ', configuration);
   return (
-    <View style={styles.rootContainer}>
+    <SafeAreaView style={styles.defaultPlayerStyle}>
+      <NativeBitMovinPlayer
+        ref={setPlayer}
+        configuration={configuration}
+        analytics={analytics}
+        style={
+          styles.playerLoaded}
+        autoPlay={autoPlay}
+      />
+    </SafeAreaView>
+    /* <View style={styles.rootContainer}>
+
       {shouldShowBack? <GoBack /> : null}
       <RohText style={styles.rootText} bold>
         iOS bitmovin player coming soon
       </RohText>
-    </View>
+    </View> */
   );
 };
 
 const styles = StyleSheet.create({
+  defaultPlayerStyle: {
+    backgroundColor: 'black',
+    flex: 1,
+  },
+  playerLoaded: {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+  },
   rootContainer: {
     height: Dimensions.get('window').height,
     flexDirection: 'row',

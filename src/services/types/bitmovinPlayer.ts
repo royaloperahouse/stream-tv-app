@@ -1,5 +1,5 @@
 import { ViewProps } from 'react-native';
-export type TBitmoviPlayerNativeProps = {
+export type TBitmovinPlayerNativeProps = {
   autoPlay?: boolean;
   configuration: {
     url: string;
@@ -8,7 +8,7 @@ export type TBitmoviPlayerNativeProps = {
     offset?: string;
   };
   analytics?: {
-    videoId: string;
+    videoId?: string;
     title?: string;
     userId?: string;
     experiment?: string;
