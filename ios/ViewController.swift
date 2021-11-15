@@ -67,9 +67,11 @@ final class ViewController: UIView {
   }
   
   override func didSetProps(_ changedProps: [String]!) {
-
-    let sourceConfig = SourceConfig(url: URL.init(string: self.configuration!["url"] as! String)!, type: .hls)
-    // let source = SourceFactory.create(from: sourceConfig)
+    print("changed props: ", changedProps!)
+    guard let streamUrl = URL.init(string: self.configuration!["url"] as! String) else {
+        return
+    }
+    let sourceConfig = SourceConfig(url: streamUrl, type: .hls)
       
       if((self.configuration!["poster"]) != nil) {
           sourceConfig.posterSource = URL.init(string: self.configuration!["poster"] as! String)!
@@ -135,8 +137,8 @@ final class ViewController: UIView {
           configAnalytics.videoId = self.analytics!["videoId"] as? String;
           configAnalytics.title = self.analytics!["title"] as? String;
           configAnalytics.customerUserId = self.analytics!["userId"] as? String;
-          configAnalytics.cdnProvider = CdnProvider.bitmovin
-          //configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
+          // configAnalytics.cdnProvider = CdnProvider.bitmovin
+          configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
           configAnalytics.customData1 = self.analytics!["customData1"] as? String;
           configAnalytics.customData2 = self.analytics!["customData2"] as? String;
           configAnalytics.customData3 = self.analytics!["customData3"] as? String;
@@ -148,7 +150,7 @@ final class ViewController: UIView {
           // Attach your player instance
           analyticsCollector!.attachPlayer(player: player!);
         // Create player view and pass the player instance to it
-        let playerView = PlayerView(player: player!, frame: .zero)
+        let playerView = PlayerView(player: player!, frame: self.bounds)
 
         // Listen to player events
         player?.add(listener: self)
