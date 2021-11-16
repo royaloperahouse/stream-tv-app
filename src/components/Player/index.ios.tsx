@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useRef, useCallback } from 'react';
+import React, { useLayoutEffect, useState, useRef, useCallback, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,6 +7,9 @@ import {
   View,
   HostComponent,
   requireNativeComponent,
+  NativeModules,
+  findNodeHandle,
+  Platform
 } from 'react-native';
 import RohText from '@components/RohText';
 import GoBack from '@components/GoBack';
@@ -16,6 +19,8 @@ import { TBitmovinPlayerNativeProps } from '@services/types/bitmovinPlayer';
 
 let NativeBitMovinPlayer: HostComponent<TBitmovinPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
+
+const ROHBitmovinPlayerModule = NativeModules.NativeBitMovinPlayer;
 
 type TCallbackFunc = (data?: any) => void;
 
@@ -124,6 +129,138 @@ const Player: React.FC<TPlayerProps> = props => {
     }, []),
   );
 
+  useEffect(() => {
+    if (playerReady && autoPlay && Platform.OS === 'android') {
+      play();
+    }
+  }, [playerReady, autoPlay]);
+
+  const play = () => {
+    if (Platform.OS === 'android') {
+      ROHBitmovinPlayerModule.play(
+        findNodeHandle(playerRef?.current || null)
+      );
+    } else {
+      ROHBitmovinPlayerModule.play();
+    }
+  };
+
+  const pause = () => {
+    if (Platform.OS === 'android') {
+      ROHBitmovinPlayerModule.pause(
+        findNodeHandle(playerRef?.current || null)
+      );
+    } else {
+      ROHBitmovinPlayerModule.pause();
+    }
+  };
+
+  const seekBackwardCommand = () => {
+    ROHBitmovinPlayerModule.seekBackwardCommand();
+  };
+
+  const seekForwardCommand = () => {
+    ROHBitmovinPlayerModule.seekForwardCommand();
+  };
+
+  const destroy = () => {
+    if (Platform.OS === 'android') {
+      ROHBitmovinPlayerModule.destroy(
+        findNodeHandle(playerRef.current || null)
+      );
+    } else {
+      ROHBitmovinPlayerModule.destroy();
+    }
+  };
+
+  const setZoom = () => {
+    ROHBitmovinPlayerModule.setZoom(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const setFit = () => {
+    ROHBitmovinPlayerModule.setFit(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const seek = (time = 0) => {
+    const seekTime = parseFloat(time.toString());
+
+    if (seekTime) {
+      ROHBitmovinPlayerModule.seek(
+        findNodeHandle(playerRef.current || null),
+        seekTime
+      );
+    }
+  };
+
+  const mute = () => {
+    ROHBitmovinPlayerModule.mute(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const unmute = () => {
+    ROHBitmovinPlayerModule.unmute(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const enterFullscreen = () => {
+    ROHBitmovinPlayerModule.enterFullscreen(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const exitFullscreen = () => {
+    ROHBitmovinPlayerModule.exitFullscreen(
+      findNodeHandle(playerRef.current || null)
+    );
+  };
+
+  const getCurrentTime = () =>
+    ROHBitmovinPlayerModule.getCurrentTime(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const getDuration = () =>
+    ROHBitmovinPlayerModule.getDuration(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const getVolume = () =>
+    ROHBitmovinPlayerModule.getVolume(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const setVolume = (volume = 100) => {
+    ROHBitmovinPlayerModule.setVolume(
+      findNodeHandle(playerRef.current || null),
+      volume
+    );
+  };
+
+  const isMuted = () =>
+    ROHBitmovinPlayerModule.isMuted(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const isPaused = () =>
+    ROHBitmovinPlayerModule.isPaused(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const isStalled = () =>
+    ROHBitmovinPlayerModule.isStalled(
+      findNodeHandle(playerRef.current || null)
+    );
+
+  const isPlaying = () =>
+    ROHBitmovinPlayerModule.isPlaying(
+      findNodeHandle(playerRef.current || null)
+    );
   const setPlayer = (ref: any) => {
     playerRef.current = ref;
   };

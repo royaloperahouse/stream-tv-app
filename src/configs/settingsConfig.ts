@@ -14,6 +14,11 @@ export type TSettingsSection = {
 export const settingsSectionsConfig: {
   [key: string]: TSettingsSection;
 } = {
+  switchSubscriptionMode: {
+    key: 'switchSubscriptionMode',
+    navMenuItemTitle: 'SUBSCRIPTION',
+    ContentComponent: SwitchSubscriptionMode,
+  },
   account: {
     key: 'account',
     navMenuItemTitle: 'ACCOUNT',
@@ -23,11 +28,6 @@ export const settingsSectionsConfig: {
     key: 'signOut',
     navMenuItemTitle: 'SIGN OUT',
     ContentComponent: SignOut,
-  },
-  switchSubscriptionMode: {
-    key: 'switchSubscriptionMode',
-    navMenuItemTitle: 'SUBSCRIPTION',
-    ContentComponent: SwitchSubscriptionMode,
   },
 };
 

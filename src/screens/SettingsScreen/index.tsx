@@ -33,8 +33,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   const Content = contentFactory(activeContentKey);
   console.log('settings', viewRef.current);
   return (
-    <TVFocusGuideView
-      style={styles.root}
+    <TVFocusGuideView style={styles.root}
       destinations={[viewRef.current]}>
       <View style={styles.container}>
         <View style={styles.navMenuContainer}>
@@ -49,6 +48,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
                 title={item.navMenuItemTitle}
                 canMoveDown={index !== collectionOfSettingsSections.length - 1}
                 canMoveUp={index !== 0}
+                hasTVPreferredFocus={index === 0}
                 onFocus={touchableRef => {
                   activeItemRef.current = touchableRef.current;
                   setActiveContentKey(item.key);
@@ -57,9 +57,9 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             )}
           />
         </View>
-        <View ref={viewRef} style={styles.contentContainer}>
-          <Content listItemGetNode={activeItemRef.current?.getNode} />
-        </View>
+          <View ref={viewRef} hasTVPreferredFocus={activeItemRef.current != null} style={styles.contentContainer}>            
+              <Content listItemGetNode={activeItemRef.current?.getNode} />
+          </View>
       </View>
     </TVFocusGuideView>
   );
