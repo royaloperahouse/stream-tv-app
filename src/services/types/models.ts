@@ -75,6 +75,12 @@ export type TVSVideo = {
     id: string;
     link_type: string;
     isBroken: boolean;
+    type: string;
+    tags: Array<any>;
+    slug: string;
+    lang: string;
+    first_publication_date: string;
+    last_publication_date: string;
   };
 };
 

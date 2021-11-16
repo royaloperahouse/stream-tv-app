@@ -4,56 +4,37 @@ import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useDispatch } from 'react-redux';
-import {
-  clearEventState,
-  getEventListLoopStop,
-} from '@services/store/events/Slices';
-import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
-import { pinUnlink } from '@services/apiClient';
-import { clearPrevSearchList } from '@services/previousSearch';
-import { clearListOfBitmovinSavedPosition } from '@services/bitMovinPlayer';
-import { clearMyList } from '@services/myList';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { toggleSubscriptionMode } from '@services/store/auth/Slices';
+import { subscribedModeSelector } from '@services/store/auth/Selectors';
 
-type TSignOutProps = {
+type TSwitchSubscriptionMode = {
   listItemGetNode?: () => number;
 };
 
-const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
+const SwitchSubscriptionMode: React.FC<TSwitchSubscriptionMode> = ({
+  listItemGetNode,
+}) => {
   const dispatch = useDispatch();
-  const signOutActionHandler = () =>
-    pinUnlink()
-      .then(response => {
-        if (response.status !== 204) {
-          throw Error('Something went wrong');
-        }
-        dispatch(getEventListLoopStop());
-        dispatch(endLoginLoop());
-        dispatch(clearAuthState());
-        dispatch(clearEventState());
-        return Promise.all([
-          clearPrevSearchList(),
-          clearListOfBitmovinSavedPosition(),
-          clearMyList(),
-        ]);
-      })
-      .catch(console.log);
+  const fullSubscription: boolean = useSelector(
+    subscribedModeSelector,
+    shallowEqual,
+  );
+  const switchSubscriptionModeActionHandler = () =>
+    dispatch(toggleSubscriptionMode());
+  const actionButtonText = `Switch to ${
+    fullSubscription ? 'non-subscribed' : 'subscribed'
+  } mode`;
+  const subscriptionInfoText = `You are ${
+    fullSubscription ? 'subscribed' : 'non-subscribed'
+  }`;
   return (
     <View style={styles.root}>
       <View style={styles.titleContainer}>
-        <RohText style={styles.titleText}>SIGN OUT OF THIS DEVICE</RohText>
+        <RohText style={styles.titleText}>Switch of Subscription Mode</RohText>
       </View>
       <View style={styles.descriptionContainer}>
-        <RohText style={styles.descriptionText}>
-          Choosing to sign out of this device will stop this device being paired
-          with your ROH account. To access content on this device again, you
-          will need to pair.
-        </RohText>
-      </View>
-      <View style={styles.commonQuestionContainer}>
-        <RohText style={styles.commonQuestionText}>
-          Are you sure you want to sign out?
-        </RohText>
+        <RohText style={styles.descriptionText}>{subscriptionInfoText}</RohText>
       </View>
       <View style={styles.actionButtonsContainer}>
         <View style={styles.actionButtonContainer}>
@@ -66,12 +47,12 @@ const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
                 ? listItemGetNode()
                 : undefined
             }
-            onPress={signOutActionHandler}
+            onPress={switchSubscriptionModeActionHandler}
             style={styles.actionButtonDefault}
             styleFocused={styles.actionButtonFocus}>
             <View style={styles.actionButtonContentContainer}>
               <RohText style={styles.actionButtonText}>
-                I want to sign out
+                {actionButtonText}
               </RohText>
             </View>
           </TouchableHighlightWrapper>
@@ -81,7 +62,7 @@ const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
   );
 };
 
-export default SignOut;
+export default SwitchSubscriptionMode;
 
 const styles = StyleSheet.create({
   root: {

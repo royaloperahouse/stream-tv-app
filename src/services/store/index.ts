@@ -10,16 +10,12 @@ import {
   reducer as eventsReducer,
   name as eventsReducerName,
 } from '@services/store/events/Slices';
-import {
-  reducer as videoURLsReducer,
-  name as videoURLsReducerName,
-} from '@services/store/videos/Slices';
+
 import { rootSaga } from '@services/store/rootSaga';
 
 const rootReducer = combineReducers({
   [authReducerName]: authReducer,
   [eventsReducerName]: eventsReducer,
-  [videoURLsReducerName]: videoURLsReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();

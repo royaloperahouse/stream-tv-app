@@ -1,4 +1,7 @@
-import { SignOut } from '@components/SettingsComponents';
+import {
+  SignOut,
+  SwitchSubscriptionMode,
+} from '@components/SettingsComponents';
 
 export const settingsTitle = 'SETTINGS';
 
@@ -11,6 +14,11 @@ export type TSettingsSection = {
 export const settingsSectionsConfig: {
   [key: string]: TSettingsSection;
 } = {
+  switchSubscriptionMode: {
+    key: 'switchSubscriptionMode',
+    navMenuItemTitle: 'SUBSCRIPTION',
+    ContentComponent: SwitchSubscriptionMode,
+  },
   account: {
     key: 'account',
     navMenuItemTitle: 'ACCOUNT',
