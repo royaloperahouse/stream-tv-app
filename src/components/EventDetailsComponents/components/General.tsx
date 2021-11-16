@@ -24,6 +24,7 @@ import { globalModalManager } from '@components/GlobalModal';
 import {
   NonSubscribedModeAlert,
   СontinueWatchingModal,
+  ErrorModal,
 } from '@components/GlobalModal/variants';
 import Prismic from '@prismicio/client';
 import { getSubscribeInfo, fetchVideoURL } from '@services/apiClient';
@@ -172,10 +173,25 @@ const General: React.FC<Props> = ({
         eventId: event.id,
         savePosition: true,
       });
-    } catch (err) {}
+    } catch (err: any) {
+      globalModalManager.openModal({
+        contentComponent: ErrorModal,
+        contentProps: {
+          confirmActionHandler: () => {
+            globalModalManager.closeModal(() => {
+              if (typeof ref?.current?.setNativeProps === 'function') {
+                ref.current.setNativeProps({ hasTVPreferredFocus: true });
+              }
+            });
+          },
+          title: "Player's Error",
+          subtitle: err.message,
+        },
+      });
+    }
   };
 
-  const getTrailerVideoUrl = async () => {
+  const getTrailerVideoUrl = async (ref?: RefObject<TouchableHighlight>) => {
     try {
       if (!videos.length) {
         throw new Error('Something went wrong');
@@ -205,7 +221,22 @@ const General: React.FC<Props> = ({
         eventId: event.id,
         position: '0.0',
       });
-    } catch (err) {}
+    } catch (err: any) {
+      globalModalManager.openModal({
+        contentComponent: ErrorModal,
+        contentProps: {
+          confirmActionHandler: () => {
+            globalModalManager.closeModal(() => {
+              if (typeof ref?.current?.setNativeProps === 'function') {
+                ref.current.setNativeProps({ hasTVPreferredFocus: true });
+              }
+            });
+          },
+          title: "Player's Error",
+          subtitle: err.message,
+        },
+      });
+    }
   };
 
   const addOrRemoveItemIdFromMyListHandler = () => {
