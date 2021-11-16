@@ -10,15 +10,10 @@ export type TSettingsSection = {
   navMenuItemTitle: string;
   ContentComponent: React.FC<{ listItemGetNode?: () => number }>;
 };
-
+// TODO: put back in right order before main merge!
 export const settingsSectionsConfig: {
   [key: string]: TSettingsSection;
 } = {
-  switchSubscriptionMode: {
-    key: 'switchSubscriptionMode',
-    navMenuItemTitle: 'SUBSCRIPTION',
-    ContentComponent: SwitchSubscriptionMode,
-  },
   account: {
     key: 'account',
     navMenuItemTitle: 'ACCOUNT',
@@ -28,6 +23,11 @@ export const settingsSectionsConfig: {
     key: 'signOut',
     navMenuItemTitle: 'SIGN OUT',
     ContentComponent: SignOut,
+  },
+  switchSubscriptionMode: {
+    key: 'switchSubscriptionMode',
+    navMenuItemTitle: 'SUBSCRIPTION',
+    ContentComponent: SwitchSubscriptionMode,
   },
 };
 

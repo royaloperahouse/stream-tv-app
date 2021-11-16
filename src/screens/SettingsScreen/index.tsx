@@ -35,10 +35,9 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   return (
     <TVFocusGuideView
       style={styles.root}
-      destinations={[viewRef.current]}
-    >
+      destinations={[viewRef.current]}>
       <View style={styles.container}>
-        <View ref={viewRef} style={styles.navMenuContainer}>
+        <View style={styles.navMenuContainer}>
           <RohText style={styles.pageTitle}>{settingsTitle}</RohText>
           <FlatList
             data={collectionOfSettingsSections}
@@ -58,7 +57,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             )}
           />
         </View>
-        <View style={styles.contentContainer}>
+        <View ref={viewRef} style={styles.contentContainer}>
           <Content listItemGetNode={activeItemRef.current?.getNode} />
         </View>
       </View>
