@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useRef, useCallback, useEffect } from 'react';
+import React, { useLayoutEffect, useState, useRef, useCallback, useEffect, useImperativeHandle } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,13 +9,14 @@ import {
   requireNativeComponent,
   NativeModules,
   findNodeHandle,
-  Platform
+  Platform,
+  LayoutRectangle
 } from 'react-native';
-import RohText from '@components/RohText';
-import GoBack from '@components/GoBack';
 import { scaleSize } from '@utils/scaleSize';
 import { useFocusEffect } from '@react-navigation/native';
-import { TBitmovinPlayerNativeProps } from '@services/types/bitmovinPlayer';
+import { TBitmovinPlayerNativeProps, ROHBitmovinPlayerMethodsType } from '@services/types/bitmovinPlayer';
+import RohText from '@components/RohText';
+// import { TPlayerControlsRef } from './PlayerControls';
 
 let NativeBitMovinPlayer: HostComponent<TBitmovinPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
@@ -114,8 +115,11 @@ const Player: React.FC<TPlayerProps> = props => {
     autoPlay = false,
   } = cloneProps;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
+  const controlRef = useRef<ROHBitmovinPlayerMethodsType | null>(null);
   const playerMounted = useRef<boolean>(false);
-  const [playerReady, setReady] = useState(false);
+  const [maxHeight, setMaxHeight] = useState<number | null>(null);
+  const [layout, setLayout] = useState<LayoutRectangle | null>(null);
+  const [loading, setLoading] = useState(false);
 
 
   useFocusEffect(
@@ -130,10 +134,24 @@ const Player: React.FC<TPlayerProps> = props => {
   );
 
   useEffect(() => {
-    if (playerReady && autoPlay && Platform.OS === 'android') {
+    const { height } = layout || {};
+
+    if (maxHeight !== null && height && !loading) {
+      setTimeout(() => {
+        setMaxHeight(height);
+      }, 300);
+    }
+
+    if (height && maxHeight === height) {
+      setLoading(true);
+    }
+  }, [maxHeight, layout, loading]);
+
+  useEffect(() => {
+    if (loading && autoPlay && Platform.OS === 'android') {
       play();
     }
-  }, [playerReady, autoPlay]);
+  }, [loading, autoPlay]);
 
   const play = () => {
     if (Platform.OS === 'android') {
@@ -261,6 +279,30 @@ const Player: React.FC<TPlayerProps> = props => {
     ROHBitmovinPlayerModule.isPlaying(
       findNodeHandle(playerRef.current || null)
     );
+
+    useImperativeHandle(controlRef, () => ({
+      play,
+      pause,
+      seekBackwardCommand,
+      seekForwardCommand,
+      destroy,
+      setZoom,
+      setFit,
+      seek,
+      mute,
+      unmute,
+      enterFullscreen,
+      exitFullscreen,
+      getCurrentTime,
+      getDuration,
+      getVolume,
+      setVolume,
+      isMuted,
+      isPaused,
+      isStalled,
+      isPlaying,
+    }));
+      
   const setPlayer = (ref: any) => {
     playerRef.current = ref;
   };
@@ -276,14 +318,10 @@ const Player: React.FC<TPlayerProps> = props => {
           styles.playerLoaded}
         autoPlay={autoPlay}
       />
+      {configuration.url === '' && 
+        <RohText style={styles.textDescription}>Video not provided</RohText>
+      }
     </SafeAreaView>
-    /* <View style={styles.rootContainer}>
-
-      {shouldShowBack? <GoBack /> : null}
-      <RohText style={styles.rootText} bold>
-        iOS bitmovin player coming soon
-      </RohText>
-    </View> */
   );
 };
 
@@ -309,6 +347,14 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: scaleSize(48),
+  },
+  textDescription: {
+    position: 'absolute',
+    flex: 1,
+    alignSelf: 'center',
+    top: scaleSize(180),
+    fontSize: scaleSize(80),
+    color: 'red'
   },
 });
 
