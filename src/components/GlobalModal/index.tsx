@@ -8,16 +8,15 @@ import React, {
 import { View, StyleSheet, Animated } from 'react-native';
 import WithLogo from '@components/WithLogo';
 import WithBackground from '@components/WithBackground';
-import { TDefaultGlobalModalContentProps } from '@services/types/globalModal';
+import { TGlobalModalContentProps } from '@services/types/globalModal';
 const fadeDuration = 500;
 type TGlobalModalProps = {};
 export type TGlobalModalConfig = {
   hasLogo?: boolean;
   hasBackground?: boolean;
-  contentComponent: React.FC<
-    TDefaultGlobalModalContentProps & { [key: string]: any }
-  >;
-  contentProps: TDefaultGlobalModalContentProps & { [key: string]: any };
+  backgroundImageUrl?: string;
+  contentComponent: React.FC<TGlobalModalContentProps>;
+  contentProps: TGlobalModalContentProps;
 };
 const globalModalRef = createRef<
   Partial<{
@@ -121,7 +120,11 @@ const GlobalModal: React.FC<TGlobalModalProps> = () => {
     returnetContent = <WithLogo>{returnetContent}</WithLogo>;
   }
   if (open && open.hasBackground !== false) {
-    returnetContent = <WithBackground>{returnetContent}</WithBackground>;
+    returnetContent = (
+      <WithBackground url={open.backgroundImageUrl}>
+        {returnetContent}
+      </WithBackground>
+    );
   }
   return (
     <Animated.View style={[styles.overlayLayer, { opacity: fadeAnimation }]}>

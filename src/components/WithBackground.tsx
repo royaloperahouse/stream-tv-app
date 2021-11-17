@@ -1,15 +1,16 @@
 import React from 'react';
-import { StyleSheet, ImageBackground } from 'react-native';
+import { StyleSheet, ImageBackground, Dimensions } from 'react-native';
 
 import { Colors, Images } from '@themes/Styleguide';
 
-type TWithBackgroundProps = {};
+type TWithBackgroundProps = {
+  url?: string;
+};
 
-const WithBackground: React.FC<TWithBackgroundProps> = ({ children }) => {
+const WithBackground: React.FC<TWithBackgroundProps> = ({ url, children }) => {
+  const source = url ? { uri: url } : Images.defaultBackground;
   return (
-    <ImageBackground
-      style={styles.containerBackground}
-      source={Images.defaultBackground}>
+    <ImageBackground style={styles.containerBackground} source={source}>
       {children}
     </ImageBackground>
   );
@@ -17,7 +18,8 @@ const WithBackground: React.FC<TWithBackgroundProps> = ({ children }) => {
 
 const styles = StyleSheet.create({
   containerBackground: {
-    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
     backgroundColor: Colors.backgroundColor,
     resizeMode: 'cover',
   },

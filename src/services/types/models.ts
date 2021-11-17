@@ -203,7 +203,7 @@ export type TVSBackgroundImage = {
 export type TBitMovinPlayerSavedPosition = {
   id: string;
   position: string;
-  eventId?: string;
+  eventId: string;
 };
 
 export type TEventVideo = {

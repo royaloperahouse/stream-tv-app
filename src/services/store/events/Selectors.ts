@@ -9,6 +9,8 @@ import {
   balletAndDanceWhiteList,
 } from '@configs/eventListScreensConfig';
 import get from 'lodash.get';
+import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
+import { removeItemsFromSavedPositionListByEventIds } from '@services/bitMovinPlayer';
 
 export const digitalEventDetailsSearchSelector = (store: {
   [key: string]: any;
@@ -24,15 +26,22 @@ export const searchQuerySelector = (store: { [key: string]: any }) =>
   store.events.searchQueryString;
 
 export const digitalEventsForHomePageSelector =
-  (myList: Array<string>) => (store: { [key: string]: any }) => {
+  (myList: Array<string>, continueWatchingList: Array<string>) =>
+  (store: { [key: string]: any }) => {
     const eventGroupsArray = Object.entries<{
       title: string;
       ids: Array<string>;
     }>(store.events.eventGroups).filter(([key]) => key in homePageWhiteList);
     const arrayOfIdsForRemoveFromMyList: Array<string> = [];
-    if (myList.length && eventGroupsArray.length) {
+    const arrayOfIdsForRemoveFromContinueWatchingList: Array<string> = [];
+    if (eventGroupsArray.length) {
       eventGroupsArray.unshift(['', { title: myListTitle, ids: myList }]);
+      eventGroupsArray.unshift([
+        '',
+        { title: continueWatchingRailTitle, ids: continueWatchingList },
+      ]);
     }
+
     const eventSections = eventGroupsArray.reduce<
       Array<{
         sectionIndex: number;
@@ -40,7 +49,7 @@ export const digitalEventsForHomePageSelector =
         data: Array<TEventContainer>;
       }>
     >((acc, [_, groupInfo], index) => {
-      acc.push({
+      const rail = {
         sectionIndex: index,
         title: groupInfo.title,
         data: groupInfo.ids.reduce<Array<TEventContainer>>((accEvents, id) => {
@@ -48,14 +57,22 @@ export const digitalEventsForHomePageSelector =
             accEvents.push(store.events.allDigitalEventsDetail[id]);
           } else if (groupInfo.title === myListTitle) {
             arrayOfIdsForRemoveFromMyList.push(id);
+          } else if (groupInfo.title === continueWatchingRailTitle) {
+            arrayOfIdsForRemoveFromContinueWatchingList.push(id);
           }
           return accEvents;
         }, []),
-      });
+      };
+      if (rail.data.length) {
+        acc.push(rail);
+      }
       return acc;
     }, []);
     if (store.events.eventsLoaded) {
       removeIdsFromMyList(arrayOfIdsForRemoveFromMyList);
+      removeItemsFromSavedPositionListByEventIds(
+        arrayOfIdsForRemoveFromContinueWatchingList,
+      );
     }
     return eventSections;
   };

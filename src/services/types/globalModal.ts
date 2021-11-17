@@ -3,3 +3,7 @@ export type TDefaultGlobalModalContentProps = {
   rejectActionHandler?: () => void;
   cancelActionHandler?: () => void;
 };
+
+export type TGlobalModalContentProps = {
+  [key: string]: any;
+} & TDefaultGlobalModalContentProps;

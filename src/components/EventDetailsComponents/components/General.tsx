@@ -21,10 +21,14 @@ import {
 } from '@services/myList';
 
 import { globalModalManager } from '@components/GlobalModal';
-import { NonSubscribedModeAlert } from '@components/GlobalModal/variants';
+import {
+  NonSubscribedModeAlert,
+  СontinueWatchingModal,
+} from '@components/GlobalModal/variants';
 import Prismic from '@prismicio/client';
 import { getSubscribeInfo, fetchVideoURL } from '@services/apiClient';
 import { getVideoDetails } from '@services/prismicApiClient';
+import { getBitMovinSavedPosition } from '@services/bitMovinPlayer';
 
 type Props = {
   event: TEventContainer;
@@ -109,6 +113,54 @@ const General: React.FC<Props> = ({
       if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
         throw new Error('Something went wrong');
       }
+      const videoPositionInfo = await getBitMovinSavedPosition(
+        videoFromPrismic.id,
+        event.id,
+      );
+      if (videoPositionInfo && videoPositionInfo?.position) {
+        const fromTime = new Date(0);
+        fromTime.setSeconds(parseInt(videoPositionInfo.position));
+        globalModalManager.openModal({
+          hasBackground: true,
+          hasLogo: true,
+          contentComponent: СontinueWatchingModal,
+          contentProps: {
+            confirmActionHandler: () => {
+              globalModalManager.closeModal(() => {
+                showPlayer({
+                  videoId: videoFromPrismic.id,
+                  url: manifestInfo.data.data.attributes.hlsManifestUrl,
+                  title,
+                  poster:
+                    'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+                  subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+                  position: videoPositionInfo.position,
+                  eventId: event.id,
+                  savePosition: true,
+                });
+              });
+            },
+            rejectActionHandler: () => {
+              globalModalManager.closeModal(() => {
+                showPlayer({
+                  videoId: videoFromPrismic.id,
+                  url: manifestInfo.data.data.attributes.hlsManifestUrl,
+                  title,
+                  poster:
+                    'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+                  subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+                  position: '0.0',
+                  eventId: event.id,
+                  savePosition: true,
+                });
+              });
+            },
+            videoTitle: title,
+            fromTime: fromTime.toISOString().substr(11, 8),
+          },
+        });
+        return;
+      }
       showPlayer({
         videoId: videoFromPrismic.id,
         url: manifestInfo.data.data.attributes.hlsManifestUrl,
@@ -116,6 +168,9 @@ const General: React.FC<Props> = ({
         poster:
           'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
         subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+        position: '0.0',
+        eventId: event.id,
+        savePosition: true,
       });
     } catch (err) {}
   };
@@ -147,6 +202,8 @@ const General: React.FC<Props> = ({
         poster:
           'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
         subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+        eventId: event.id,
+        position: '0.0',
       });
     } catch (err) {}
   };
