@@ -9,11 +9,13 @@ import {
   Platform,
   HostComponent,
   ViewProps,
-  View,
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
-import { TBitmoviPlayerNativeProps } from '@services/types/bitmovinPlayer';
+import {
+  TBitmoviPlayerNativeProps,
+  TBMPlayerErrorObject,
+} from '@services/types/bitmovinPlayer';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 
@@ -74,7 +76,7 @@ type TPlayerProps = {
   onError?: (event: any) => void;
   title: string;
   subtitle?: string;
-  onClose?: (stoppedTime: string) => void;
+  onClose?: (error: TBMPlayerErrorObject | null, stoppedTime: string) => void;
   configuration: {
     url: string;
     poster?: string;
@@ -118,6 +120,7 @@ const Player: React.FC<TPlayerProps> = props => {
   } = cloneProps;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const controlRef = useRef<TPlayerControlsRef | null>(null);
+  const playerError = useRef<TBMPlayerErrorObject | null>(null);
 
   const [playerReady, setReady] = useState(false);
   const [duration, setDuration] = useState(0.0);
@@ -131,7 +134,6 @@ const Player: React.FC<TPlayerProps> = props => {
     ) {
       controlRef.current.loadSubtitleList(payload.subtitles);
     }
-    console.log(payload?.subtitles, 'subtitles');
     if (!isNaN(initDuration)) {
       setDuration(initDuration);
     }
@@ -224,13 +226,20 @@ const Player: React.FC<TPlayerProps> = props => {
           isNaN(floatTime) || isNaN(initDuration) || floatTime === initDuration
             ? '0.0'
             : floatTime;
-        onClose(stoppedTimePoint.toString());
+        if (typeof onClose === 'function') {
+          onClose(playerError.current, stoppedTimePoint.toString());
+        }
       });
       eventEmitter.addListener('onPlaybackFinished', () => {
         onPlaybackFinished();
       });
       eventEmitter.addListener('onError', event => {
         console.log('error', event);
+        playerError.current = {
+          errCode: event.errCode,
+          errMessage: event.errMessage,
+          url: configuration.url,
+        };
         ROHBitmovinPlayerModule.destroy(findNodeHandle(playerRef.current));
       });
       eventEmitter.addListener('onSubtitleChanged', event => {
@@ -254,7 +263,7 @@ const Player: React.FC<TPlayerProps> = props => {
         eventEmitter.removeAllListeners('onSubtitleChanged');
       }
     };
-  }, [onEvent, onClose, onReady]);
+  }, [onEvent, onClose, onReady, configuration.url]);
 
   const getCurrentTime = useCallback(
     () =>
@@ -370,9 +379,9 @@ const Player: React.FC<TPlayerProps> = props => {
         setSubtitle={setSubtitle}
         autoPlay={autoPlay}
       />
-      {configuration.url === '' && 
+      {configuration.url === '' && (
         <RohText style={styles.textDescription}>Video not provided</RohText>
-      }
+      )}
     </SafeAreaView>
   );
 };
@@ -399,7 +408,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     top: scaleSize(180),
     fontSize: scaleSize(80),
-    color: 'red'
+    color: 'red',
   },
 });
 

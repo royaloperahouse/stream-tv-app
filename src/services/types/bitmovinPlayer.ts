@@ -33,3 +33,9 @@ export type TBMPlayerShowingData = {
   eventId: string;
   savePosition?: boolean;
 };
+
+export type TBMPlayerErrorObject = {
+  errCode: string;
+  errMessage: string;
+  url?: string;
+};

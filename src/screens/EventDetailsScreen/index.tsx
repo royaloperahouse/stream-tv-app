@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
 import {
   View,
@@ -18,9 +18,14 @@ import {
   removeBitMovinSavedPositionByIdAndEventId,
   savePosition,
 } from '@services/bitMovinPlayer';
-import { TBMPlayerShowingData } from '@services/types/bitmovinPlayer';
+import {
+  TBMPlayerShowingData,
+  TBMPlayerErrorObject,
+} from '@services/types/bitmovinPlayer';
 
 import { useFocusEffect } from '@react-navigation/native';
+import { globalModalManager } from '@components/GlobalModal';
+import { ErrorModal } from '@components/GlobalModal/variants';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
@@ -30,6 +35,8 @@ type TEventDetalsScreenProps = StackScreenProps<
 const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   const [bMPlayerShowingData, setIsBMPlayerShowing] =
     useState<TBMPlayerShowingData | null>(null);
+  const [bMPlayerError, setBMPlayerError] =
+    useState<TBMPlayerErrorObject | null>(null);
   const isBMPlayerShowingRef = useRef<boolean>(false);
   const { event } = route.params;
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
@@ -41,7 +48,10 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
     }
   }, []);
 
-  const closePlayer = async (time: string) => {
+  const closePlayer = async (
+    error: TBMPlayerErrorObject | null,
+    time: string,
+  ) => {
     if (bMPlayerShowingData === null) {
       return;
     }
@@ -59,6 +69,11 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
           eventId: bMPlayerShowingData.eventId,
         });
       }
+    }
+
+    if (error) {
+      setBMPlayerError(error);
+      return;
     }
     setIsBMPlayerShowing(null);
     isBMPlayerShowingRef.current = false;
@@ -95,6 +110,27 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
     },
     [bMPlayerShowingData, event, showPlayer],
   );
+
+  useLayoutEffect(() => {
+    if (bMPlayerError) {
+      globalModalManager.openModal({
+        contentComponent: ErrorModal,
+        contentProps: {
+          confirmActionHandler: () => {
+            setIsBMPlayerShowing(null);
+            isBMPlayerShowingRef.current = false;
+            globalModalManager.closeModal(() => {
+              setBMPlayerError(null);
+            });
+          },
+          title: "Player's Error",
+          subtitle: `Something went wrong.\n${bMPlayerError.errCode}: ${
+            bMPlayerError.errMessage
+          }\n${bMPlayerError.url || ''}`,
+        },
+      });
+    }
+  }, [bMPlayerError]);
 
   useFocusEffect(
     useCallback(() => {

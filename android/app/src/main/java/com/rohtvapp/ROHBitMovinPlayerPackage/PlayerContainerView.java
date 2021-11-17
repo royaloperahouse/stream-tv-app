@@ -24,6 +24,8 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.rohtvapp.R;
+import com.bitmovin.player.api.deficiency.ErrorEvent;
+
 
 import java.util.List;
 
@@ -70,6 +72,7 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(PlayerEvent.Ready.class, this::onReady);
         player.on(SourceEvent.Error.class, this::onError);
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
+        player.on(PlayerEvent.Error.class, this::onError);
 
         RelativeLayout playerContainer = findViewById(R.id.player_container);
 
@@ -266,7 +269,7 @@ public class PlayerContainerView extends RelativeLayout {
         }
     }
 
-    private void onError(SourceEvent.Error event) {
+    private void onError(ErrorEvent event) {
         WritableMap map = Arguments.createMap();
         map.putString("message", "error");
         map.putString("errMessage", event.getMessage());
