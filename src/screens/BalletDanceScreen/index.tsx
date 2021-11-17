@@ -60,6 +60,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
               ref={previewRef}
               canMoveUp={section.sectionIndex !== 0}
               canMoveRight={index !== section.data.length - 1}
+              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
               onFocus={scrollToRail}
             />
           )}

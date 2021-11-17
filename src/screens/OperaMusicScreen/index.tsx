@@ -59,6 +59,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
               ref={previewRef}
               canMoveUp={section.sectionIndex !== 0}
               canMoveRight={index !== section.data.length - 1}
+              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
               onFocus={scrollToRail}
             />
           )}

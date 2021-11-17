@@ -7,6 +7,7 @@ import VirtualKeyboard, {
 } from '@components/VirtualKeyboard';
 import { Colors } from '@themes/Styleguide';
 import SearchResult from '@components/SearchResult';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 type TSearchScreenProps = {};
 const SearchScreen: React.FC<TSearchScreenProps> = () => {
@@ -20,7 +21,9 @@ const SearchScreen: React.FC<TSearchScreenProps> = () => {
         <View style={styles.searchTextDisplayContainer}>
           <DisplayForVirtualKeyboard ref={vkRef} />
         </View>
-        <VirtualKeyboard ref={vkRef} />
+        <View hasTVPreferredFocus={true}>
+          <VirtualKeyboard ref={vkRef} />
+        </View>
       </View>
       <View style={styles.resultsContainer}>
         <SearchResult />
