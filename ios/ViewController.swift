@@ -41,25 +41,6 @@ final class ViewController: UIView {
   override init(frame: CGRect) {
     super.init(frame: frame)
     print("initting!")
-//    var plistDictionary: NSDictionary?
-//    if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
-//        plistDictionary = NSDictionary(contentsOfFile: path)
-//    }
-    
-//
-//    config = BitmovinAnalyticsConfig(key: "45a0bac7-b900-4a0f-9d87-41a120744160")
-//    config.cdnProvider = CdnProvider.bitmovin
-//    config.customData1 = "customData1"
-//    config.customData2 = "customData2"
-//    config.customData3 = "customData3"
-//    config.customData4 = "customData4"
-//    config.customData5 = "customData5"
-//    config.customerUserId = "customUserId"
-//    config.experimentName = "experiment-1"
-//    config.videoId = "tvOSHLSStatic"
-//    config.path = "/vod/breadcrumb/"
-//
-//    analyticsCollector = BitmovinAnalytics(config: config)
   }
   
   deinit {
@@ -137,7 +118,6 @@ final class ViewController: UIView {
           configAnalytics.videoId = self.analytics!["videoId"] as? String;
           configAnalytics.title = self.analytics!["title"] as? String;
           configAnalytics.customerUserId = self.analytics!["userId"] as? String;
-          // configAnalytics.cdnProvider = CdnProvider.bitmovin
           configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
           configAnalytics.customData1 = self.analytics!["customData1"] as? String;
           configAnalytics.customData2 = self.analytics!["customData2"] as? String;
@@ -214,6 +194,17 @@ final class ViewController: UIView {
 extension ViewController: PlayerListener {
     func onEvent(_ event: Event, player: Player) {
         dump(event, name: "[Player Event]", maxDepth: 1)
+    }
+  
+    public func onMetadata(_ event: MetadataEvent, player: Player) {
+        if event.metadataType == .ID3 {
+            for entry in event.metadata.entries {
+                if let metadataEntry = entry as? AVMetadataItem,
+                   let id3Key = metadataEntry.key {
+                    print("Received metadata with key: \(id3Key)")
+                }
+            }
+        }
     }
 }
 
