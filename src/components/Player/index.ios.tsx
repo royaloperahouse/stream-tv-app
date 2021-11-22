@@ -307,7 +307,6 @@ const Player: React.FC<TPlayerProps> = props => {
     playerRef.current = ref;
   };
 
-  console.log('config is ', configuration);
   return (
     <SafeAreaView style={styles.defaultPlayerStyle}>
       <NativeBitMovinPlayer

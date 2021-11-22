@@ -19,6 +19,8 @@ final class ViewController: UIView {
   let playerConfig = PlayerConfig()
   let playbackConfig = PlaybackConfig()
   
+  let maxDepth = 2
+  
   @objc var hasZoom: Bool = false
   @objc var autoPlay: Bool = false
   @objc var configuration: NSDictionary? = nil
@@ -206,6 +208,42 @@ extension ViewController: PlayerListener {
             }
         }
     }
+  
+  func onPlay(_ event: PlayEvent, player: Player) {
+    dump(event, name: "** PlayEvent", maxDepth: maxDepth)
+  }
+  
+  func onReady(_ event: ReadyEvent, player: Player) {
+    dump(event, name: "** ReadyEvent", maxDepth: maxDepth)
+  }
+  
+  func onPaused(_ event: PausedEvent, player: Player) {
+    dump(event, name: "** PausedEvent", maxDepth: maxDepth)
+  }
+  
+  func onTimeChanged(_ event: TimeChangedEvent, player: Player) {
+    dump(event, name: "** TimeChangedEvent", maxDepth: maxDepth)
+  }
+  
+  func onSeeked(_ event: SeekedEvent, player: Player) {
+    dump(event, name: "** SeekedEvent", maxDepth: maxDepth)
+  }
+  
+  func onDestroy(_ event: DestroyEvent, player: Player) {
+    dump(event, name: "** DestroyEvent", maxDepth: maxDepth)
+  }
+  
+  func onPlaybackFinished(_ event: PlaybackFinishedEvent, player: Player) {
+    dump(event, name: "** PlaybackFinishedEvent", maxDepth: maxDepth)
+  }
+  
+  func onPlayerError(_ event: PlayerErrorEvent, player: Player) {
+    dump(event, name: "** PlayerErrorEvent", maxDepth: maxDepth)
+  }
+  
+  func onSubtitleChanged(_ event: SubtitleChangedEvent, player: Player) {
+    dump(event, name: "** SubtitleChangedEvent", maxDepth: maxDepth)
+  }
 }
 
 
