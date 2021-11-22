@@ -316,6 +316,7 @@ const Player: React.FC<TPlayerProps> = props => {
         style={
           styles.playerLoaded}
         autoPlay={autoPlay}
+        onPlay={(event) => {console.log('play:', event);}}
       />
       {configuration.url === '' && 
         <RohText style={styles.textDescription}>Video not provided</RohText>

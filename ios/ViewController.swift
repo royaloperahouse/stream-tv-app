@@ -210,7 +210,11 @@ extension ViewController: PlayerListener {
     }
   
   func onPlay(_ event: PlayEvent, player: Player) {
-    dump(event, name: "** PlayEvent", maxDepth: maxDepth)
+    if self.onPlay != nil {
+      print("sending time \(event.time)")
+      onPlay!(["time": event.time])
+    }
+    // dump(event, name: "** PlayEvent", maxDepth: maxDepth)
   }
   
   func onReady(_ event: ReadyEvent, player: Player) {
