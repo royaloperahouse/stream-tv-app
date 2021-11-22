@@ -30,6 +30,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
     return settingsSectionsConfig[contentKey].ContentComponent;
   };
   const Content = contentFactory(activeContentKey);
+
   return (
     <View style={styles.root}>
       <View style={styles.container}>
@@ -41,6 +42,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <SettingsNavMenuItem
+                isFirst={index === 0}
                 isActive={item.key === activeContentKey}
                 title={item.navMenuItemTitle}
                 canMoveDown={index !== collectionOfSettingsSections.length - 1}

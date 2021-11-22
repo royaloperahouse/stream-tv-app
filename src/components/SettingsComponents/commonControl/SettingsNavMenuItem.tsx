@@ -4,8 +4,10 @@ import TouchableHighlightWrapper, {
 } from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { navMenuManager } from '@components/NavMenu';
 
 type TSettingsNavMenuItemProps = {
   title: string;
@@ -16,6 +18,7 @@ type TSettingsNavMenuItemProps = {
   ) => void;
   isActive: boolean;
   hasTVPreferredFocus?: boolean;
+  isFirst: boolean;
 };
 const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
   const {
@@ -25,6 +28,7 @@ const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
     onFocus,
     isActive,
     hasTVPreferredFocus,
+    isFirst,
   } = props;
   const touchableRef = useRef<TTouchableHighlightWrapperRef>();
   const focusHandler = () => {
@@ -32,7 +36,17 @@ const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
       onFocus(touchableRef);
     }
   };
-
+  const route = useRoute();
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirst && typeof touchableRef.current?.getNode === 'function') {
+        navMenuManager.setNextFocusRightValue(
+          touchableRef.current?.getNode(),
+          route.name,
+        );
+      }
+    }, [isFirst, route.name]),
+  );
   return (
     <TouchableHighlightWrapper
       ref={touchableRef}
