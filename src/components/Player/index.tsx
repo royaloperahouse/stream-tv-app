@@ -16,7 +16,7 @@ import {
   TBitmoviPlayerNativeProps,
   TBMPlayerErrorObject,
 } from '@services/types/bitmovinPlayer';
-import RohText from '@components/RohText';
+
 import { scaleSize } from '@utils/scaleSize';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
@@ -123,6 +123,7 @@ const Player: React.FC<TPlayerProps> = props => {
   const playerError = useRef<TBMPlayerErrorObject | null>(null);
 
   const [playerReady, setReady] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [duration, setDuration] = useState(0.0);
 
   const onReady: TCallbackFunc = useCallback(data => {
@@ -147,7 +148,6 @@ const Player: React.FC<TPlayerProps> = props => {
   };
 
   const onPause: TCallbackFunc = _ => {
-    console.log('pause');
     if (typeof controlRef.current?.setPlay === 'function') {
       controlRef.current.setPlay(false);
     }
@@ -234,7 +234,6 @@ const Player: React.FC<TPlayerProps> = props => {
         onPlaybackFinished();
       });
       eventEmitter.addListener('onError', event => {
-        console.log('error', event);
         playerError.current = {
           errCode: event.errCode,
           errMessage: event.errMessage,
@@ -244,6 +243,9 @@ const Player: React.FC<TPlayerProps> = props => {
       });
       eventEmitter.addListener('onSubtitleChanged', event => {
         console.log('onSubtitleChanged', event);
+      });
+      eventEmitter.addListener('onLoad', (event: any) => {
+        setLoaded(true);
       });
     }
     return () => {
@@ -261,6 +263,7 @@ const Player: React.FC<TPlayerProps> = props => {
         eventEmitter.removeAllListeners('onReady');
         eventEmitter.removeAllListeners('onError');
         eventEmitter.removeAllListeners('onSubtitleChanged');
+        eventEmitter.removeAllListeners('onLoad');
       }
     };
   }, [onEvent, onClose, onReady, configuration.url]);
@@ -346,22 +349,14 @@ const Player: React.FC<TPlayerProps> = props => {
     actionClose();
     return true;
   });
-  useLayoutEffect(() => {
-    if (
-      playerReady &&
-      autoPlay &&
-      typeof controlRef.current?.controlFadeIn === 'function'
-    ) {
-      controlRef.current.controlFadeIn();
-    }
-  }, [playerReady, autoPlay]);
+
   return (
     <SafeAreaView style={styles.defaultPlayerStyle}>
       <NativeBitMovinPlayer
         ref={setPlayer}
         configuration={configuration}
         analytics={analytics}
-        style={[playerReady ? styles.playerLoaded : {}]}
+        style={loaded ? styles.playerLoaded : {}}
         autoPlay={autoPlay}
       />
       <PlayerControls
@@ -379,9 +374,6 @@ const Player: React.FC<TPlayerProps> = props => {
         setSubtitle={setSubtitle}
         autoPlay={autoPlay}
       />
-      {configuration.url === '' && (
-        <RohText style={styles.textDescription}>Video not provided</RohText>
-      )}
     </SafeAreaView>
   );
 };

@@ -59,21 +59,24 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       onPausePress,
       onClose,
       setSubtitle,
+      playerLoaded,
+      autoPlay,
     } = props;
     const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
     const tvEventFireCounter = useRef<number>(0);
     const activeAnimation = useRef<Animated.Value>(
-      new Animated.Value(1),
+      new Animated.Value(0),
     ).current;
-    const [isPlaying, setPlaying] = useState(false);
     const isPlayingRef = useRef<boolean>(false);
     const controlMountedRef = useRef<boolean>(false);
     const progressBarRef = useRef<TProgressBarRef | null>(null);
     const subtitleButtonRef = useRef<null | TTouchableHighlightWrapperRef>(
       null,
     );
+    const centralControlsRef = useRef<TCentralControlsRef | null>(null);
     const subtitlesRef = useRef<null | TSubtitlesRef>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const controlPanelVisibleRef = useRef<boolean>(true);
     const focusToSutitleButton = useCallback(() => {
       if (
         typeof subtitleButtonRef.current?.getRef === 'function' &&
@@ -89,6 +92,10 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         subtitlesRef.current.showSubtitles();
       }
     };
+    const getControlPanelVisible = useCallback(
+      () => controlPanelVisibleRef.current,
+      [],
+    );
     useImperativeHandle(
       ref,
       () => ({
@@ -105,7 +112,9 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
             return;
           }
           isPlayingRef.current = play;
-          setPlaying(play);
+          if (typeof centralControlsRef.current?.setPlay === 'function') {
+            centralControlsRef.current.setPlay(play);
+          }
         },
         loadSubtitleList: (subtitles: TSubtitles) => {
           if (!controlMountedRef.current) {
@@ -116,31 +125,54 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           }
         },
         controlFadeIn: () => {
-          isPlayingRef.current = true;
           Animated.timing(activeAnimation, {
             toValue: 0,
             useNativeDriver: true,
             duration: 5000,
-          }).start();
+          }).start(({ finished }) => {
+            if (finished) {
+              controlPanelVisibleRef.current = false;
+            }
+          });
         },
         controlFadeOut: () => {
           Animated.timing(activeAnimation, {
             toValue: 1,
             useNativeDriver: true,
             duration: 500,
-          }).start();
+          }).start(({ finished }) => {
+            if (finished) {
+              controlPanelVisibleRef.current = true;
+            }
+          });
         },
       }),
-      [activeAnimation],
+      [],
     );
 
     useLayoutEffect(() => {
+      if (autoPlay && playerLoaded) {
+        activeAnimation.setValue(1);
+        controlPanelVisibleRef.current = true;
+        Animated.timing(activeAnimation, {
+          toValue: 0,
+          useNativeDriver: true,
+          duration: 5000,
+        }).start(({ finished }) => {
+          if (finished) {
+            controlPanelVisibleRef.current = false;
+          }
+        });
+      }
+      if (!autoPlay && playerLoaded) {
+        activeAnimation.setValue(1);
+        controlPanelVisibleRef.current = true;
+      }
+    }, [autoPlay && playerLoaded]);
+
+    useLayoutEffect(() => {
       tvEventHandler.current?.enable(null, (_: any, eve: any) => {
-        if (
-          !controlMountedRef.current ||
-          eve?.eventType === 'blur' ||
-          eve?.eventType === 'focus'
-        ) {
+        if (eve?.eventType === 'blur' || eve?.eventType === 'focus') {
           return;
         }
         if (tvEventFireCounter.current === 1) {
@@ -153,6 +185,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
             if (!finished) {
               activeAnimation.setValue(1);
             }
+            controlPanelVisibleRef.current = true;
             if (timeoutRef.current) {
               clearTimeout(timeoutRef.current);
             }
@@ -164,7 +197,11 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
                 toValue: 0,
                 useNativeDriver: true,
                 duration: 500,
-              }).start();
+              }).start(({ finished: animationFinished }) => {
+                if (animationFinished) {
+                  controlPanelVisibleRef.current = false;
+                }
+              });
             }, 5000);
           });
           return;
@@ -174,7 +211,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       return () => {
         tvEventHandler?.current.disable();
       };
-    }, [activeAnimation]);
+    }, []);
 
     useLayoutEffect(() => {
       controlMountedRef.current = true;
@@ -184,9 +221,6 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
       };
     }, []);
-    useLayoutEffect(() => {
-      console.log('control render');
-    });
     return (
       <SafeAreaView style={styles.root}>
         <Animated.View style={[styles.container, { opacity: activeAnimation }]}>
@@ -195,13 +229,13 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               icon={PlayerIcons.close}
               onPress={onClose}
               text="Exit"
-              visibleAnimation={activeAnimation}
+              getControlPanelVisible={getControlPanelVisible}
             />
             <ControlButton
               icon={PlayerIcons.restart}
               onPress={onRestartPress}
               text="Restart"
-              visibleAnimation={activeAnimation}
+              getControlPanelVisible={getControlPanelVisible}
             />
           </View>
           <View style={styles.titleContainer}>
@@ -222,30 +256,20 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           </View>
           <ProgressBar duration={duration} ref={progressBarRef} />
           <View style={styles.controlContainer}>
-            <View style={styles.centralControls}>
-              <ControlButton
-                icon={PlayerIcons.seekBackward}
-                onPress={onSeekBackwardPress}
-                visibleAnimation={activeAnimation}
-              />
-              <ControlButton
-                icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
-                onPress={isPlaying ? onPausePress : onPlayPress}
-                hasTVPreferredFocus
-                visibleAnimation={activeAnimation}
-              />
-              <ControlButton
-                icon={PlayerIcons.seekForward}
-                onPress={onSeekForwardPress}
-                visibleAnimation={activeAnimation}
-              />
-            </View>
+            <CentralControls
+              onSeekBackwardPress={onSeekBackwardPress}
+              onSeekForwardPress={onSeekForwardPress}
+              onPausePress={onPausePress}
+              onPlayPress={onPlayPress}
+              ref={centralControlsRef}
+              getControlPanelVisible={getControlPanelVisible}
+            />
             <View style={styles.rightControls}>
               <ControlButton
                 ref={subtitleButtonRef}
                 icon={PlayerIcons.subtitles}
                 onPress={openSubtitleListHandler}
-                visibleAnimation={activeAnimation}
+                getControlPanelVisible={getControlPanelVisible}
               />
             </View>
           </View>
@@ -480,6 +504,71 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
     </SafeAreaView>
   );
 });
+
+//Central Controls Component
+
+type TCentralControlsProps = {
+  onSeekForwardPress: () => void;
+  onSeekBackwardPress: () => void;
+  onPausePress: () => void;
+  onPlayPress: () => void;
+  getControlPanelVisible: () => boolean;
+};
+type TCentralControlsRef = {
+  setPlay: (play: boolean) => void;
+};
+const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
+  (props, ref) => {
+    const {
+      onSeekForwardPress,
+      onSeekBackwardPress,
+      onPausePress,
+      onPlayPress,
+      getControlPanelVisible,
+    } = props;
+    const centralControlsMounted = useRef<boolean>(false);
+    const [isPlaying, setPlaying] = useState(false);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        setPlay: play => {
+          if (centralControlsMounted.current) {
+            setPlaying(play);
+          }
+        },
+      }),
+      [],
+    );
+
+    useLayoutEffect(() => {
+      centralControlsMounted.current = true;
+      return () => {
+        centralControlsMounted.current = false;
+      };
+    }, []);
+    return (
+      <View style={styles.centralControls}>
+        <ControlButton
+          icon={PlayerIcons.seekBackward}
+          onPress={onSeekBackwardPress}
+          getControlPanelVisible={getControlPanelVisible}
+        />
+        <ControlButton
+          icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
+          onPress={isPlaying ? onPausePress : onPlayPress}
+          hasTVPreferredFocus
+          getControlPanelVisible={getControlPanelVisible}
+        />
+        <ControlButton
+          icon={PlayerIcons.seekForward}
+          onPress={onSeekForwardPress}
+          getControlPanelVisible={getControlPanelVisible}
+        />
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   root: {
