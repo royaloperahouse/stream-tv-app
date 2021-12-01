@@ -1,5 +1,5 @@
-import React, { useState, forwardRef, useLayoutEffect, useRef } from 'react';
-import { View, Image, StyleSheet, Animated } from 'react-native';
+import React, { useState, forwardRef } from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 
 import { scaleSize } from '@utils/scaleSize';
 
@@ -14,7 +14,7 @@ type Props = {
   onPress?: (val: boolean) => void;
   onFocus?: () => void;
   hasTVPreferredFocus?: boolean;
-  visibleAnimation: Animated.Value;
+  getControlPanelVisible: () => boolean;
 };
 
 const ControlButton = forwardRef<any, Props>((props, ref) => {
@@ -25,7 +25,7 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
     onPress,
     onFocus,
     hasTVPreferredFocus = false,
-    visibleAnimation,
+    getControlPanelVisible,
   } = props;
   const onFocusHandler = () => {
     setFocus(true);
@@ -33,22 +33,16 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
       onFocus();
     }
   };
-  const isButtonVisible = useRef<boolean>(true);
   const onBlurHandler = () => setFocus(false);
 
   const onPressHandler = () => {
-    if (typeof onPress === 'function' && isButtonVisible.current) {
+    if (!getControlPanelVisible()) {
+      return;
+    }
+    if (typeof onPress === 'function') {
       onPress(true);
     }
   };
-  useLayoutEffect(() => {
-    const id = visibleAnimation.addListener(({ value }) => {
-      isButtonVisible.current = value === 1;
-    });
-    return () => {
-      visibleAnimation.removeListener(id);
-    };
-  }, [visibleAnimation]);
   return (
     <View style={styles.buttonContainer}>
       <TouchableHighlightWrapper
