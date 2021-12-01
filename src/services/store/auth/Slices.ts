@@ -8,6 +8,7 @@ interface AuthState {
   showIntroScreen: boolean;
   errorString: string;
   fullSubscription: boolean;
+  userEmail: string;
 }
 
 const initialState: AuthState = {
@@ -18,6 +19,7 @@ const initialState: AuthState = {
   showIntroScreen: true,
   errorString: '',
   fullSubscription: false,
+  userEmail: '',
 };
 
 const appSlice = createSlice({
@@ -42,6 +44,7 @@ const appSlice = createSlice({
       state.isLoading = false;
       state.showIntroScreen = false;
       state.errorString = '';
+      state.userEmail = payload.data.attributes.email;
     },
     checkDeviceError: (state, { payload }) => {
       state.devicePin = payload?.detail || '';

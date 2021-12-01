@@ -13,3 +13,6 @@ export const deviceAuthenticatedErrorSelector = (store: {
 
 export const subscribedModeSelector = (store: { [key: string]: any }) =>
   store.auth.fullSubscription;
+
+export const userEmailSelector = (store: { [key: string]: any }) =>
+  store.auth.userEmail;
