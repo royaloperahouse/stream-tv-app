@@ -23,7 +23,7 @@ type TAppProps = {};
 const App: React.FC<TAppProps> = () => {
   return (
     <Provider store={store}>
-      <FlagsProvider features={{ hasOpera: false }}>
+      <FlagsProvider features={{ hasOpera: false, canExit: false }}>
         <AppLayout />
       </FlagsProvider>
     </Provider>

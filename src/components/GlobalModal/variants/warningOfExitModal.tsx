@@ -21,7 +21,6 @@ const WarningOfExitModal: React.FC<TGlobalModalContentProps> = ({
         <View style={styles.actionButtonsContainer}>
           <TouchableHighlightWrapper
             style={styles.primaryActionButton}
-            hasTVPreferredFocus
             canMoveLeft={false}
             canMoveDown={false}
             canMoveUp={false}
@@ -36,6 +35,7 @@ const WarningOfExitModal: React.FC<TGlobalModalContentProps> = ({
           <TouchableHighlightWrapper
             style={styles.secondaryActionButton}
             canMoveDown={false}
+            hasTVPreferredFocus
             canMoveUp={false}
             canMoveRight={false}
             styleFocused={styles.secondaryActionButtonFocus}

@@ -51,6 +51,7 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
+import { useFeature } from 'flagged';
 
 type TNavMenuProps = {
   navMenuConfig: Array<{
@@ -108,6 +109,7 @@ export const navMenuManager = Object.freeze({
 });
 
 const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
+  const canExit = useFeature('canExit');
   const navMenuMountedRef = useRef<boolean>(false);
   const [isMenuVisible, setIsMenuVisible] = useState<boolean>(true);
   const [isMenuFocused, setIsMenuFocused] = useState<boolean>(false);
@@ -294,6 +296,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     const backButtonCallback = () => {
       const routeState = getCurrentRoute();
       if (
+        canExit &&
         routeState &&
         navMenuConfig.some(route => route.navMenuScreenName === routeState.name)
       ) {
@@ -305,7 +308,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', backButtonCallback);
     };
-  }, [navMenuConfig, exitOfApp]);
+  }, [navMenuConfig, exitOfApp, canExit]);
   useLayoutEffect(() => {
     if (
       !navMenuMountedRef.current ||
@@ -404,34 +407,36 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           )}
         />
       </Animated.View>
-      <Animated.View
-        style={[
-          styles.exitOfAppContainer,
-          {
-            opacity: exitOfAppInterpolation,
-            width: menuFocusInterpolate,
-            marginLeft: marginLeftInterpolation,
-            marginRight: marginRightInterpolation,
-          },
-        ]}>
-        <TouchableHighlightWrapper
-          accessible={isMenuFocused}
-          onPress={exitOfAppPressHandler}
-          ref={exitOfAppButtonRef}
-          style={styles.exitOfAppButton}
-          onFocus={() => {
-            onBlurRef.current = false;
-            exitOfAppButtonGotFocus.current = true;
-            setActiveMenuid('');
-          }}
-          styleFocused={styles.exitOfAppButtonActive}
-          canCollapseNavMenu={false}
-          canMoveDown={false}
-          canMoveRight={false}
-          canMoveLeft={false}>
-          <RohText style={styles.exitOfAppText}>Exit ROH Stream</RohText>
-        </TouchableHighlightWrapper>
-      </Animated.View>
+      {canExit && (
+        <Animated.View
+          style={[
+            styles.exitOfAppContainer,
+            {
+              opacity: exitOfAppInterpolation,
+              width: menuFocusInterpolate,
+              marginLeft: marginLeftInterpolation,
+              marginRight: marginRightInterpolation,
+            },
+          ]}>
+          <TouchableHighlightWrapper
+            accessible={isMenuFocused}
+            onPress={exitOfAppPressHandler}
+            ref={exitOfAppButtonRef}
+            style={styles.exitOfAppButton}
+            onFocus={() => {
+              onBlurRef.current = false;
+              exitOfAppButtonGotFocus.current = true;
+              setActiveMenuid('');
+            }}
+            styleFocused={styles.exitOfAppButtonActive}
+            canCollapseNavMenu={false}
+            canMoveDown={false}
+            canMoveRight={false}
+            canMoveLeft={false}>
+            <RohText style={styles.exitOfAppText}>Exit ROH Stream</RohText>
+          </TouchableHighlightWrapper>
+        </Animated.View>
+      )}
     </View>
   );
 };
