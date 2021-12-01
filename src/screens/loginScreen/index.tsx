@@ -52,7 +52,7 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
               </RohText>
 
               <RohText style={styles.pin}>
-                {devicePin || 'pin did not found'}
+                {devicePin || 'Pin not found'}
               </RohText>
               <RohText style={styles.regular}>
                 {deviceAuthenticatedError}
