@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     marginTop: scaleSize(186),
   },
   welcome: {
-    marginTop: scaleSize(174),
+    marginTop: scaleSize(126),
     color: 'white',
     textTransform: 'uppercase',
     fontSize: scaleSize(38),
