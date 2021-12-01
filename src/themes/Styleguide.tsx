@@ -8,6 +8,7 @@ export const Colors = Object.freeze({
   searchDisplayBackgroundColor: '#4B5B7A',
   midGrey: '#7E91B4',
   tVMidGrey: '#6887B6',
+  tvMidGreyWith50Alpha: '#364b6b',
   title: '#FFFFFF',
   subtitlesActiveBackground: '#1866DC',
   streamPrimary: '#1866DC',

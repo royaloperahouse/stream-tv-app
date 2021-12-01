@@ -1,6 +1,7 @@
 import {
   SignOut,
   SwitchSubscriptionMode,
+  Account,
 } from '@components/SettingsComponents';
 
 export const settingsTitle = 'SETTINGS';
@@ -22,7 +23,7 @@ export const settingsSectionsConfig: {
   account: {
     key: 'account',
     navMenuItemTitle: 'ACCOUNT',
-    ContentComponent: () => null,
+    ContentComponent: Account,
   },
   signOut: {
     key: 'signOut',
