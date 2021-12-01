@@ -84,6 +84,9 @@ const GlobalModal: React.FC<TGlobalModalProps> = () => {
           if (typeof cb === 'function') {
             cb();
           }
+          if (!mounted.current) {
+            return;
+          }
           setOpen(null);
         });
       },
@@ -114,6 +117,11 @@ const GlobalModal: React.FC<TGlobalModalProps> = () => {
 
   useLayoutEffect(() => {
     mounted.current = true;
+    return () => {
+      if (mounted?.current) {
+        mounted.current = false;
+      }
+    };
   }, []);
 
   if (open && open.hasLogo !== false) {

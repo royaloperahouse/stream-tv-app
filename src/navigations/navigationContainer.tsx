@@ -5,6 +5,7 @@ import {
   CommonActions,
   StackActions,
   DefaultTheme,
+  Route,
 } from '@react-navigation/native';
 
 const navigationRef = createRef<NavigationContainerRef>();
@@ -71,6 +72,14 @@ export function resetStackCacheAndNavigate(
         index: stateIndex,
       }),
     );
+  }
+}
+
+export function getCurrentRoute():
+  | Route<string, object | undefined>
+  | undefined {
+  if (isReady && navigationRef.current?.getCurrentRoute) {
+    return navigationRef.current.getCurrentRoute();
   }
 }
 
