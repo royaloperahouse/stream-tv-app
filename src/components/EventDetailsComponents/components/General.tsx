@@ -131,10 +131,11 @@ const General: React.FC<Props> = ({
                 showPlayer({
                   videoId: videoFromPrismic.id,
                   url: manifestInfo.data.data.attributes.hlsManifestUrl,
-                  title,
+                  title:
+                    videoFromPrismic.data?.video_title[0]?.text || title || '',
                   poster:
                     'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                  subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+                  subtitle: '',
                   position: videoPositionInfo.position,
                   eventId: event.id,
                   savePosition: true,
@@ -146,10 +147,11 @@ const General: React.FC<Props> = ({
                 showPlayer({
                   videoId: videoFromPrismic.id,
                   url: manifestInfo.data.data.attributes.hlsManifestUrl,
-                  title,
+                  title:
+                    videoFromPrismic.data?.video_title[0]?.text || title || '',
                   poster:
                     'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                  subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+                  subtitle: '',
                   position: '0.0',
                   eventId: event.id,
                   savePosition: true,
@@ -165,10 +167,10 @@ const General: React.FC<Props> = ({
       showPlayer({
         videoId: videoFromPrismic.id,
         url: manifestInfo.data.data.attributes.hlsManifestUrl,
-        title,
+        title: videoFromPrismic.data?.video_title[0]?.text || title || '',
         poster:
           'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-        subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+        subtitle: '',
         position: '0.0',
         eventId: event.id,
         savePosition: true,
@@ -214,10 +216,10 @@ const General: React.FC<Props> = ({
       showPlayer({
         videoId: videoFromPrismic.id,
         url: manifestInfo.data.data.attributes.hlsManifestUrl,
-        title,
+        title: videoFromPrismic.data?.video_title[0]?.text || title || '',
         poster:
           'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-        subtitle: videoFromPrismic.data?.video_title[0]?.text || '',
+        subtitle: '',
         eventId: event.id,
         position: '0.0',
       });
