@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "927519488741",
+    "project_id": "test100-b28b5",
+    "storage_bucket": "test100-b28b5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927519488741:android:6a9d55c98dbf715408f20c",
+        "android_client_info": {
+          "package_name": "com.rohtvapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "927519488741-si4i0j7a8sjsd2apm1ip8hf8u6a8oqe8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVmJ60Q9cX1pTtQetknUDjteq4MZy5N74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "927519488741-si4i0j7a8sjsd2apm1ip8hf8u6a8oqe8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
