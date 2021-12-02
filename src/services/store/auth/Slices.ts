@@ -18,7 +18,7 @@ const initialState: AuthState = {
   customerId: null,
   showIntroScreen: true,
   errorString: '',
-  fullSubscription: false,
+  fullSubscription: true,
   userEmail: '',
 };
 

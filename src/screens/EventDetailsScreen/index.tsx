@@ -148,7 +148,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
       <Player
         autoPlay
         configuration={{
-          url: bMPlayerShowingData.url,
+          url: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
           poster: bMPlayerShowingData.poster,
           offset: bMPlayerShowingData.position || '0.0',
         }}

@@ -2,6 +2,7 @@ package com.rohtvapp.ROHBitMovinPlayerPackage;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -57,9 +58,10 @@ public class PlayerContainerView extends RelativeLayout {
         PlayerConfig playerConfig = new PlayerConfig();
         playerConfig.setStyleConfig(styleConfig);
 
+        playerView = findViewById(R.id.bitmovinPlayerView);
         player = Player.create(context, playerConfig);
-
-        playerView = new PlayerView(context, player);
+        //playerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        playerView.setPlayer(player);
 
         player.on(SourceEvent.Loaded.class, this::onLoad);
         player.on(PlayerEvent.Playing.class, this::onPlay);
@@ -74,20 +76,27 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
         player.on(PlayerEvent.Error.class, this::onError);
 
-        RelativeLayout playerContainer = findViewById(R.id.player_container);
 
-        subtitleView = new SubtitleView(context, null);
+        subtitleView = findViewById(R.id.bitmovinSubtitleView);
         subtitleView.setPlayer(player);
-        subtitleView.setUserDefaultStyle();
-        subtitleView.setUserDefaultTextSize();
 
-        // Add the SubtitleView to the layout
-        playerContainer.addView(subtitleView);
-
-        // Add the PlayerView to the layout as first position (so it is the behind the SubtitleView)
-        playerContainer.addView(playerView, 0);
         player.setVolume(100);
     }
+//
+//    @Override
+//    public void requestLayout() {
+//        super.requestLayout();
+//        post(measureAndLayout);
+//    }
+//
+//    private final Runnable measureAndLayout = new Runnable() {
+//        @Override
+//        public void run() {
+//            measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+//                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+//            layout(getLeft(), getTop(), getRight(), getBottom());
+//        }
+//    };
 
     public void configure(Source source) {
         player.load(source);
