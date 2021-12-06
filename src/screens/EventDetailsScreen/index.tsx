@@ -26,6 +26,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { globalModalManager } from '@components/GlobalModal';
 import { ErrorModal } from '@components/GlobalModal/variants';
+import analytics from '@react-native-firebase/analytics';
+import get from 'lodash.get';
 
 type TEventDetalsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
@@ -47,6 +49,17 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
       isBMPlayerShowingRef.current = true;
     }
   }, []);
+
+  const title: string =
+  get(event.data, ['vs_event_details', 'title'], '').replace(
+    /(<([^>]+)>)/gi,
+    '',
+  ) ||
+  get(event.data, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
+  
+  analytics().logScreenView({
+    screen_name: `Event details screen for ${title}`
+  });
 
   const closePlayer = async (
     error: TBMPlayerErrorObject | null,

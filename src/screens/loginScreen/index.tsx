@@ -11,6 +11,7 @@ import {
   devicePinSelector,
   deviceAuthenticatedErrorSelector,
 } from '@services/store/auth/Selectors';
+import analytics from '@react-native-firebase/analytics';
 
 type TLoginScreenProps = {};
 
@@ -20,6 +21,10 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
     deviceAuthenticatedErrorSelector,
     shallowEqual,
   );
+  
+  analytics().logScreenView({
+    screen_name: "Login Screen"
+  });
 
   return (
     <WithBackground>
