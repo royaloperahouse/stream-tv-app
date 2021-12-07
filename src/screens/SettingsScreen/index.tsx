@@ -14,7 +14,6 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
-import analytics from '@react-native-firebase/analytics';
 
 type TSettingsScreenProps = {};
 const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
@@ -31,11 +30,6 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
     return settingsSectionsConfig[contentKey].ContentComponent;
   };
   const Content = contentFactory(activeContentKey);
-
-  analytics().logScreenView({
-    screen_class: 'SettingsScreen',
-    screen_name: 'Settings Screen'
-  });
 
   return (
     <View style={styles.root}>

@@ -186,6 +186,8 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
+    implementation 'com.google.android.gms:play-services-tagmanager:17.0.1'
+
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     implementation 'com.bitmovin.player:player:3.4.0'

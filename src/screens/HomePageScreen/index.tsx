@@ -16,7 +16,6 @@ import {
 } from '@configs/navMenuConfig';
 import { useMyList } from '@hooks/useMyList';
 import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
-import analytics from '@react-native-firebase/analytics';
 
 type THomePageScreenProps = {};
 const HomePageScreen: React.FC<THomePageScreenProps> = () => {
@@ -29,10 +28,6 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
   if (!data.length) {
     return null;
   }
-  analytics().logScreenView({
-    screen_class: 'HomePageScreen',
-    screen_name: 'Home Screen'
-  });
 
   return (
     <View style={styles.root}>

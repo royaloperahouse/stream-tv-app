@@ -57,9 +57,10 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
   ) ||
   get(event.data, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
   
-  analytics().logScreenView({
-    screen_class: 'EventDetailsScreen',
-    screen_name: `Event details screen for ${title}`
+  analytics().logViewItem({
+    items: [{
+      item_name: title
+    }]
   });
 
   const closePlayer = async (

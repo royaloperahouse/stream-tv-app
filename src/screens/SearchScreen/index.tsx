@@ -7,16 +7,10 @@ import VirtualKeyboard, {
 } from '@components/VirtualKeyboard';
 import { Colors } from '@themes/Styleguide';
 import SearchResult from '@components/SearchResult';
-import analytics from '@react-native-firebase/analytics';
 
 type TSearchScreenProps = {};
 const SearchScreen: React.FC<TSearchScreenProps> = () => {
   const vkRef = useRef();
-  
-  analytics().logScreenView({
-    screen_class: 'SearchScreen',
-    screen_name: 'Search Screen'
-  });
 
   return (
     <View style={styles.root}>

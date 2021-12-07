@@ -15,7 +15,6 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
-import analytics from '@react-native-firebase/analytics';
 
 type TOperaMusicScreenProps = {};
 const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
@@ -36,11 +35,6 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
     return null;
   }
 
-  analytics().logScreenView({
-    screen_class: 'OperaMusicScreen',
-    screen_name: 'Opera & Music Screen'
-  });
-  '
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />

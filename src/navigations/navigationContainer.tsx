@@ -1,4 +1,4 @@
-import React, { createRef, useCallback, useEffect } from 'react';
+import React, { createRef, useCallback, useEffect, useRef } from 'react';
 import {
   NavigationContainer,
   NavigationContainerRef,
@@ -7,8 +7,10 @@ import {
   DefaultTheme,
   Route,
 } from '@react-navigation/native';
+import analytics from '@react-native-firebase/analytics';
 
 const navigationRef = createRef<NavigationContainerRef>();
+
 let isReady: boolean = false;
 const customTheme: typeof DefaultTheme = {
   ...DefaultTheme,
@@ -21,19 +23,45 @@ type TROHNavigationContainerProps = {};
 const ROHNavigationContainer: React.FC<TROHNavigationContainerProps> = ({
   children,
 }) => {
+  const routeNameRef = useRef('');
   const switchNavigationToReady = useCallback(() => {
     isReady = true;
+    const currentRoute = getCurrentRoute();
+    if(currentRoute) {
+      routeNameRef.current = currentRoute.name;
+    }
   }, []);
   useEffect(() => {
     return () => {
       isReady = false;
     };
   }, []);
+  const handleStateChange = async() => {
+    const previousRouteName = routeNameRef.current;
+    const currentRoute = getCurrentRoute();
+    const currentRouteName = currentRoute ? currentRoute.name : null;
+    
+    if(!currentRouteName) {
+      return;
+    }
+  
+    if (previousRouteName !== currentRouteName) {
+      await analytics().logScreenView({
+        screen_name: currentRouteName,
+        screen_class: currentRouteName,
+      });
+    }
+  
+    // Save the current route name for later comparison
+    routeNameRef.current = currentRouteName;  
+  }
   return (
     <NavigationContainer
       ref={navigationRef}
       onReady={switchNavigationToReady}
-      theme={customTheme}>
+      theme={customTheme}
+      onStateChange={handleStateChange}
+      >
       {children}
     </NavigationContainer>
   );
