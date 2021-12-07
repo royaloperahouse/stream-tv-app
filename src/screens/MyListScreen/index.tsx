@@ -18,6 +18,7 @@ type TMyListScreenProps = {};
 const MyListScreen: React.FC<TMyListScreenProps> = () => {
   const myList = useMyList();
   const data = useSelector(digitalEventsForMyListScreenSelector(myList));
+
   return (
     <View style={styles.root}>
       <RohText style={styles.pageTitle}>{myListTitle}</RohText>

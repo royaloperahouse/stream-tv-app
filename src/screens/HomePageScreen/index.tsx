@@ -28,6 +28,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
   if (!data.length) {
     return null;
   }
+
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />

@@ -11,6 +11,7 @@ import SearchResult from '@components/SearchResult';
 type TSearchScreenProps = {};
 const SearchScreen: React.FC<TSearchScreenProps> = () => {
   const vkRef = useRef();
+
   return (
     <View style={styles.root}>
       <View style={styles.virtualKeyboardContainer}>

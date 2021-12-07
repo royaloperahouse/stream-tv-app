@@ -16,6 +16,8 @@
   "dependencies": {
     "@prismicio/client": "^5.1.0",
     "@react-native-async-storage/async-storage": "^1.15.5",
+    "@react-native-firebase/analytics": "^13.0.1",
+    "@react-native-firebase/app": "^13.0.1",
     "@react-native-masked-view/masked-view": "^0.2.6",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",

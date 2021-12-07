@@ -15,6 +15,7 @@ const IntroScreen: React.FC<TIntroScreenProps> = () => {
   const getStarted = () => {
     dispatch(startLoginLoop());
   };
+
   return (
     <ImageBackground
       style={styles.containerBackground}

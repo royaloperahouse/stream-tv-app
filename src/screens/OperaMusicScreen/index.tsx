@@ -15,6 +15,7 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
+
 type TOperaMusicScreenProps = {};
 const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
   const data = useSelector(digitalEventsForOperaAndMusicSelector);
@@ -33,6 +34,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
   if (!data.length) {
     return null;
   }
+
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />
