@@ -23,7 +23,8 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
   );
   
   analytics().logScreenView({
-    screen_name: "Login Screen"
+    screen_class: 'LoginScreen',
+    screen_name: 'Login Screen'
   });
 
   return (

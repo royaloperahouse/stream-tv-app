@@ -13,11 +13,16 @@ import {
   marginRightWithOutFocus,
   marginLeftStop,
 } from '@configs/navMenuConfig';
+import analytics from '@react-native-firebase/analytics';
 
 type TMyListScreenProps = {};
 const MyListScreen: React.FC<TMyListScreenProps> = () => {
   const myList = useMyList();
   const data = useSelector(digitalEventsForMyListScreenSelector(myList));
+  analytics().logScreenView({
+    screen_class: 'MyListScreen',
+    screen_name: 'My List Screen'
+  });
   return (
     <View style={styles.root}>
       <RohText style={styles.pageTitle}>{myListTitle}</RohText>

@@ -30,8 +30,10 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
     return null;
   }
   analytics().logScreenView({
-    screen_name: "Home Screen"
+    screen_class: 'HomePageScreen',
+    screen_name: 'Home Screen'
   });
+
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />

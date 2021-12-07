@@ -7,6 +7,7 @@ import RohText from '@components/RohText';
 import { startLoginLoop } from '@services/store/auth/Slices';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import IntroStreamLogoSvg from '@assets/svg/IntroStreamLogo.svg';
+import analytics from '@react-native-firebase/analytics';
 
 type TIntroScreenProps = {};
 
@@ -15,6 +16,12 @@ const IntroScreen: React.FC<TIntroScreenProps> = () => {
   const getStarted = () => {
     dispatch(startLoginLoop());
   };
+
+  analytics().logScreenView({
+    screen_class: 'IntroScreen',
+    screen_name: 'Intro Screen'
+  });
+
   return (
     <ImageBackground
       style={styles.containerBackground}

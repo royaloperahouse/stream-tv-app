@@ -15,6 +15,8 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
+import analytics from '@react-native-firebase/analytics';
+
 
 type TBalletDanceScreenProps = {};
 const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
@@ -34,6 +36,12 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   if (!data.length) {
     return null;
   }
+
+  analytics().logScreenView({
+    screen_class: 'BalletDanceScreen',
+    screen_name: 'Ballet & Dance Screen'
+  });
+
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />
