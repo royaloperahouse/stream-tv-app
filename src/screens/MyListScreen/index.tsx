@@ -42,7 +42,7 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
       ) : (
         <View style={styles.emptyListContainer}>
           <RohText style={styles.emptyListText} bold>
-            {myListTitle} is Empty
+            {myListTitle + ' is Empty'}
           </RohText>
         </View>
       )}
