@@ -302,7 +302,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
       ) {
         exitOfApp(true);
       }
-      return true;
+      return Boolean(canExit);
     };
     BackHandler.addEventListener('hardwareBackPress', backButtonCallback);
     return () => {
