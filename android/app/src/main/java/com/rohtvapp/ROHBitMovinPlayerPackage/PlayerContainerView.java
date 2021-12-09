@@ -49,16 +49,7 @@ public class PlayerContainerView extends RelativeLayout {
     public PlayerContainerView(ThemedReactContext context) {
         super(context);
         this.context = context;
-//      Attempt 0!
-//        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                requestLayout();
-//            }
-//        });
         this.init();
-//        this.requestLayout();
-//        setupLayoutHack();
     }
 
     public void init() {
@@ -89,67 +80,9 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(PlayerEvent.CueEnter.class, this::onCueEnter);
         player.on(PlayerEvent.CueExit.class, this::onCueExit);
 
-//      Final custom subtitle handler, remove this and rely on onCueEnter/Exit
-//        subtitleView = findViewById(R.id.bitmovinSubtitleView);
-//        subtitleView.setPlayer(player);
-
         player.setVolume(100);
     }
-
-//  Attempt 1
-//    private void setupLayoutHack() {
-//
-//        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-//            @Override
-//            public void doFrame(long frameTimeNanos) {
-//                manuallyLayoutChildren();
-//                getViewTreeObserver().dispatchOnGlobalLayout();
-//                Choreographer.getInstance().postFrameCallback(this);
-//            }
-//        });
-//    }
-//
-//    private void manuallyLayoutChildren() {
-//        for (int i = 0; i < getChildCount(); i++) {
-//            View child = getChildAt(i);
-//            child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
-//                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
-//            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
-//        }
-//    }
-//    Attempt 2
-//    private void refreshViewChildrenLayout(View view){
-//        view.measure(
-//                View.MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(), View.MeasureSpec.EXACTLY),
-//                View.MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(), View.MeasureSpec.EXACTLY));
-//        view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
-//    }
-//
-//    @Override
-//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//
-//        Log.d("CustomComponent", "Width: " + MeasureSpec.getSize(widthMeasureSpec));
-//        Log.d("CustomComponent", "Width mode: " + widthMeasureSpec);
-//        Log.d("CustomComponent", "Height: " + MeasureSpec.getSize(heightMeasureSpec));
-//        Log.d("CustomComponent", "Height mode: " + heightMeasureSpec);
-//    }
-//    Attempt 3
-//    @Override
-//    public void requestLayout() {
-//        super.requestLayout();
-//        post(measureAndLayout);
-//    }
-//
-//    private final Runnable measureAndLayout = new Runnable() {
-//        @Override
-//        public void run() {
-//            measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
-//                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
-//            layout(getLeft(), getTop(), getRight(), getBottom());
-//        }
-//    };
-
+    
     public void configure(Source source) {
         player.load(source);
     }
