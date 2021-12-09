@@ -36,6 +36,7 @@ type TPlayerControlsProps = {
   onClose: () => void;
   setSubtitle: (trackId: string) => void;
   autoPlay: boolean;
+  subtitleCue: string;
 };
 
 export type TPlayerControlsRef = {
@@ -61,6 +62,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       setSubtitle,
       playerLoaded,
       autoPlay,
+      subtitleCue
     } = props;
     const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
     const tvEventFireCounter = useRef<number>(0);
@@ -279,6 +281,14 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           ref={subtitlesRef}
           setSubtitle={setSubtitle}
         />
+        {
+          subtitleCue !== '' &&
+          <View style={styles.subtitleCueContainer}>
+            <RohText style={styles.subtitleCueText}>
+                {subtitleCue}
+            </RohText>
+          </View>
+        }
       </SafeAreaView>
     );
   },
@@ -700,4 +710,20 @@ const styles = StyleSheet.create({
     marginBottom: scaleSize(12),
     alignItems: 'center',
   },
+  subtitleCueContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: scaleSize(100),
+    right: 0,
+    left: 0,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  subtitleCueText: {
+    textAlign: 'center',
+    color: 'white',
+    backgroundColor: 'black',
+    fontSize: scaleSize(32),
+    padding: scaleSize(4),
+  }
 });

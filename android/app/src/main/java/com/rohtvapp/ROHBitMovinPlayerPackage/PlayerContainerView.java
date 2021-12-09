@@ -2,7 +2,10 @@ package com.rohtvapp.ROHBitMovinPlayerPackage;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.Choreographer;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -46,7 +49,16 @@ public class PlayerContainerView extends RelativeLayout {
     public PlayerContainerView(ThemedReactContext context) {
         super(context);
         this.context = context;
+//      Attempt 0!
+//        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                requestLayout();
+//            }
+//        });
         this.init();
+//        this.requestLayout();
+//        setupLayoutHack();
     }
 
     public void init() {
@@ -60,7 +72,6 @@ public class PlayerContainerView extends RelativeLayout {
 
         playerView = findViewById(R.id.bitmovinPlayerView);
         player = Player.create(context, playerConfig);
-        //playerView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         playerView.setPlayer(player);
 
         player.on(SourceEvent.Loaded.class, this::onLoad);
@@ -75,14 +86,55 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(SourceEvent.Error.class, this::onError);
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
         player.on(PlayerEvent.Error.class, this::onError);
+        player.on(PlayerEvent.CueEnter.class, this::onCueEnter);
+        player.on(PlayerEvent.CueExit.class, this::onCueExit);
 
-
-        subtitleView = findViewById(R.id.bitmovinSubtitleView);
-        subtitleView.setPlayer(player);
+//      Final custom subtitle handler, remove this and rely on onCueEnter/Exit
+//        subtitleView = findViewById(R.id.bitmovinSubtitleView);
+//        subtitleView.setPlayer(player);
 
         player.setVolume(100);
     }
+
+//  Attempt 1
+//    private void setupLayoutHack() {
 //
+//        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+//            @Override
+//            public void doFrame(long frameTimeNanos) {
+//                manuallyLayoutChildren();
+//                getViewTreeObserver().dispatchOnGlobalLayout();
+//                Choreographer.getInstance().postFrameCallback(this);
+//            }
+//        });
+//    }
+//
+//    private void manuallyLayoutChildren() {
+//        for (int i = 0; i < getChildCount(); i++) {
+//            View child = getChildAt(i);
+//            child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+//                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+//            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+//        }
+//    }
+//    Attempt 2
+//    private void refreshViewChildrenLayout(View view){
+//        view.measure(
+//                View.MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(), View.MeasureSpec.EXACTLY),
+//                View.MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(), View.MeasureSpec.EXACTLY));
+//        view.layout(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+//    }
+//
+//    @Override
+//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//
+//        Log.d("CustomComponent", "Width: " + MeasureSpec.getSize(widthMeasureSpec));
+//        Log.d("CustomComponent", "Width mode: " + widthMeasureSpec);
+//        Log.d("CustomComponent", "Height: " + MeasureSpec.getSize(heightMeasureSpec));
+//        Log.d("CustomComponent", "Height mode: " + heightMeasureSpec);
+//    }
+//    Attempt 3
 //    @Override
 //    public void requestLayout() {
 //        super.requestLayout();
@@ -310,6 +362,46 @@ public class PlayerContainerView extends RelativeLayout {
             reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onSubtitleChanged", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueEnter(PlayerEvent.CueEnter event) {
+        Log.d("onCue enter",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueEnter");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueEnter", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueExit(PlayerEvent.CueExit event) {
+        Log.d("onCue exit",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueExit");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueExit", map);
 
         } catch (Exception e) {
             Log.e("ReactNative", "Caught Exception: " + e.getMessage());

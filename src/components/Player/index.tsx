@@ -125,6 +125,7 @@ const Player: React.FC<TPlayerProps> = props => {
   const [playerReady, setReady] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [duration, setDuration] = useState(0.0);
+  const [subtitleCue, setSubtitleCue] = useState('');
 
   const onReady: TCallbackFunc = useCallback(data => {
     const payload: TOnReadyPayload = data.nativeEvent;
@@ -247,6 +248,14 @@ const Player: React.FC<TPlayerProps> = props => {
       eventEmitter.addListener('onLoad', (event: any) => {
         setLoaded(true);
       });
+      eventEmitter.addListener('onCueEnter', (event: any) => {
+        console.log('onCueEnter: ', event.cueText);
+        setSubtitleCue(event.cueText);
+      })
+      eventEmitter.addListener('onCueExit', (event: any) => {
+        console.log('onCueExit: ', event.cueText);
+        setSubtitleCue('');
+      })
     }
     return () => {
       if (Platform.OS === 'android') {
@@ -264,6 +273,8 @@ const Player: React.FC<TPlayerProps> = props => {
         eventEmitter.removeAllListeners('onError');
         eventEmitter.removeAllListeners('onSubtitleChanged');
         eventEmitter.removeAllListeners('onLoad');
+        eventEmitter.removeAllListeners('onCueEnter');
+        eventEmitter.removeAllListeners('onCueExit');
       }
     };
   }, [onEvent, onClose, onReady, configuration.url]);
@@ -373,6 +384,7 @@ const Player: React.FC<TPlayerProps> = props => {
         onClose={actionClose}
         setSubtitle={setSubtitle}
         autoPlay={autoPlay}
+        subtitleCue={subtitleCue}
       />
     </SafeAreaView>
   );
@@ -392,6 +404,7 @@ const styles = StyleSheet.create({
   },
   controlsContainer: {
     position: 'absolute',
+    backgroundColor: 'red',
     bottom: 0,
   },
   textDescription: {
