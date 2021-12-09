@@ -249,11 +249,9 @@ const Player: React.FC<TPlayerProps> = props => {
         setLoaded(true);
       });
       eventEmitter.addListener('onCueEnter', (event: any) => {
-        console.log('onCueEnter: ', event.cueText);
         setSubtitleCue(event.cueText);
       })
-      eventEmitter.addListener('onCueExit', (event: any) => {
-        console.log('onCueExit: ', event.cueText);
+      eventEmitter.addListener('onCueExit', (_event: any) => {
         setSubtitleCue('');
       })
     }
