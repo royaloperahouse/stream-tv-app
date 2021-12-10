@@ -5,6 +5,7 @@ import RohText from '@components/RohText';
 import TouchableHighlightWrapper, {
   TTouchableHighlightWrapperRef,
 } from '@components/TouchableHighlightWrapper';
+import { Colors } from '@themes/Styleguide';
 
 type Props = {
   Icon: any;
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
   buttonActive: {
     paddingLeft: scaleSize(30),
     opacity: 1,
+    backgroundColor: Colors.streamPrimary,
   },
   text: {
     color: 'white',
