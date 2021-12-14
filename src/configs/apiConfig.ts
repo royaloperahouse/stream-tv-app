@@ -15,4 +15,8 @@ export const ApiConfig = Object.freeze({
     pinUnlink: '/auth/device/unlink',
     subscriptionInfo: '/auth/device/subscription-info',
   },
+  auth: {
+    username: 'tvapp',
+    password: 'stream',
+  },
 });

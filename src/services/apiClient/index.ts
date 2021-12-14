@@ -56,6 +56,7 @@ export const fetchVideoURL = (id: string) =>
       id,
     },
     baseURL: ApiConfig.manifestURL,
+    auth: ApiConfig.auth,
   });
 
 export const pinUnlink = () => axiosClient.delete(ApiConfig.routes.pinUnlink);
