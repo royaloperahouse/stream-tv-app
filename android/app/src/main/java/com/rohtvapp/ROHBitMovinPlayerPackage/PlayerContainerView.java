@@ -2,6 +2,10 @@ package com.rohtvapp.ROHBitMovinPlayerPackage;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.Choreographer;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -57,9 +61,9 @@ public class PlayerContainerView extends RelativeLayout {
         PlayerConfig playerConfig = new PlayerConfig();
         playerConfig.setStyleConfig(styleConfig);
 
+        playerView = findViewById(R.id.bitmovinPlayerView);
         player = Player.create(context, playerConfig);
-
-        playerView = new PlayerView(context, player);
+        playerView.setPlayer(player);
 
         player.on(SourceEvent.Loaded.class, this::onLoad);
         player.on(PlayerEvent.Playing.class, this::onPlay);
@@ -73,22 +77,12 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(SourceEvent.Error.class, this::onError);
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
         player.on(PlayerEvent.Error.class, this::onError);
+        player.on(PlayerEvent.CueEnter.class, this::onCueEnter);
+        player.on(PlayerEvent.CueExit.class, this::onCueExit);
 
-        RelativeLayout playerContainer = findViewById(R.id.player_container);
-
-        subtitleView = new SubtitleView(context, null);
-        subtitleView.setPlayer(player);
-        subtitleView.setUserDefaultStyle();
-        subtitleView.setUserDefaultTextSize();
-
-        // Add the SubtitleView to the layout
-        playerContainer.addView(subtitleView);
-
-        // Add the PlayerView to the layout as first position (so it is the behind the SubtitleView)
-        playerContainer.addView(playerView, 0);
         player.setVolume(100);
     }
-
+    
     public void configure(Source source) {
         player.load(source);
     }
@@ -301,6 +295,46 @@ public class PlayerContainerView extends RelativeLayout {
             reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onSubtitleChanged", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueEnter(PlayerEvent.CueEnter event) {
+        Log.d("onCue enter",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueEnter");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueEnter", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueExit(PlayerEvent.CueExit event) {
+        Log.d("onCue exit",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueExit");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueExit", map);
 
         } catch (Exception e) {
             Log.e("ReactNative", "Caught Exception: " + e.getMessage());
