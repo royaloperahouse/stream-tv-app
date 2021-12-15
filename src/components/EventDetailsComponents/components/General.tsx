@@ -30,6 +30,7 @@ import Prismic from '@prismicio/client';
 import { getSubscribeInfo, fetchVideoURL } from '@services/apiClient';
 import { getVideoDetails } from '@services/prismicApiClient';
 import { getBitMovinSavedPosition } from '@services/bitMovinPlayer';
+import { resumeRollbackTime, minResumeTime } from '@configs/bitMovinPlayerConfig';
 
 type Props = {
   event: TEventContainer;
@@ -118,9 +119,13 @@ const General: React.FC<Props> = ({
         videoFromPrismic.id,
         event.id,
       );
-      if (videoPositionInfo && videoPositionInfo?.position) {
+      if (videoPositionInfo && 
+        videoPositionInfo?.position && 
+        parseInt(videoPositionInfo?.position) > minResumeTime) {
         const fromTime = new Date(0);
-        fromTime.setSeconds(parseInt(videoPositionInfo.position));
+        const intPosition = parseInt(videoPositionInfo.position)
+        const rolledBackPos = intPosition - resumeRollbackTime;
+        fromTime.setSeconds(intPosition);
         globalModalManager.openModal({
           hasBackground: true,
           hasLogo: true,
@@ -136,7 +141,7 @@ const General: React.FC<Props> = ({
                   poster:
                     'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
                   subtitle: '',
-                  position: videoPositionInfo.position,
+                  position: rolledBackPos.toString(),
                   eventId: event.id,
                   savePosition: true,
                 });
