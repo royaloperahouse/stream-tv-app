@@ -36,6 +36,7 @@ type Props = {
   event: TEventContainer;
   nextScreenText: string;
   isBMPlayerShowing: boolean;
+  continueWatching: boolean;
   showPlayer: (...args: any[]) => void;
 };
 
@@ -43,10 +44,12 @@ const General: React.FC<Props> = ({
   event,
   showPlayer,
   nextScreenText = 'Some Screen',
+  continueWatching
 }) => {
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
+  const [showContinueWatching, setShowContinueWatching] = useState<boolean>(false);
 
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
@@ -66,6 +69,43 @@ const General: React.FC<Props> = ({
   );
 
   const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
+
+  const updateContinueWatching = async () => {
+    if(continueWatching) {
+      return;
+    }
+    const result = await Promise.all([
+      getSubscribeInfo(),
+      getVideoDetails({
+        queryPredicates: [Prismic.predicates.any('document.id', videos)],
+      }),
+    ]);
+    if (
+      result[0].status >= 400 ||
+      result[0]?.data?.data?.attributes?.isSubscriptionActive === undefined
+    ) {
+      return;
+    }
+    
+    if (result[0]?.data?.data?.attributes?.isSubscriptionActive) {
+      const videoFromPrismic = result[1].results.find(
+        prismicResponseResult =>
+          prismicResponseResult.data?.video?.video_type === 'performance',
+      );
+
+      if (videoFromPrismic === undefined) {
+        return;
+      }
+
+      const videoPositionInfo = await getBitMovinSavedPosition(
+        videoFromPrismic.id,
+        event.id,
+      );
+      if(videoPositionInfo !== null) { 
+        setShowContinueWatching(true);
+      }
+    }
+  }
 
   const getPerformanceVideoUrl = async (
     ref?: RefObject<TouchableHighlight>,
@@ -191,7 +231,7 @@ const General: React.FC<Props> = ({
               }
             });
           },
-          title: "Player's Error",
+          title: "Player Error",
           subtitle: err.message,
         },
       });
@@ -239,7 +279,7 @@ const General: React.FC<Props> = ({
               }
             });
           },
-          title: "Player's Error",
+          title: "Player Error",
           subtitle: err.message,
         },
       });
@@ -271,7 +311,7 @@ const General: React.FC<Props> = ({
       [EActionButtonListType.common]: [
         {
           key: 'WatchNow',
-          text: 'Watch now',
+          text: continueWatching || showContinueWatching ? 'Continue watching' : 'Watch now', 
           hasTVPreferredFocus: true,
           onPress: getPerformanceVideoUrl,
           onFocus: () => console.log('Watch now focus'),
@@ -317,6 +357,11 @@ const General: React.FC<Props> = ({
   useEffect(() => {
     generalMountedRef.current = true;
   }, []);
+
+  useEffect(() => {
+      updateContinueWatching();
+  }, [])
+
   return (
     <View style={styles.generalContainer}>
       <View style={styles.contentContainer}>

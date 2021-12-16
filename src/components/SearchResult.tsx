@@ -60,7 +60,7 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   const touchableHandler = () => {
     navMenuManager.hideNavMenu();
     navigation.push(
-      additionalRoutesWithoutNavMenuNavigation.eventDetais.navMenuScreenName,
+      additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
       { event: item },
     );
   };

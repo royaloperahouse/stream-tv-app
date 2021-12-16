@@ -16,6 +16,7 @@ import {
 } from '@configs/navMenuConfig';
 import { useMyList } from '@hooks/useMyList';
 import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
+import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
 
 type THomePageScreenProps = {};
 const HomePageScreen: React.FC<THomePageScreenProps> = () => {
@@ -51,6 +52,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
               hasTVPreferredFocus={isFirstRail && index === 0}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
+              continueWatching={section.title === continueWatchingRailTitle}
             />
           )}
         />

@@ -92,7 +92,7 @@ export const routes: TRoutes = [
 ];
 
 export const additionalRoutesWithoutNavMenuNavigation = {
-  eventDetais: {
+  eventDetails: {
     navMenuScreenName: 'eventDetails',
     ScreenComponent: EventDetailsScreen,
     isDefault: false,

@@ -16,12 +16,13 @@ type DigitalEventItemProps = {
   canMoveUp?: boolean;
   hasTVPreferredFocus?: boolean;
   canMoveRight?: boolean;
+  continueWatching?: boolean;
   onFocus?: (...[]: any[]) => void;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
   (
-    { event, canMoveUp, hasTVPreferredFocus, canMoveRight = true, onFocus },
+    { event, canMoveUp, hasTVPreferredFocus, canMoveRight = true, onFocus, continueWatching },
     ref: any,
   ) => {
     const navigation = useNavigation();
@@ -42,8 +43,8 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     const onPressHandler = () => {
       navMenuManager.hideNavMenu();
       navigation.navigate(
-        additionalRoutesWithoutNavMenuNavigation.eventDetais.navMenuScreenName,
-        { event },
+        additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
+        { event, continueWatching },
       );
     };
     return (
@@ -57,6 +58,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           style={styles.imageContainer}
           onFocus={() => {
             ref?.current?.setDigitalEvent(event);
+            //ref?.current?.setShowContinueWatching(continueWatching)
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
