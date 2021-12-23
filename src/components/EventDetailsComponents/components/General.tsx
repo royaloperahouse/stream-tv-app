@@ -30,7 +30,10 @@ import Prismic from '@prismicio/client';
 import { getSubscribeInfo, fetchVideoURL } from '@services/apiClient';
 import { getVideoDetails } from '@services/prismicApiClient';
 import { getBitMovinSavedPosition } from '@services/bitMovinPlayer';
-import { resumeRollbackTime, minResumeTime } from '@configs/bitMovinPlayerConfig';
+import {
+  resumeRollbackTime,
+  minResumeTime,
+} from '@configs/bitMovinPlayerConfig';
 
 type Props = {
   event: TEventContainer;
@@ -44,12 +47,13 @@ const General: React.FC<Props> = ({
   event,
   showPlayer,
   nextScreenText = 'Some Screen',
-  continueWatching
+  continueWatching,
 }) => {
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
-  const [showContinueWatching, setShowContinueWatching] = useState<boolean>(false);
+  const [showContinueWatching, setShowContinueWatching] =
+    useState<boolean>(false);
 
   const title: string =
     get(event.data, ['vs_event_details', 'title'], '').replace(
@@ -71,7 +75,7 @@ const General: React.FC<Props> = ({
   const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
 
   const updateContinueWatching = async () => {
-    if(continueWatching) {
+    if (continueWatching) {
       return;
     }
     const result = await Promise.all([
@@ -86,7 +90,7 @@ const General: React.FC<Props> = ({
     ) {
       return;
     }
-    
+
     if (result[0]?.data?.data?.attributes?.isSubscriptionActive) {
       const videoFromPrismic = result[1].results.find(
         prismicResponseResult =>
@@ -101,11 +105,16 @@ const General: React.FC<Props> = ({
         videoFromPrismic.id,
         event.id,
       );
-      if(videoPositionInfo !== null) { 
+      if (
+        videoPositionInfo !== null &&
+        parseInt(videoPositionInfo.position) > minResumeTime &&
+        generalMountedRef &&
+        generalMountedRef.current
+      ) {
         setShowContinueWatching(true);
       }
     }
-  }
+  };
 
   const getPerformanceVideoUrl = async (
     ref?: RefObject<TouchableHighlight>,
@@ -159,11 +168,13 @@ const General: React.FC<Props> = ({
         videoFromPrismic.id,
         event.id,
       );
-      if (videoPositionInfo && 
-        videoPositionInfo?.position && 
-        parseInt(videoPositionInfo?.position) > minResumeTime) {
+      if (
+        videoPositionInfo &&
+        videoPositionInfo?.position &&
+        parseInt(videoPositionInfo?.position) > minResumeTime
+      ) {
         const fromTime = new Date(0);
-        const intPosition = parseInt(videoPositionInfo.position)
+        const intPosition = parseInt(videoPositionInfo.position);
         const rolledBackPos = intPosition - resumeRollbackTime;
         fromTime.setSeconds(intPosition);
         globalModalManager.openModal({
@@ -231,7 +242,7 @@ const General: React.FC<Props> = ({
               }
             });
           },
-          title: "Player Error",
+          title: 'Player Error',
           subtitle: err.message,
         },
       });
@@ -279,7 +290,7 @@ const General: React.FC<Props> = ({
               }
             });
           },
-          title: "Player Error",
+          title: 'Player Error',
           subtitle: err.message,
         },
       });
@@ -311,7 +322,10 @@ const General: React.FC<Props> = ({
       [EActionButtonListType.common]: [
         {
           key: 'WatchNow',
-          text: continueWatching || showContinueWatching ? 'Continue watching' : 'Watch now', 
+          text:
+            continueWatching || showContinueWatching
+              ? 'Continue watching'
+              : 'Watch now',
           hasTVPreferredFocus: true,
           onPress: getPerformanceVideoUrl,
           onFocus: () => console.log('Watch now focus'),
@@ -356,11 +370,16 @@ const General: React.FC<Props> = ({
 
   useEffect(() => {
     generalMountedRef.current = true;
+    return () => {
+      if (generalMountedRef.current) {
+        generalMountedRef.current = false;
+      }
+    };
   }, []);
 
   useEffect(() => {
-      updateContinueWatching();
-  }, [])
+    updateContinueWatching();
+  }, []);
 
   return (
     <View style={styles.generalContainer}>
