@@ -27,18 +27,18 @@ import { useFocusEffect } from '@react-navigation/native';
 import { globalModalManager } from '@components/GlobalModal';
 import { ErrorModal } from '@components/GlobalModal/variants';
 
-type TEventDetalsScreenProps = StackScreenProps<
+type TEventDetailsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
   'eventDetails'
 >;
 
-const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
+const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
   const [bMPlayerShowingData, setIsBMPlayerShowing] =
     useState<TBMPlayerShowingData | null>(null);
   const [bMPlayerError, setBMPlayerError] =
     useState<TBMPlayerErrorObject | null>(null);
   const isBMPlayerShowingRef = useRef<boolean>(false);
-  const { event } = route.params;
+  const { event, continueWatching } = route.params;
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
   const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
@@ -92,6 +92,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
               key={item?.key || index}
               event={event}
               showPlayer={showPlayer}
+              continueWatching={continueWatching}
               isBMPlayerShowing={bMPlayerShowingData !== null}
               nextScreenText={item.nextSectionTitle}
             />
@@ -123,7 +124,7 @@ const EventDetailsScreen: React.FC<TEventDetalsScreenProps> = ({ route }) => {
               setBMPlayerError(null);
             });
           },
-          title: "Player's Error",
+          title: "Player Error",
           subtitle: `Something went wrong.\n${bMPlayerError.errCode}: ${
             bMPlayerError.errMessage
           }\n${bMPlayerError.url || ''}`,

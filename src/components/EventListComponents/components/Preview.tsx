@@ -15,6 +15,7 @@ import { Colors } from '@themes/Styleguide';
 
 export type TPreviewRef = {
   setDigitalEvent?: (digitalEvent: TEventContainer) => void;
+  setShowContinueWatching?: (showContinueWatching: boolean) => void;
 };
 
 type TPreviewProps = {};
@@ -34,6 +35,7 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
     }),
     [],
   );
+
   const eventGroupTitle: string = get(
     event,
     ['vs_event_details', 'tags', '0', 'attributes', 'title'],
