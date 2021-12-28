@@ -9,10 +9,15 @@ export const useMyList = (): Array<string> => {
     useCallback(() => {
       mountedRef.current = true;
       getMyList().then(items => {
-        if (mountedRef.current) {
+        if (mountedRef && mountedRef.current) {
           setMyList(items);
         }
       });
+      return () => {
+        if (mountedRef && mountedRef.current) {
+          mountedRef.current = false;
+        }
+      };
     }, []),
   );
   return myList;
