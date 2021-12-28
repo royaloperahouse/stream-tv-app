@@ -345,13 +345,6 @@ const General: React.FC<Props> = ({
           onFocus: () => console.log('Add to my list focus'),
           Icon: AddToMyList,
         },
-        {
-          key: 'Audio&Subtitles',
-          text: 'Audio & Subtitles',
-          onPress: () => console.log('Audio & Subtitles press'),
-          onFocus: () => console.log('Audio & Subtitles focus'),
-          Icon: Subtitles,
-        },
       ],
     };
     if (typeOfList in buttonListCollection) {
