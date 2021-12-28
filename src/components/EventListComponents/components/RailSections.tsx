@@ -1,5 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { View, ViewProps, VirtualizedList } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 type TRailSectionsProps = {
   containerStyle?: ViewProps['style'];
@@ -31,6 +32,7 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
     railWindowSize = 5,
     renderItem,
   } = props;
+  const mountedRef = useRef<boolean>(false);
   const sectionsListRef = useRef<VirtualizedList<any> | null>(null);
   const getSectionCount = useCallback(data => data.length, []);
   const getSectionItemCount = useCallback(data => data.length, []);
@@ -42,6 +44,16 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
       });
     }
   };
+  useFocusEffect(
+    useCallback(() => {
+      mountedRef.current = true;
+      return () => {
+        if (mountedRef && mountedRef.current) {
+          mountedRef.current = false;
+        }
+      };
+    }, []),
+  );
   return (
     <View style={[containerStyle]}>
       <VirtualizedList
@@ -56,6 +68,23 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
         getItemCount={getSectionCount}
         windowSize={sectionsWindowSize}
         getItem={data => [...data]}
+        onScrollToIndexFailed={info => {
+          const wait = new Promise(resolve => setTimeout(resolve, 500));
+          wait.then(() => {
+            if (
+              !mountedRef ||
+              !mountedRef.current ||
+              info.index === undefined ||
+              !sectionsListRef.current
+            ) {
+              return;
+            }
+            sectionsListRef.current.scrollToIndex({
+              animated: true,
+              index: info.index,
+            });
+          });
+        }}
         renderItem={({ item, index }) => (
           <View style={[railStyle]}>
             <View style={[headerContainerStyle]}>

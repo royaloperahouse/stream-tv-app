@@ -357,6 +357,11 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
 
   useLayoutEffect(() => {
     navMenuMountedRef.current = true;
+    return () => {
+      if (navMenuMountedRef && navMenuMountedRef.current) {
+        navMenuMountedRef.current = false;
+      }
+    };
   }, []);
   return (
     <View>
@@ -378,6 +383,9 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           onScrollToIndexFailed={info => {
             const wait = new Promise(resolve => setTimeout(resolve, 500));
             wait.then(() => {
+              if (!navMenuMountedRef || !navMenuMountedRef.current) {
+                return;
+              }
               flatListRef.current?.scrollToIndex({
                 index: info.index !== -1 ? info.index : 0,
                 animated: false,

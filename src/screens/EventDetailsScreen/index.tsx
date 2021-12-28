@@ -124,7 +124,7 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               setBMPlayerError(null);
             });
           },
-          title: "Player Error",
+          title: 'Player Error',
           subtitle: `Something went wrong.\n${bMPlayerError.errCode}: ${
             bMPlayerError.errMessage
           }\n${bMPlayerError.url || ''}`,
@@ -192,7 +192,6 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
           minimumViewTime: 100, //In milliseconds
         }}
         onViewableItemsChanged={info => {
-          console.log(info, 'info');
           let itemForScrolling: ViewToken | undefined;
           if (
             info.viewableItems.length > 1 &&
@@ -210,6 +209,23 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
         getItem={data => [...data]}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        onScrollToIndexFailed={info => {
+          const wait = new Promise(resolve => setTimeout(resolve, 500));
+          wait.then(() => {
+            if (
+              !eventDetailsScreenMounted ||
+              !eventDetailsScreenMounted.current ||
+              info.index === undefined ||
+              !VirtualizedListRef.current
+            ) {
+              return;
+            }
+            VirtualizedListRef.current.scrollToIndex({
+              animated: true,
+              index: info.index,
+            });
+          });
+        }}
       />
     </View>
   );
