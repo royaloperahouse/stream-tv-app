@@ -62,7 +62,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       setSubtitle,
       playerLoaded,
       autoPlay,
-      subtitleCue
+      subtitleCue,
     } = props;
     const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
     const tvEventFireCounter = useRef<number>(0);
@@ -179,6 +179,12 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
         if (tvEventFireCounter.current === 1) {
           tvEventFireCounter.current = 0;
+          if (eve.eventType === 'playPause') {
+            const currentPlayerAction = isPlayingRef.current
+              ? onPausePress
+              : onPlayPress;
+            currentPlayerAction();
+          }
           Animated.timing(activeAnimation, {
             toValue: 1,
             useNativeDriver: true,
@@ -213,7 +219,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       return () => {
         tvEventHandler?.current.disable();
       };
-    }, []);
+    }, [onPausePress, onPlayPress]);
 
     useLayoutEffect(() => {
       controlMountedRef.current = true;
@@ -281,14 +287,11 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           ref={subtitlesRef}
           setSubtitle={setSubtitle}
         />
-        {
-          subtitleCue !== '' &&
+        {subtitleCue !== '' && (
           <View style={styles.subtitleCueContainer}>
-            <RohText style={styles.subtitleCueText}>
-                {subtitleCue}
-            </RohText>
+            <RohText style={styles.subtitleCueText}>{subtitleCue}</RohText>
           </View>
-        }
+        )}
       </SafeAreaView>
     );
   },
@@ -725,5 +728,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     fontSize: scaleSize(32),
     padding: scaleSize(4),
-  }
+  },
 });
