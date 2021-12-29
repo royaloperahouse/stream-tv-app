@@ -1,4 +1,4 @@
-import React, { useRef, RefObject } from 'react';
+import React, { useRef, RefObject, forwardRef, useLayoutEffect } from 'react';
 import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
@@ -15,46 +15,50 @@ type Props = {
   hasTVPreferredFocus?: boolean;
 };
 
-const ExpandableButton: React.FC<Props> = ({
-  Icon,
-  text,
-  focusCallback,
-  onPress,
-  hasTVPreferredFocus = false,
-}) => {
-  const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
-  return (
-    <View style={styles.buttonContainer}>
-      <TouchableHighlightWrapper
-        ref={buttonRef}
-        canMoveRight={false}
-        hasTVPreferredFocus={hasTVPreferredFocus}
-        style={styles.button}
-        styleFocused={styles.buttonActive}
-        onFocus={() => {
-          focusCallback();
-        }}
-        onPress={() => {
-          if (typeof onPress === 'function') {
-            onPress(
-              typeof buttonRef.current?.getRef === 'function'
-                ? buttonRef.current.getRef()
-                : undefined,
-            );
-          }
-        }}>
-        <View style={styles.wrapper}>
-          {Icon && <Icon width={scaleSize(40)} height={scaleSize(40)} />}
-          {
-            <RohText style={styles.text} numberOfLines={1}>
-              {text}
-            </RohText>
-          }
-        </View>
-      </TouchableHighlightWrapper>
-    </View>
-  );
-};
+const ExpandableButton = forwardRef<any, Props>(
+  (
+    { Icon, text, focusCallback, onPress, hasTVPreferredFocus = false },
+    ref,
+  ) => {
+    const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
+    useLayoutEffect(() => {
+      if (ref !== null && typeof buttonRef.current?.getRef === 'function') {
+        ref.current = buttonRef.current.getRef().current;
+      }
+    }, [ref]);
+    return (
+      <View style={styles.buttonContainer}>
+        <TouchableHighlightWrapper
+          ref={buttonRef}
+          canMoveRight={false}
+          hasTVPreferredFocus={hasTVPreferredFocus}
+          style={styles.button}
+          styleFocused={styles.buttonActive}
+          onFocus={() => {
+            focusCallback();
+          }}
+          onPress={() => {
+            if (typeof onPress === 'function') {
+              onPress(
+                typeof buttonRef.current?.getRef === 'function'
+                  ? buttonRef.current.getRef()
+                  : undefined,
+              );
+            }
+          }}>
+          <View style={styles.wrapper}>
+            {Icon && <Icon width={scaleSize(40)} height={scaleSize(40)} />}
+            {
+              <RohText style={styles.text} numberOfLines={1}>
+                {text}
+              </RohText>
+            }
+          </View>
+        </TouchableHighlightWrapper>
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   buttonContainer: {
