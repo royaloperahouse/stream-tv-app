@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 import { View, FlatList, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import keyboardDataEng from './components/translations/eng.json';
-import keyboardDataRu from './components/translations/ru.json';
 import keyboardDataNumbers from './components/numbers.json';
 import keyboardDataSpecSymbols from './components/specSymbols.json';
 import Button from './components/button';
@@ -20,10 +19,7 @@ import { searchQuerySelector } from '@services/store/events/Selectors';
 import { setSearchQuery } from '@services/store/events/Slices';
 import { useLayoutEffect } from 'react';
 
-const keyboardDataLocale: TKeyboardAdditionalLocales = [
-  keyboardDataEng,
-  keyboardDataRu,
-];
+const keyboardDataLocale: TKeyboardAdditionalLocales = [keyboardDataEng];
 
 type TKeyboardAdditionalLocales = Array<{
   langSwitchButton: {
