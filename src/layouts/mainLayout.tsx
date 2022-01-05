@@ -10,17 +10,26 @@ import RohText from '@components/RohText';
 import { buildInfo } from '@configs/globalConfig';
 import { scaleSize } from '@utils/scaleSize';
 import GlobalModal from '@components/GlobalModal';
+import { useFeature } from 'flagged';
 type TMainLayoutProps = {};
 
 const MainLayout: React.FC<TMainLayoutProps> = () => {
-  const navMenuConfig = routes.map(route => ({
-    navMenuScreenName: route.navMenuScreenName,
-    SvgIconActiveComponent: route.SvgIconActiveComponent,
-    SvgIconInActiveComponent: route.SvgIconInActiveComponent,
-    navMenuTitle: route.navMenuTitle,
-    position: route.position,
-    isDefault: route.isDefault,
-  }));
+  const showLiveStream = useFeature('showLiveStream');
+  const navMenuConfig = routes
+    .filter(route => {
+      if (showLiveStream) {
+        return true;
+      }
+      return route.navMenuScreenName !== 'liveStream';
+    })
+    .map(route => ({
+      navMenuScreenName: route.navMenuScreenName,
+      SvgIconActiveComponent: route.SvgIconActiveComponent,
+      SvgIconInActiveComponent: route.SvgIconInActiveComponent,
+      navMenuTitle: route.navMenuTitle,
+      position: route.position,
+      isDefault: route.isDefault,
+    }));
   return (
     <WithBackground>
       <WithLogo>
