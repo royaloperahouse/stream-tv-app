@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { TEventContainer, TVSEventDetailsCast } from '@services/types/models';
+import { TEventContainer, TDieseActivityCast } from '@services/types/models';
 import RohText from '@components/RohText';
 import GoDown from '../commonControls/GoDown';
 import get from 'lodash.get';
@@ -14,15 +14,14 @@ type CastProps = {
 };
 
 const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
-  const castList: Array<TVSEventDetailsCast> = get(
-    event.data,
-    ['vs_event_details', 'cast'],
-    [],
-  );
+  const castList: Array<TDieseActivityCast> =
+    get(event.data, ['diese_activity', 'cast']) || [];
   const listOfEvalableCasts = castList.reduce<{ [key: string]: string }>(
     (acc, cast) => {
-      const role = get(cast, ['attributes', 'role'], '');
-      const name = get(cast, ['attributes', 'name'], '');
+      const role = cast.role_title;
+      const name =
+        (cast.contact_firstName ? cast.contact_firstName + ' ' : '') +
+          cast.contact_lastName || '';
       if (!name) {
         return acc;
       }
@@ -38,22 +37,9 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
   const data: Array<{ role: string; name: string }> = Object.entries(
     listOfEvalableCasts,
   ).map(([role, name]) => ({ role, name }));
-
-  /**
-  for testing multi-columns only.
-  will be useful for showing how it looks if we will have the count of items more than for three columns view
-  need to not forget to delete it in the future
-   */
-  for (let i = 0; i < 40; i++) {
-    if (!data.length) {
-      break;
-    }
-    data.push({
-      role: data[0].role + '-' + i,
-      name: data[0].name,
-    });
+  if (!data.length) {
+    return null;
   }
-  /** */
   return (
     <View style={styles.generalContainer}>
       <View style={styles.wrapper}>

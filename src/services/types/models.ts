@@ -62,6 +62,7 @@ export type TEvent = {
   vs_labels: Array<{ tag: string }>; //example Available soon
   vs_genres: Array<{ tag: string }>; //example Romance
   vs_behind_the_scenes: Array<any>; // need better type;
+  diese_activity: TDieseActivity | null;
 };
 
 export type TVSTitle = {
@@ -210,4 +211,34 @@ export type TEventVideo = {
   id: string;
   video_type: 'performance' | 'trailer' | 'behind_the_scenes';
   performanceVideoURL: string;
+};
+
+export type TDieseActivity = {
+  activity_id: number;
+  start: string;
+  end: string;
+  activity_type: string;
+  activity_status: 'Confirmed';
+  activity_venue: string;
+  activity_production: string;
+  production_id: number;
+  cast: Array<TDieseActivityCast>;
+  creatives: Array<TDieseActitvityCreatives>;
+};
+
+export type TDieseActivityCast = {
+  contact_lastName: string;
+  contact_firstName: string;
+  role_title: string;
+  role_order: number;
+  roleCategory_title: string;
+  attendingArtist_isCover: number;
+};
+
+export type TDieseActitvityCreatives = {
+  contact_lastName: string;
+  contact_firstName: string;
+  role_title: string;
+  role_order: number;
+  roleCategory_title: string;
 };
