@@ -3,7 +3,7 @@ import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import {
   TEventContainer,
-  TVSEventDetailsCreative,
+  TDieseActitvityCreatives,
 } from '@services/types/models';
 import RohText from '@components/RohText';
 import GoDown from '../commonControls/GoDown';
@@ -17,17 +17,19 @@ type CreativesProps = {
 };
 
 const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
-  const creativesList: Array<TVSEventDetailsCreative> = get(
+  const creativesList: Array<TDieseActitvityCreatives> = get(
     event.data,
-    ['vs_event_details', 'creatives'],
+    ['diese_activity', 'creatives'],
     [],
   );
 
   const listOfEvalableCreatives = creativesList.reduce<{
     [key: string]: string;
-  }>((acc, cast) => {
-    const role = get(cast, ['attributes', 'role'], '');
-    const name = get(cast, ['attributes', 'name'], '');
+  }>((acc, creative) => {
+    const role = creative.role_title;
+    const name =
+      (creative.contact_firstName ? creative.contact_firstName + ' ' : '') +
+        creative.contact_lastName || '';
     if (!name) {
       return acc;
     }
@@ -42,6 +44,9 @@ const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
     listOfEvalableCreatives,
   ).map(([role, name]) => ({ role, name }));
 
+  if (!data.length) {
+    return null;
+  }
   return (
     <View style={styles.generalContainer}>
       <View style={styles.wrapper}>
