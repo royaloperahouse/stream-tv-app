@@ -69,6 +69,7 @@ const navMenuRef = createRef<
     showNavMenu: () => void;
     hideNavMenu: () => void;
     setNavMenuBlur: () => void;
+    setNavMenuFocus: () => void;
     setNavMenuAccessible: () => void;
     setNavMenuNotAccessible: () => void;
     setNextFocusRightValue: (nodeValue: number, screenName: string) => void;
@@ -89,6 +90,11 @@ export const navMenuManager = Object.freeze({
   setNavMenuBlur: () => {
     if (typeof navMenuRef.current?.setNavMenuBlur === 'function') {
       navMenuRef.current.setNavMenuBlur();
+    }
+  },
+  setNavMenuFocus: () => {
+    if (typeof navMenuRef.current?.setNavMenuFocus === 'function') {
+      navMenuRef.current.setNavMenuFocus();
     }
   },
   setNavMenuAccessible: () => {
@@ -255,6 +261,9 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           [screenName]: nodeValue,
         }));
       },
+      setNavMenuFocus: () => {
+        setIsMenuFocused(true);
+      },
     }),
     [],
   );
@@ -266,7 +275,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
     (id: string, index: number, ref: React.RefObject<TouchableHighlight>) => {
       if (onBlurRef.current || exitOfAppButtonGotFocus.current) {
         setActiveMenuid(id);
-        navigate(id);
+        navigate(id, { fromEventDetails: false });
         activeItemRef.current = ref.current;
         selectedItemIndexRef.current = index;
         exitOfAppButtonGotFocus.current = false;
@@ -333,11 +342,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   }, [isMenuVisible, menuAnimation]);
 
   useLayoutEffect(() => {
-    if (
-      !navMenuMountedRef.current ||
-      menuVisibleAnimationInProcess.current ||
-      menuFocusAnimationInProcess.current
-    ) {
+    if (!navMenuMountedRef.current || menuFocusAnimationInProcess.current) {
       return;
     }
     menuFocusAnimationInProcess.current = true;

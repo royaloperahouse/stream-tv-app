@@ -15,11 +15,23 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
+import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { navMenuManager } from '@components/NavMenu';
+
 type TOperaMusicScreenProps = {};
 const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
   const data = useSelector(digitalEventsForOperaAndMusicSelector);
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
+  const isFocused = useIsFocused();
+  const route = useRoute<RouteProp<any, string>>();
+  useLayoutEffect(() => {
+    if (isFocused && route?.params?.fromEventDetails && !data.length) {
+      navMenuManager.setNavMenuAccessible();
+      navMenuManager.showNavMenu();
+      navMenuManager.setNavMenuFocus();
+    }
+  }, [isFocused, route, data.length]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -50,6 +62,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
           )}
           renderItem={({ item, section, index, scrollToRail }) => (
             <DigitalEventItem
+              screenNameFrom={route.name}
               event={item}
               ref={previewRef}
               canMoveUp={section.sectionIndex !== 0}
