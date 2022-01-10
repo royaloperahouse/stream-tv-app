@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions, BackHandler } from 'react-native';
 import { navMenuManager } from '@components/NavMenu';
 import { scaleSize } from '@utils/scaleSize';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
 import { globalModalManager } from '@components/GlobalModal';
@@ -11,9 +11,16 @@ type TGoBackProps = {};
 
 const GoBack: React.FC<TGoBackProps> = () => {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<any, string>>();
   const onFocusHandler = () => {
     if (navigation.canGoBack()) {
-      navigation.goBack();
+      if (route.params?.screenNameFrom) {
+        navigation.navigate(route.params.screenNameFrom, {
+          fromEventDetails: true,
+        });
+      } else {
+        navigation.goBack();
+      }
       navMenuManager.showNavMenu();
     }
   };
@@ -23,7 +30,14 @@ const GoBack: React.FC<TGoBackProps> = () => {
         return true;
       }
       navMenuManager.showNavMenu();
-      return false;
+      if (route.params?.screenNameFrom) {
+        navigation.navigate(route.params.screenNameFrom, {
+          fromEventDetails: true,
+        });
+      } else {
+        navigation.goBack();
+      }
+      return true;
     };
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return () => {

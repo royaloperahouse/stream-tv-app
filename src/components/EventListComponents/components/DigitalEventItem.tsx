@@ -18,11 +18,20 @@ type DigitalEventItemProps = {
   canMoveRight?: boolean;
   continueWatching?: boolean;
   onFocus?: (...[]: any[]) => void;
+  screenNameFrom?: string;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
   (
-    { event, canMoveUp, hasTVPreferredFocus, canMoveRight = true, onFocus, continueWatching },
+    {
+      event,
+      canMoveUp,
+      hasTVPreferredFocus,
+      canMoveRight = true,
+      onFocus,
+      continueWatching,
+      screenNameFrom = '',
+    },
     ref: any,
   ) => {
     const navigation = useNavigation();
@@ -44,7 +53,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       navMenuManager.hideNavMenu();
       navigation.navigate(
         additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
-        { event, continueWatching },
+        { event, continueWatching, screenNameFrom },
       );
     };
     return (
