@@ -29,8 +29,11 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.rohtvapp.R;
 import com.bitmovin.player.api.deficiency.ErrorEvent;
+import com.bitmovin.player.api.PlaybackConfig;
+import com.bitmovin.player.api.SeekMode;
+import com.bitmovin.player.api.media.MediaFilter;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerContainerView extends RelativeLayout {
@@ -60,6 +63,34 @@ public class PlayerContainerView extends RelativeLayout {
 
         PlayerConfig playerConfig = new PlayerConfig();
         playerConfig.setStyleConfig(styleConfig);
+        ArrayList<String> videoCodecPriority = new ArrayList<String>();
+        videoCodecPriority.add("h264");
+        videoCodecPriority.add("av1");
+        videoCodecPriority.add("hevc");
+        videoCodecPriority.add("hvc");
+        videoCodecPriority.add("vp9");
+        videoCodecPriority.add("avc");
+        ArrayList<String> audioCodecPriority = new ArrayList<String>();
+        audioCodecPriority.add("ec-3");
+        audioCodecPriority.add("mp4a.a6");
+        audioCodecPriority.add("ac-3");
+        audioCodecPriority.add("mp4a.a5");
+        audioCodecPriority.add("mp4a.40");
+
+        PlaybackConfig playbackConfig = new PlaybackConfig(
+            false,
+            false,
+            true,
+            videoCodecPriority,
+            audioCodecPriority,
+            true,
+            SeekMode.Exact,
+            null,
+            MediaFilter.Loose,
+            MediaFilter.Loose
+        );
+        //playbackConfig.setTunneledPlaybackEnabled(true);
+        playerConfig.setPlaybackConfig(playbackConfig);
 
         playerView = findViewById(R.id.bitmovinPlayerView);
         player = Player.create(context, playerConfig);
@@ -82,7 +113,7 @@ public class PlayerContainerView extends RelativeLayout {
 
         player.setVolume(100);
     }
-    
+
     public void configure(Source source) {
         player.load(source);
     }
