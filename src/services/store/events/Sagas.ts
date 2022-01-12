@@ -146,13 +146,22 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
           ),
         },
       };
-      const tags: Array<any> = Array.isArray(
-        digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
-      )
-        ? digitalEventDetail.data.vs_event_details.tags
-        : [];
+      console.log(digitalEventDetail?.data?.tags, 'tags');
+      const tags: Array<any> =
+        Array.isArray(digitalEventDetail?.data?.tags) &&
+        digitalEventDetail.data.tags.length &&
+        digitalEventDetail.data.tags.some((item: any) => !!item.tag)
+          ? digitalEventDetail.data.tags
+          : Array.isArray(
+              digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
+            )
+          ? digitalEventDetail.data.vs_event_details.tags
+          : [];
       for (let i = 0; i < tags.length; i++) {
-        const groupKey = tags[i].attributes.title
+        if (tags[i].tag === null) {
+          continue;
+        }
+        const groupKey = (tags[i].tag || tags[i].attributes.title)
           .toLowerCase()
           .trim()
           .replace(/\s/g, '_');
@@ -160,7 +169,7 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
           acc.eventGroups[groupKey].ids.push(digitalEventDetail.id);
         } else {
           acc.eventGroups[groupKey] = {
-            title: tags[i].attributes.title,
+            title: tags[i].tag || tags[i].attributes.title,
             ids: [digitalEventDetail.id],
           };
         }

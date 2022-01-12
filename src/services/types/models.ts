@@ -63,6 +63,7 @@ export type TEvent = {
   vs_genres: Array<{ tag: string }>; //example Romance
   vs_behind_the_scenes: Array<any>; // need better type;
   diese_activity: TDieseActivity | null;
+  tags: Array<{ tag: string | null }>;
 };
 
 export type TVSTitle = {
