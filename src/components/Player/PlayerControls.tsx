@@ -179,12 +179,26 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
         if (tvEventFireCounter.current === 1) {
           tvEventFireCounter.current = 0;
-          if (eve.eventType === 'playPause') {
-            const currentPlayerAction = isPlayingRef.current
-              ? onPausePress
-              : onPlayPress;
-            currentPlayerAction();
+          switch (eve.eventType) {
+            case 'fastForward': {
+              onSeekForwardPress();
+              break;
+            }
+            case 'rewind': {
+              onSeekBackwardPress();
+              break;
+            }
+            case 'playPause': {
+              const currentPlayerAction = isPlayingRef.current
+                ? onPausePress
+                : onPlayPress;
+              currentPlayerAction();
+              break;
+            }
+            default:
+              break;
           }
+
           Animated.timing(activeAnimation, {
             toValue: 1,
             useNativeDriver: true,
@@ -219,7 +233,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       return () => {
         tvEventHandler?.current.disable();
       };
-    }, [onPausePress, onPlayPress]);
+    }, [onPausePress, onPlayPress, onSeekBackwardPress, onSeekForwardPress]);
 
     useLayoutEffect(() => {
       controlMountedRef.current = true;
