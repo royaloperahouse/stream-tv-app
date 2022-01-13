@@ -304,6 +304,19 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   useLayoutEffect(() => {
     const backButtonCallback = () => {
       const routeState = getCurrentRoute();
+      if (!isMenuFocused) {
+        setIsMenuFocused(true);
+        setMenuAccessible(true);
+        flatListRef.current?.scrollToIndex({
+          animated: false,
+          index: selectedItemIndexRef.current,
+          viewPosition: 0,
+        });
+        if (activeItemRef.current?.setNativeProps) {
+          activeItemRef.current.setNativeProps({ hasTVPreferredFocus: true });
+        }
+        return true;
+      }
       if (
         canExit &&
         routeState &&
@@ -311,13 +324,13 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
       ) {
         exitOfApp(true);
       }
-      return Boolean(canExit);
+      return true;
     };
     BackHandler.addEventListener('hardwareBackPress', backButtonCallback);
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', backButtonCallback);
     };
-  }, [navMenuConfig, exitOfApp, canExit]);
+  }, [navMenuConfig, exitOfApp, canExit, isMenuFocused]);
   useLayoutEffect(() => {
     if (
       !navMenuMountedRef.current ||
