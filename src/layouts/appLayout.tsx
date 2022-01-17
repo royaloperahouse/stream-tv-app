@@ -3,7 +3,12 @@ import { useSelector, shallowEqual, useDispatch } from 'react-redux';
 import {
   introScreenShowSelector,
   deviceAuthenticatedSelector,
+  deviceAuthenticatedInfoLoadedSelector,
 } from '@services/store/auth/Selectors';
+import {
+  checkDeviceSuccess,
+  checkDeviceError,
+} from '@services/store/auth/Slices';
 import IntroScreen from '@screens/introScreen';
 import LoginScreen from '@screens/loginScreen';
 import MainLayout from '@layouts/mainLayout';
@@ -13,6 +18,7 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import RNBootSplash from 'react-native-bootsplash';
+import { verifyDevice } from '@services/apiClient';
 
 type TAppLayoutProps = {};
 const AppLayout: React.FC<TAppLayoutProps> = () => {
@@ -21,6 +27,10 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
   const showIntroScreen = useSelector(introScreenShowSelector, shallowEqual);
   const isAuthenticated = useSelector(
     deviceAuthenticatedSelector,
+    shallowEqual,
+  );
+  const deviceAuthInfoLoaded = useSelector(
+    deviceAuthenticatedInfoLoadedSelector,
     shallowEqual,
   );
   useEffect(() => {
@@ -50,7 +60,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
 
   useLayoutEffect(() => {
     // we need to setup splashscreen for tvOS(iOS)
-    if (Platform.OS === 'android') {
+    if (Platform.OS === 'android' && deviceAuthInfoLoaded) {
       RNBootSplash.getVisibilityStatus().then(status => {
         if (status !== 'hidden') {
           RNBootSplash.hide({ fade: true });
@@ -58,7 +68,25 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
       });
     }
   });
-  if (showIntroScreen) {
+
+  useEffect(() => {
+    if (!deviceAuthInfoLoaded) {
+      verifyDevice().then(response => {
+        if (response?.data?.data?.attributes?.customerId) {
+          dispatch(getEventListLoopStart());
+          dispatch(checkDeviceSuccess(response.data));
+        } else if (response?.data?.errors?.length) {
+          const errObj = response.data.errors[0];
+          dispatch(checkDeviceError(errObj));
+        }
+      });
+    }
+  }, [deviceAuthInfoLoaded]);
+
+  if (
+    !deviceAuthInfoLoaded ||
+    (deviceAuthInfoLoaded && !isAuthenticated && showIntroScreen)
+  ) {
     return <IntroScreen />;
   }
   if (!isAuthenticated) {

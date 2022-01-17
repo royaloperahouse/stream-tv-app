@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Image, ImageBackground, StyleSheet } from 'react-native';
+import { View, ImageBackground, StyleSheet } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { Colors, Images } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import { startLoginLoop } from '@services/store/auth/Slices';
+import {
+  startLoginLoop,
+  switchOffIntroScreen,
+} from '@services/store/auth/Slices';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import IntroStreamLogoSvg from '@assets/svg/IntroStreamLogo.svg';
 
@@ -13,6 +16,7 @@ type TIntroScreenProps = {};
 const IntroScreen: React.FC<TIntroScreenProps> = () => {
   const dispatch = useDispatch();
   const getStarted = () => {
+    dispatch(switchOffIntroScreen());
     dispatch(startLoginLoop());
   };
   return (
