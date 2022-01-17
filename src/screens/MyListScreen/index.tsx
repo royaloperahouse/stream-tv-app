@@ -57,7 +57,7 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
       ) : (
         <View style={styles.emptyListContainer}>
           <RohText style={styles.emptyListText} bold>
-            {myListTitle + ' is Empty'}
+            No items have been added to your list
           </RohText>
         </View>
       )}
@@ -69,12 +69,15 @@ const styles = StyleSheet.create({
   root: { flex: 1, marginTop: scaleSize(189) },
   emptyListContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginLeft: scaleSize(20),
+    marginTop: scaleSize(25),
   },
   emptyListText: {
+    fontSize: scaleSize(26),
+    lineHeight: scaleSize(30),
+    letterSpacing: scaleSize(1),
     color: Colors.defaultTextColor,
-    fontSize: scaleSize(48),
+    opacity: 0.7,
   },
   pageTitle: {
     color: Colors.defaultTextColor,
