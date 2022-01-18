@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
+  isLoaded: boolean;
   devicePin: null | string;
   customerId: null | number;
   showIntroScreen: boolean;
@@ -14,6 +15,7 @@ interface AuthState {
 const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
+  isLoaded: false,
   devicePin: null,
   customerId: null,
   showIntroScreen: true,
@@ -45,14 +47,15 @@ const appSlice = createSlice({
       state.showIntroScreen = false;
       state.errorString = '';
       state.userEmail = payload.data.attributes.email;
+      state.isLoaded = true;
     },
     checkDeviceError: (state, { payload }) => {
       state.devicePin = payload?.detail || '';
-      state.showIntroScreen = false;
       if (payload.status !== 401) {
         state.errorString = `${payload.status} - ${payload?.title}`;
       }
       state.isLoading = false;
+      state.isLoaded = true;
     },
     clearAuthState: () => ({ ...initialState }),
     toggleSubscriptionMode: state => {

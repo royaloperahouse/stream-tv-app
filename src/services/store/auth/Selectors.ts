@@ -16,3 +16,7 @@ export const subscribedModeSelector = (store: { [key: string]: any }) =>
 
 export const userEmailSelector = (store: { [key: string]: any }) =>
   store.auth.userEmail;
+
+export const deviceAuthenticatedInfoLoadedSelector = (store: {
+  [key: string]: any;
+}) => store.auth.isLoaded;
