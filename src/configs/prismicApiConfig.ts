@@ -12,4 +12,4 @@ export const documentTypes: TDocumentTypeList = Object.freeze({
   digitalEventVideo: 'digital_event_video',
 });
 
-export const refLabelOfPublishing = 'Staging';
+export const refLabelOfPublishing = 'Master Ref' || 'Staging';
