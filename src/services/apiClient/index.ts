@@ -55,7 +55,6 @@ export const fetchVideoURL = (id: string) =>
     params: {
       id,
     },
-    baseURL: ApiConfig.manifestURL,
     auth: ApiConfig.auth,
   });
 
