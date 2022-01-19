@@ -64,7 +64,8 @@ const General: React.FC<Props> = ({
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const [showContinueWatching, setShowContinueWatching] =
     useState<boolean>(false);
-
+  const [hideWatchTrailerButton, setHideWatchTrailerButton] =
+    useState<boolean>(true);
   const title: string =
     get(event.data, ['vs_title', '0', 'text'], '').replace(
       /(<([^>]+)>)/gi,
@@ -364,11 +365,49 @@ const General: React.FC<Props> = ({
           Icon: AddToMyList,
         },
       ],
+      [EActionButtonListType.withoutTrailers]: [
+        {
+          key: 'WatchNow',
+          text:
+            continueWatching || showContinueWatching
+              ? 'Continue watching'
+              : 'Watch now',
+          hasTVPreferredFocus: true,
+          onPress: getPerformanceVideoUrl,
+          onFocus: () => console.log('Watch now focus'),
+          Icon: Watch,
+        },
+        {
+          key: 'AddToMyList',
+          text: (existInMyList ? 'Remove from' : 'Add to') + ' my list',
+          onPress: addOrRemoveItemIdFromMyListHandler,
+          onFocus: () => console.log('Add to my list focus'),
+          Icon: AddToMyList,
+        },
+      ],
     };
     if (typeOfList in buttonListCollection) {
       return buttonListCollection[typeOfList];
     }
     return buttonListCollection[EActionButtonListType.common];
+  };
+
+  const showWatchTrailerButton = async () => {
+    if (!videos.length) {
+      setHideWatchTrailerButton(false);
+    }
+    const prismicResponse = await getVideoDetails({
+      queryPredicates: [Prismic.predicates.any('document.id', videos)],
+    });
+
+    const videoFromPrismic = prismicResponse.results.find(
+      prismicResponseResult =>
+        prismicResponseResult.data?.video?.video_type === 'trailer',
+    );
+    if (!generalMountedRef.current) {
+      return;
+    }
+    setHideWatchTrailerButton(!videoFromPrismic);
   };
 
   useEffect(() => {
@@ -390,6 +429,7 @@ const General: React.FC<Props> = ({
 
   useEffect(() => {
     updateContinueWatching();
+    showWatchTrailerButton();
   }, []);
 
   useLayoutEffect(() => {
@@ -421,7 +461,11 @@ const General: React.FC<Props> = ({
             <ActionButtonList
               ref={watchNowButtonRef}
               buttonsFactory={actionButtonListFactory}
-              type={EActionButtonListType.common}
+              type={
+                hideWatchTrailerButton
+                  ? EActionButtonListType.withoutTrailers
+                  : EActionButtonListType.common
+              }
             />
           </View>
         </View>

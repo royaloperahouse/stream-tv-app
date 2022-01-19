@@ -3,6 +3,7 @@ import { ViewStyle, StyleSheet, VirtualizedList } from 'react-native';
 import ExpandableButton from './ExpandableButton';
 export enum EActionButtonListType {
   common,
+  withoutTrailers,
 }
 
 type TActionButton = {
