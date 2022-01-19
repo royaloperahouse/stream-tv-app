@@ -66,11 +66,15 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   };
 
   const title: string =
-    get(item.data, ['vs_event_details', 'title'], '').replace(
+    get(item.data, ['vs_title', '0', 'text'], '').replace(
       /(<([^>]+)>)/gi,
       '',
     ) ||
-    get(item.data, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
+    get(item.data, ['vs_event_details', 'title'], '').replace(
+      /(<([^>]+)>)/gi,
+      '',
+    );
+
   const description: string = get(
     item.data,
     ['vs_event_details', 'shortDescription'],
@@ -199,30 +203,31 @@ type TPreviousSearchListItemComponentProps = {
   text: string;
   canMoveUp: boolean;
 };
-const PreviousSearchListItemComponent: React.FC<TPreviousSearchListItemComponentProps> =
-  ({ text, canMoveUp }) => {
-    const dispatch = useDispatch();
-    const onPressHandler = () => {
-      navMenuManager.setNavMenuNotAccessible();
-      dispatch(setFullSearchQuery({ searchQuery: text }));
-    };
-    return (
-      <View style={styles.searchesResultItemContainer}>
-        <View>
-          <TouchableHighlightWrapper
-            underlayColor={Colors.defaultBlue}
-            onPress={onPressHandler}
-            canMoveUp={canMoveUp}
-            style={styles.searchesResultItemWrapperContainer}
-            styleFocused={styles.searchesResultItemWrapperActive}>
-            <RohText style={styles.searchesResultItemText} numberOfLines={1}>
-              {text.toUpperCase()}
-            </RohText>
-          </TouchableHighlightWrapper>
-        </View>
-      </View>
-    );
+const PreviousSearchListItemComponent: React.FC<
+  TPreviousSearchListItemComponentProps
+> = ({ text, canMoveUp }) => {
+  const dispatch = useDispatch();
+  const onPressHandler = () => {
+    navMenuManager.setNavMenuNotAccessible();
+    dispatch(setFullSearchQuery({ searchQuery: text }));
   };
+  return (
+    <View style={styles.searchesResultItemContainer}>
+      <View>
+        <TouchableHighlightWrapper
+          underlayColor={Colors.defaultBlue}
+          onPress={onPressHandler}
+          canMoveUp={canMoveUp}
+          style={styles.searchesResultItemWrapperContainer}
+          styleFocused={styles.searchesResultItemWrapperActive}>
+          <RohText style={styles.searchesResultItemText} numberOfLines={1}>
+            {text.toUpperCase()}
+          </RohText>
+        </TouchableHighlightWrapper>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   searchItemListContainer: {

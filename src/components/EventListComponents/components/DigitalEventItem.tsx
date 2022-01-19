@@ -41,14 +41,15 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       '',
     );
     const eventTitle: string =
-      get(event.data, ['vs_event_details', 'title'], '').replace(
-        /(<([^>]+)>)/gi,
-        '',
-      ) ||
       get(event.data, ['vs_title', '0', 'text'], '').replace(
         /(<([^>]+)>)/gi,
         '',
+      ) ||
+      get(event.data, ['vs_event_details', 'title'], '').replace(
+        /(<([^>]+)>)/gi,
+        '',
       );
+
     const onPressHandler = () => {
       navMenuManager.hideNavMenu();
       navigation.navigate(

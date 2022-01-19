@@ -66,11 +66,14 @@ const General: React.FC<Props> = ({
     useState<boolean>(false);
 
   const title: string =
-    get(event.data, ['vs_event_details', 'title'], '').replace(
+    get(event.data, ['vs_title', '0', 'text'], '').replace(
       /(<([^>]+)>)/gi,
       '',
     ) ||
-    get(event.data, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
+    get(event.data, ['vs_event_details', 'title'], '').replace(
+      /(<([^>]+)>)/gi,
+      '',
+    );
   const shortDescription = get(
     event.data,
     ['vs_event_details', 'shortDescription'],
