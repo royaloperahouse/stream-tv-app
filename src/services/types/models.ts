@@ -50,6 +50,7 @@ export type TEvent = {
   vs_behind_the_scenes: Array<any>; // need better type;
   diese_activity: TDieseActivity | null;
   tags: Array<{ tag: string | null }>;
+  vs_tray_image: TVSTrayImage;
 };
 
 export type TVSTitle = {
@@ -228,4 +229,23 @@ export type TDieseActitvityCreatives = {
   role_title: string;
   role_order: number;
   roleCategory_title: string;
+};
+
+export type TVSTrayImage = {
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  alt: string | null;
+  copyright: string | null;
+  url: string;
+  large_tray_video: {
+    dimensions: {
+      width: number;
+      height: number;
+    };
+    alt: string | null;
+    copyright: string | null;
+    url: string;
+  };
 };

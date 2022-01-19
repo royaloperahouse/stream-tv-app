@@ -80,10 +80,10 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
     ['vs_event_details', 'shortDescription'],
     '',
   ).replace(/(<([^>]+)>)/gi, '');
-  const imgUrl: string = get(
-    item.data,
-    ['vs_background', '0', 'vs_background_image', 'url'],
-    '',
+
+  const imgUrl: string = get(item.data, ['vs_tray_image', 'url'], '').replace(
+    /w=\d+&h=\d+$/i,
+    `w=${scaleSize(358)}&h=${scaleSize(200)}`,
   );
   const toggleFocus = () => setIsFocused(prevState => !prevState);
   const focusHandler = () => {
