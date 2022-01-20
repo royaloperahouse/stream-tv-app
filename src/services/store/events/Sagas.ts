@@ -63,7 +63,6 @@ function* saveSearchResultQueryWatcher() {
 function* getEventListLoopWorker(): any {
   while (true) {
     const result = [];
-    const eventIdsForHomePage: Array<string> = [];
     try {
       const initialResponse: ApiSearchResponse = yield call(
         getDigitalEventDetails,
@@ -92,21 +91,11 @@ function* getEventListLoopWorker(): any {
           ),
         );
       }
-    } catch (err) {
+    } catch (err: any) {
       logError('something went wrong with prismic request', err);
     }
     if (result.length) {
-      eventIdsForHomePage.push(
-        ...result.reduce((acc, event: any, index) => {
-          if (index % 2 === 0) {
-            acc.push(event.id);
-          }
-          return acc;
-        }, []),
-      );
       const resultForDigitalEventsDetailUpdate = groupDigitalEvents(result);
-      resultForDigitalEventsDetailUpdate.eventIdsForHomePage =
-        eventIdsForHomePage;
       yield put(
         getEventListSuccess({
           digitalEventDetailsList: resultForDigitalEventsDetailUpdate,

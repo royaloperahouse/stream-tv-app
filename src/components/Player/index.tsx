@@ -191,9 +191,7 @@ const Player: React.FC<TPlayerProps> = props => {
   const setPlayer = (ref: any) => {
     playerRef.current = ref;
   };
-  const onPlaybackFinished = () => {
-    console.log('onPlaybackFinished');
-  };
+  const onPlaybackFinished = () => {};
 
   useLayoutEffect(() => {
     if (Platform.OS === 'android') {
@@ -214,9 +212,7 @@ const Player: React.FC<TPlayerProps> = props => {
       eventEmitter.addListener('onTimeChanged', (event: any) =>
         onTimeChanged({ nativeEvent: event }),
       );
-      eventEmitter.addListener('onSeek', (event: any) => {
-        console.log('seek', event);
-      });
+      eventEmitter.addListener('onSeek', () => {});
       eventEmitter.addListener('onSeeked', (event: any) =>
         onSeeked({ nativeEvent: event }),
       );
@@ -242,18 +238,16 @@ const Player: React.FC<TPlayerProps> = props => {
         };
         ROHBitmovinPlayerModule.destroy(findNodeHandle(playerRef.current));
       });
-      eventEmitter.addListener('onSubtitleChanged', event => {
-        console.log('onSubtitleChanged', event);
-      });
-      eventEmitter.addListener('onLoad', (event: any) => {
+      eventEmitter.addListener('onSubtitleChanged', () => {});
+      eventEmitter.addListener('onLoad', () => {
         setLoaded(true);
       });
       eventEmitter.addListener('onCueEnter', (event: any) => {
         setSubtitleCue(event.cueText);
-      })
+      });
       eventEmitter.addListener('onCueExit', (_event: any) => {
         setSubtitleCue('');
-      })
+      });
     }
     return () => {
       if (Platform.OS === 'android') {
