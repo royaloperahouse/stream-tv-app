@@ -146,7 +146,6 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
           ),
         },
       };
-      console.log(digitalEventDetail?.data?.tags, 'tags');
       const tags: Array<any> =
         Array.isArray(digitalEventDetail?.data?.tags) &&
         digitalEventDetail.data.tags.length &&

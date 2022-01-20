@@ -351,18 +351,18 @@ const General: React.FC<Props> = ({
           Icon: Watch,
         },
         {
-          key: 'WatchTrailer',
-          text: 'Watch trailer',
-          onPress: getTrailerVideoUrl,
-          onFocus: () => console.log('Watch trailer focus'),
-          Icon: Trailer,
-        },
-        {
           key: 'AddToMyList',
           text: (existInMyList ? 'Remove from' : 'Add to') + ' my list',
           onPress: addOrRemoveItemIdFromMyListHandler,
           onFocus: () => console.log('Add to my list focus'),
           Icon: AddToMyList,
+        },
+        {
+          key: 'WatchTrailer',
+          text: 'Watch trailer',
+          onPress: getTrailerVideoUrl,
+          onFocus: () => console.log('Watch trailer focus'),
+          Icon: Trailer,
         },
       ],
       [EActionButtonListType.withoutTrailers]: [
