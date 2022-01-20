@@ -65,6 +65,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
               continueWatching={section.title === continueWatchingRailTitle}
+              eventGroupTitle={section.title}
             />
           )}
         />

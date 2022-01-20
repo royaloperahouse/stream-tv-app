@@ -19,6 +19,7 @@ type DigitalEventItemProps = {
   continueWatching?: boolean;
   onFocus?: (...[]: any[]) => void;
   screenNameFrom?: string;
+  eventGroupTitle?: string;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -31,6 +32,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       onFocus,
       continueWatching,
       screenNameFrom = '',
+      eventGroupTitle,
     },
     ref: any,
   ) => {
@@ -67,7 +69,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           styleFocused={styles.imageContainerActive}
           style={styles.imageContainer}
           onFocus={() => {
-            ref?.current?.setDigitalEvent(event);
+            ref?.current?.setDigitalEvent(event, eventGroupTitle);
             //ref?.current?.setShowContinueWatching(continueWatching)
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
