@@ -68,6 +68,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
               canMoveUp={section.sectionIndex !== 0}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
+              eventGroupTitle={section.title}
             />
           )}
         />

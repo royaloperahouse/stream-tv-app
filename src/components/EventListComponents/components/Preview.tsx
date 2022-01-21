@@ -14,7 +14,10 @@ import FastImage from 'react-native-fast-image';
 import { Colors } from '@themes/Styleguide';
 
 export type TPreviewRef = {
-  setDigitalEvent?: (digitalEvent: TEventContainer) => void;
+  setDigitalEvent?: (
+    digitalEvent: TEventContainer,
+    eveGroupTitle?: string,
+  ) => void;
   setShowContinueWatching?: (showContinueWatching: boolean) => void;
 };
 
@@ -24,23 +27,23 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   const fadeAnimation = useRef<Animated.Value>(new Animated.Value(0)).current;
   const mountedRef = useRef<boolean>(false);
   const [event, setEvent] = useState<TEvent | null>(null);
+  const [eventGroupTitle, setEventGroupTitle] = useState<string>('');
   useImperativeHandle(
     ref,
     () => ({
-      setDigitalEvent: (digitalEvent: TEventContainer) => {
+      setDigitalEvent: (
+        digitalEvent: TEventContainer,
+        eveGroupTitle: string = '',
+      ) => {
         if (mountedRef.current) {
           setEvent(digitalEvent.data);
+          setEventGroupTitle(eveGroupTitle);
         }
       },
     }),
     [],
   );
 
-  const eventGroupTitle: string = get(
-    event,
-    ['vs_event_details', 'tags', '0', 'attributes', 'title'],
-    '',
-  );
   const eventTitle: string =
     get(event, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '') ||
     get(event, ['vs_event_details', 'title'], '').replace(/(<([^>]+)>)/gi, '');
