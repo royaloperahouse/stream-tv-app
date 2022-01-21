@@ -82,7 +82,7 @@ const General: React.FC<Props> = ({
   ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl = get(
     event.data,
-    ['vs_tray_image', 'url'],
+    ['vs_event_image', 'high_event_image', 'url'],
     '',
   ).replace(
     /w=\d+&h=\d+$/i,

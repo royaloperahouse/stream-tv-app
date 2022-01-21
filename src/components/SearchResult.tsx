@@ -81,10 +81,11 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
     '',
   ).replace(/(<([^>]+)>)/gi, '');
 
-  const imgUrl: string = get(item.data, ['vs_tray_image', 'url'], '').replace(
-    /w=\d+&h=\d+$/i,
-    `w=${scaleSize(358)}&h=${scaleSize(200)}`,
-  );
+  const imgUrl: string = get(
+    item.data,
+    ['vs_event_image', 'wide_event_image', 'url'],
+    '',
+  ).replace(/w=\d+&h=\d+$/i, `w=${scaleSize(358)}&h=${scaleSize(200)}`);
   const toggleFocus = () => setIsFocused(prevState => !prevState);
   const focusHandler = () => {
     dispatch(saveSearchResultQuery());

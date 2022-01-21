@@ -39,7 +39,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     const navigation = useNavigation();
     const snapshotImageUrl: string = get(
       event.data,
-      ['vs_tray_image', 'url'],
+      ['vs_event_image', 'wide_event_image', 'url'],
       '',
     ).replace(/w=\d+&h=\d+$/i, `?w=${scaleSize(357)}&h=${scaleSize(200)}`);
     const eventTitle: string =

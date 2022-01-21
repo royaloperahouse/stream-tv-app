@@ -54,7 +54,7 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl: string = get(
     event,
-    ['vs_tray_image', 'url'],
+    ['vs_event_image', 'wide_event_image', 'url'],
     '',
   ).replace(/w=\d+&h=\d+$/i, `w=${scaleSize(975)}&h=${scaleSize(600)}`);
 
