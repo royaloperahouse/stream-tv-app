@@ -54,9 +54,9 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl: string = get(
     event,
-    ['vs_background', '0', 'vs_background_image', 'url'],
+    ['vs_event_image', 'wide_event_image', 'url'],
     '',
-  );
+  ).replace(/w=\d+&h=\d+$/i, `w=${scaleSize(975)}&h=${scaleSize(600)}`);
 
   useLayoutEffect(() => {
     fadeAnimation.setValue(0);

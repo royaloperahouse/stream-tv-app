@@ -82,8 +82,11 @@ const General: React.FC<Props> = ({
   ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl = get(
     event.data,
-    ['vs_background', '0', 'vs_background_image', 'url'],
+    ['vs_event_image', 'high_event_image', 'url'],
     '',
+  ).replace(
+    /w=\d+&h=\d+$/i,
+    `w=${scaleSize(975)}&h=${Dimensions.get('window').height}`,
   );
 
   const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
