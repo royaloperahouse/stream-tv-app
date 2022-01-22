@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiConfig } from '@configs/apiConfig';
-import { store } from '@services/store';
 
 const axiosClient: AxiosInstance = axios.create({
   baseURL: ApiConfig.host,
@@ -61,16 +60,4 @@ export const fetchVideoURL = (id: string) =>
 export const pinUnlink = () => axiosClient.delete(ApiConfig.routes.pinUnlink);
 
 export const getSubscribeInfo = () =>
-  axiosClient.get(ApiConfig.routes.subscriptionInfo).then(response => {
-    const responseClone = {
-      ...response,
-    };
-    if (
-      responseClone.data?.data?.attributes &&
-      responseClone.data.data.attributes.isSubscriptionActive !== undefined
-    ) {
-      responseClone.data.data.attributes.isSubscriptionActive =
-        store.getState().auth.fullSubscription;
-    }
-    return responseClone;
-  });
+  axiosClient.get(ApiConfig.routes.subscriptionInfo);
