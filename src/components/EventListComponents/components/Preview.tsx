@@ -47,11 +47,14 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   const eventTitle: string =
     get(event, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '') ||
     get(event, ['vs_event_details', 'title'], '').replace(/(<([^>]+)>)/gi, '');
-  const shortDescription: string = get(
-    event,
-    ['vs_event_details', 'shortDescription'],
-    '',
-  ).replace(/(<([^>]+)>)/gi, '');
+  const shortDescription: string = !event
+    ? ''
+    : (
+        event.vs_short_description.reduce((acc, sDescription) => {
+          acc += sDescription.text + '\n';
+          return acc;
+        }, '') || get(event, ['vs_event_details', 'shortDescription'], '')
+      ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl: string = get(
     event,
     ['vs_event_image', 'wide_event_image', 'url'],

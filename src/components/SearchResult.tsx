@@ -75,10 +75,11 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
       '',
     );
 
-  const description: string = get(
-    item.data,
-    ['vs_event_details', 'shortDescription'],
-    '',
+  const description: string = (
+    item.data.vs_short_description.reduce((acc, sDescription) => {
+      acc += sDescription.text + '\n';
+      return acc;
+    }, '') || get(item.data, ['vs_event_details', 'shortDescription'], '')
   ).replace(/(<([^>]+)>)/gi, '');
 
   const imgUrl: string = get(
