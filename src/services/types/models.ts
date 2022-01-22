@@ -31,7 +31,7 @@ export type TEvent = {
   vs_event_card_primary_cta_link: {
     link_tytpe: string;
   };
-  vs_description: TVSDescription;
+  vs_description: Array<TVSDescription>;
   vs_price_details: null | any; // need better type;
   vs_guidance: null | any; // need better type;
   vs_guidance_details: Array<any>; // need better type;
@@ -51,6 +51,7 @@ export type TEvent = {
   diese_activity: TDieseActivity | null;
   tags: Array<{ tag: string | null }>;
   vs_tray_image: TVSTrayImage;
+  vs_short_description: Array<TVSDescription>;
 };
 
 export type TVSTitle = {

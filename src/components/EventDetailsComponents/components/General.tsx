@@ -75,11 +75,14 @@ const General: React.FC<Props> = ({
       /(<([^>]+)>)/gi,
       '',
     );
-  const shortDescription = get(
-    event.data,
-    ['vs_event_details', 'shortDescription'],
-    '',
+
+  const shortDescription = (
+    event.data.vs_description.reduce((acc, description) => {
+      acc += description.text + '\n';
+      return acc;
+    }, '') || get(event, ['vs_event_details', 'description'], '')
   ).replace(/(<([^>]+)>)/gi, '');
+
   const snapshotImageUrl = get(
     event.data,
     ['vs_event_image', 'high_event_image', 'url'],
