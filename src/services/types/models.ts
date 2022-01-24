@@ -52,6 +52,7 @@ export type TEvent = {
   tags: Array<{ tag: string | null }>;
   vs_tray_image: TVSTrayImage;
   vs_short_description: Array<TVSDescription>;
+  vs_synopsis: Array<TVSSynops>;
 };
 
 export type TVSTitle = {
@@ -250,3 +251,5 @@ export type TVSTrayImage = {
     url: string;
   };
 };
+
+export type TVSSynops = { type: string; text: string; spans: Array<any> };
