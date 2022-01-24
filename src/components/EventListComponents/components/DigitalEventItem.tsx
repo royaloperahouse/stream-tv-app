@@ -41,7 +41,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       event.data,
       ['vs_event_image', 'wide_event_image', 'url'],
       '',
-    ).replace(/w=\d+&h=\d+$/i, `?w=${scaleSize(357)}&h=${scaleSize(200)}`);
+    );
     const eventTitle: string =
       get(event.data, ['vs_title', '0', 'text'], '').replace(
         /(<([^>]+)>)/gi,
