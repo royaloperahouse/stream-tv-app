@@ -59,7 +59,7 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
     event,
     ['vs_event_image', 'wide_event_image', 'url'],
     '',
-  ).replace(/w=\d+&h=\d+$/i, `w=${scaleSize(975)}&h=${scaleSize(600)}`);
+  );
 
   useLayoutEffect(() => {
     fadeAnimation.setValue(0);

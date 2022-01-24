@@ -87,9 +87,6 @@ const General: React.FC<Props> = ({
     event.data,
     ['vs_event_image', 'high_event_image', 'url'],
     '',
-  ).replace(
-    /w=\d+&h=\d+$/i,
-    `w=${scaleSize(975)}&h=${Dimensions.get('window').height}`,
   );
 
   const videos = get(event.data, 'vs_videos', []).map(({ video }) => video.id);
