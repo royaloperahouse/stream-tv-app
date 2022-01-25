@@ -31,7 +31,7 @@ export const eventDetailsSectionsConfig: {
   },
   synopsis: {
     key: 'synopsis',
-    nextSectionTitle: 'INFO & MORE',
+    nextSectionTitle: '', //'INFO & MORE',
     Component: Synopsis,
   },
 };
