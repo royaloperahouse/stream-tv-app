@@ -14,8 +14,10 @@ type SynopsisProps = {
 };
 
 const Synopsis: React.FC<SynopsisProps> = ({ event, nextScreenText }) => {
-  const synopsis: Array<TVSSynops> = event.data.vs_synopsis.length
-    ? event.data.vs_synopsis
+  const synopsis: Array<TVSSynops> = event.data.vs_synopsis.filter(
+    synops => synops.text.length,
+  ).length
+    ? event.data.vs_synopsis.filter(synops => synops.text.length)
     : get<TEvent, 'vs_event_details', 'productions', any[]>(
         event.data,
         ['vs_event_details', 'productions'],
