@@ -1,4 +1,4 @@
-import { SignOut, Account } from '@components/SettingsComponents';
+import { SignOut, Account, AppVersion } from '@components/SettingsComponents';
 
 export const settingsTitle = 'SETTINGS';
 
@@ -20,6 +20,11 @@ export const settingsSectionsConfig: {
     key: 'signOut',
     navMenuItemTitle: 'SIGN OUT',
     ContentComponent: SignOut,
+  },
+  appVersion: {
+    key: 'appVersion',
+    navMenuItemTitle: 'APP VERSION',
+    ContentComponent: AppVersion,
   },
 };
 
