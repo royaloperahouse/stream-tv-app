@@ -9,6 +9,9 @@ type Props = {
 };
 
 const GoDown: React.FC<Props> = ({ text = '' }) => {
+  if (!text.length) {
+    return null;
+  }
   return (
     <View style={styles.container}>
       <Down width={scaleSize(50)} height={scaleSize(50)} />
