@@ -472,9 +472,6 @@ const General: React.FC<Props> = ({
             />
           </View>
         </View>
-        <View style={styles.downContainer}>
-          <GoDown text={nextScreenText} />
-        </View>
       </View>
       <View style={styles.snapshotContainer}>
         <FastImage

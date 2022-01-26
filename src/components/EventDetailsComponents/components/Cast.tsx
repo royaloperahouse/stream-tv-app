@@ -42,6 +42,9 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
   }
   return (
     <View style={styles.generalContainer}>
+      <View style={styles.downContainer}>
+        <GoDown text={nextScreenText} />
+      </View>
       <View style={styles.wrapper}>
         <View style={styles.titleContainer}>
           <RohText style={styles.title}>Cast</RohText>
@@ -54,9 +57,6 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
           />
         </View>
       </View>
-      <View style={styles.downContainer}>
-        <GoDown text={nextScreenText} />
-      </View>
     </View>
   );
 };
@@ -64,7 +64,6 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
 const styles = StyleSheet.create({
   generalContainer: {
     height: Dimensions.get('window').height,
-    paddingTop: scaleSize(110),
     paddingRight: scaleSize(200),
   },
   wrapper: {
@@ -75,6 +74,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(110),
     paddingBottom: scaleSize(60),
+    top: -scaleSize(110),
   },
   title: {
     width: '100%',
