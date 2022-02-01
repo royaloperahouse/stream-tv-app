@@ -19,19 +19,28 @@ import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type TOperaMusicScreenProps = {};
-const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
+const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const data = useSelector(digitalEventsForOperaAndMusicSelector);
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
   const isFocused = useIsFocused();
-  const route = useRoute<RouteProp<any, string>>();
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails && !data.length) {
-      navMenuManager.setNavMenuAccessible();
-      navMenuManager.showNavMenu();
-      navMenuManager.setNavMenuFocus();
+    if (isFocused && route?.params?.fromEventDetails) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      } else {
+        navigation.setParams({
+          ...route.params,
+          fromEventDetails: false,
+        });
+      }
     }
-  }, [isFocused, route, data.length]);
+  }, [isFocused, route, data.length, navigation]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -42,6 +51,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
       previewRef.current.setDigitalEvent(data[0]?.data[0]);
     }
   }, [data]);
+  console.log(route.params, 'params');
   if (!data.length) {
     return null;
   }
@@ -60,15 +70,31 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            scrollToRail,
+            sectionIndex,
+            isFirstRail,
+            railItemIndex,
+            isLastRail,
+          }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
               event={item}
+              hasTVPreferredFocus={
+                route.params.fromEventDetails &&
+                route.params.eventId === item.id
+              }
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
+              canMoveUp={!isFirstRail}
+              canMoveDown={!isLastRail}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
               eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
+              railItemIndex={railItemIndex}
             />
           )}
         />

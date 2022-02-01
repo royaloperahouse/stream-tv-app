@@ -13,14 +13,16 @@ const GoBack: React.FC<TGoBackProps> = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<any, string>>();
   const onFocusHandler = () => {
-    if (navigation.canGoBack()) {
-      if (route.params?.screenNameFrom) {
-        navigation.navigate(route.params.screenNameFrom, {
-          fromEventDetails: true,
-        });
-      } else {
-        navigation.goBack();
-      }
+    if (route.params?.screenNameFrom) {
+      navigation.navigate(route.params.screenNameFrom, {
+        fromEventDetails: true,
+        railItemIndex: route.params.railItemIndex,
+        sectionIndex: route.params.sectionIndex,
+        eventId: route.params.event.id,
+      });
+      navMenuManager.showNavMenu();
+    } else if (navigation.canGoBack()) {
+      navigation.goBack();
       navMenuManager.showNavMenu();
     }
   };
@@ -29,13 +31,17 @@ const GoBack: React.FC<TGoBackProps> = () => {
       if (globalModalManager.isModalOpen()) {
         return true;
       }
-      navMenuManager.showNavMenu();
       if (route.params?.screenNameFrom) {
         navigation.navigate(route.params.screenNameFrom, {
           fromEventDetails: true,
+          railItemIndex: route.params.railItemIndex,
+          sectionIndex: route.params.sectionIndex,
+          eventId: route.params.event.id,
         });
-      } else {
+        navMenuManager.showNavMenu();
+      } else if (navigation.canGoBack()) {
         navigation.goBack();
+        navMenuManager.showNavMenu();
       }
       return true;
     };
@@ -46,7 +52,7 @@ const GoBack: React.FC<TGoBackProps> = () => {
         handleBackButtonClick,
       );
     };
-  }, []);
+  }, [navigation, route.params]);
 
   return (
     <TouchableHighlightWrapper

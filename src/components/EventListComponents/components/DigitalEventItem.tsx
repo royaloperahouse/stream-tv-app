@@ -1,11 +1,11 @@
 import React, { forwardRef } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
@@ -14,6 +14,9 @@ import { Colors } from '@themes/Styleguide';
 type DigitalEventItemProps = {
   event: TEventContainer;
   canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  sectionIndex: number;
+  railItemIndex: number;
   hasTVPreferredFocus?: boolean;
   canMoveRight?: boolean;
   continueWatching?: boolean;
@@ -33,6 +36,9 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       continueWatching,
       screenNameFrom = '',
       eventGroupTitle,
+      sectionIndex,
+      railItemIndex,
+      canMoveDown = true,
     },
     ref: any,
   ) => {
@@ -54,9 +60,24 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
 
     const onPressHandler = () => {
       navMenuManager.hideNavMenu();
-      navigation.navigate(
-        additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
-        { event, continueWatching, screenNameFrom },
+      navigation.dispatch(
+        CommonActions.reset({
+          routes: [
+            {
+              name: additionalRoutesWithoutNavMenuNavigation.eventDetails
+                .navMenuScreenName,
+              params: {
+                fromEventDetails: false,
+                event,
+                continueWatching,
+                screenNameFrom,
+                railItemIndex,
+                sectionIndex,
+              },
+            },
+          ],
+          index: 0,
+        }),
       );
     };
     return (
@@ -65,6 +86,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           underlayColor={Colors.defaultBlue}
           hasTVPreferredFocus={hasTVPreferredFocus}
           canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
           canMoveRight={canMoveRight}
           styleFocused={styles.imageContainerActive}
           style={styles.imageContainer}
