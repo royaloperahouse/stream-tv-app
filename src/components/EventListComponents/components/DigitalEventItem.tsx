@@ -5,7 +5,11 @@ import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
-import { useNavigation, CommonActions } from '@react-navigation/native';
+import {
+  useNavigation,
+  CommonActions,
+  useRoute,
+} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
@@ -16,13 +20,13 @@ type DigitalEventItemProps = {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   sectionIndex: number;
-  railItemIndex: number;
   hasTVPreferredFocus?: boolean;
   canMoveRight?: boolean;
   continueWatching?: boolean;
   onFocus?: (...[]: any[]) => void;
   screenNameFrom?: string;
   eventGroupTitle?: string;
+  selectedItemIndex?: number;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -37,12 +41,13 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       screenNameFrom = '',
       eventGroupTitle,
       sectionIndex,
-      railItemIndex,
       canMoveDown = true,
+      selectedItemIndex,
     },
     ref: any,
   ) => {
     const navigation = useNavigation();
+    const route = useRoute();
     const snapshotImageUrl: string = get(
       event.data,
       ['vs_event_image', 'wide_event_image', 'url'],
@@ -71,8 +76,8 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
                 event,
                 continueWatching,
                 screenNameFrom,
-                railItemIndex,
                 sectionIndex,
+                selectedItemIndex,
               },
             },
           ],
@@ -92,10 +97,15 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           style={styles.imageContainer}
           onFocus={() => {
             ref?.current?.setDigitalEvent(event, eventGroupTitle);
-            //ref?.current?.setShowContinueWatching(continueWatching)
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
+            }
+            if (route.params?.fromEventDetails) {
+              navigation.setParams({
+                ...route.params,
+                fromEventDetails: false,
+              });
             }
           }}
           onPress={onPressHandler}>

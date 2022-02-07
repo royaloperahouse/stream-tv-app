@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { View, FlatList, StyleSheet, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { digitalEventDetailsSearchSelector } from '@services/store/events/Selectors';
@@ -13,32 +13,76 @@ import get from 'lodash.get';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
 import { getPrevSearchList } from '@services/previousSearch';
-import { useNavigation } from '@react-navigation/core';
+import {
+  useNavigation,
+  CommonActions,
+  useRoute,
+  useIsFocused,
+} from '@react-navigation/core';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
-import { useRef } from 'react';
-import { useLayoutEffect } from 'react';
 import { TEventContainer } from '@services/types/models';
 import { navMenuManager } from '@components/NavMenu';
 
 type TSearchResultProps = {};
 const SearchResult: React.FC<TSearchResultProps> = () => {
+  const route = useRoute();
+  const resultListRef = useRef(null);
+  const focused = useIsFocused();
   const digitalEventDetails = useSelector<Partial<any>, Array<TEventContainer>>(
     digitalEventDetailsSearchSelector,
   );
+  useLayoutEffect(() => {
+    if (
+      (focused && digitalEventDetails.length,
+      route.params?.fromEventDetails && resultListRef.current)
+    ) {
+      resultListRef.current.scrollToIndex({
+        animated: false,
+        index:
+          route.params.sectionIndex < digitalEventDetails.length
+            ? route.params.sectionIndex
+            : 0,
+      });
+    }
+  }, [focused, digitalEventDetails.length, route]);
   if (!digitalEventDetails.length) {
     return <PreviousSearchList />;
   }
   return (
     <FlatList
+      ref={resultListRef}
       style={styles.searchItemListContainer}
       data={digitalEventDetails}
       keyExtractor={item => item.id}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
+      onScrollToIndexFailed={info => {
+        const wait = new Promise(resolve => setTimeout(resolve, 500));
+        wait.then(() => {
+          if (
+            !resultListRef.current ||
+            !resultListRef.current ||
+            info.index === undefined
+          ) {
+            return;
+          }
+          resultListRef.current.scrollToIndex({
+            animated: false,
+            index: info.index,
+          });
+        });
+      }}
       ListHeaderComponent={<ResultHraderComponent headerText="results" />}
       initialNumToRender={0}
       renderItem={({ item, index }) => (
-        <SearchItemComponent item={item} canMoveUp={index !== 0} />
+        <SearchItemComponent
+          item={item}
+          canMoveUp={index !== 0}
+          canMoveDown={index !== digitalEventDetails.length - 1}
+          screenNameFrom={route.name}
+          sectionIndex={index}
+          hasTVPreferredFocus={route?.params?.sectionIndex === index}
+        />
       )}
     />
   );
@@ -48,23 +92,44 @@ export default SearchResult;
 type TSearchItemComponentProps = {
   item: TEventContainer;
   canMoveUp: boolean;
+  screenNameFrom: string;
+  sectionIndex: number;
+  canMoveDown: boolean;
+  hasTVPreferredFocus: boolean;
 };
 
 export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   item,
   canMoveUp,
+  screenNameFrom,
+  sectionIndex,
+  canMoveDown,
+  hasTVPreferredFocus,
 }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const route = useRoute();
   const [isFocused, setIsFocused] = useState(false);
   const touchableHandler = () => {
     navMenuManager.hideNavMenu();
-    navigation.push(
-      additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
-      { event: item },
+    navigation.dispatch(
+      CommonActions.reset({
+        routes: [
+          {
+            name: additionalRoutesWithoutNavMenuNavigation.eventDetails
+              .navMenuScreenName,
+            params: {
+              fromEventDetails: false,
+              event: item,
+              screenNameFrom,
+              sectionIndex,
+            },
+          },
+        ],
+        index: 0,
+      }),
     );
   };
-
   const title: string =
     get(item.data, ['vs_title', '0', 'text'], '').replace(
       /(<([^>]+)>)/gi,
@@ -91,6 +156,12 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   const focusHandler = () => {
     dispatch(saveSearchResultQuery());
     toggleFocus();
+    if (route?.params?.fromEventDetails) {
+      navigation.setParams({
+        ...route.params,
+        fromEventDetails: false,
+      });
+    }
     navMenuManager.setNavMenuAccessible();
   };
   return (
@@ -100,7 +171,10 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
         onPress={touchableHandler}
         onBlur={toggleFocus}
         onFocus={focusHandler}
+        hasTVPreferredFocus={hasTVPreferredFocus}
         canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        canMoveRight={false}
         style={styles.itemImageContainer}>
         {imgUrl.length ? (
           <FastImage
@@ -195,7 +269,11 @@ const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
         <ResultHraderComponent headerText="previous searches" isPrevSearch />
       }
       renderItem={({ item, index }) => (
-        <PreviousSearchListItemComponent text={item} canMoveUp={index !== 0} />
+        <PreviousSearchListItemComponent
+          text={item}
+          canMoveUp={index !== 0}
+          canMoveDown={index !== previousSearchesList.length - 1}
+        />
       )}
     />
   );
@@ -204,13 +282,16 @@ const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
 type TPreviousSearchListItemComponentProps = {
   text: string;
   canMoveUp: boolean;
+  canMoveDown: boolean;
 };
 const PreviousSearchListItemComponent: React.FC<
   TPreviousSearchListItemComponentProps
-> = ({ text, canMoveUp }) => {
+> = ({ text, canMoveUp, canMoveDown }) => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const onPressHandler = () => {
     navMenuManager.setNavMenuNotAccessible();
+    navigation.setParams({ sectionIndex: 0 });
     dispatch(setFullSearchQuery({ searchQuery: text }));
   };
   return (
@@ -220,6 +301,8 @@ const PreviousSearchListItemComponent: React.FC<
           underlayColor={Colors.defaultBlue}
           onPress={onPressHandler}
           canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+          canMoveRight={false}
           style={styles.searchesResultItemWrapperContainer}
           styleFocused={styles.searchesResultItemWrapperActive}>
           <RohText style={styles.searchesResultItemText} numberOfLines={1}>

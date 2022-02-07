@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForOperaAndMusicSelector } from '@services/store/events/Selectors';
@@ -15,7 +15,7 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
-import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type TOperaMusicScreenProps = {};
@@ -23,24 +23,21 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
   navigation,
   route,
 }) => {
-  const data = useSelector(digitalEventsForOperaAndMusicSelector);
+  const { data, eventsLoaded } = useSelector(
+    digitalEventsForOperaAndMusicSelector,
+  );
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
   const isFocused = useIsFocused();
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails) {
+    if (isFocused && eventsLoaded) {
       if (!data.length) {
         navMenuManager.setNavMenuAccessible();
         navMenuManager.showNavMenu();
         navMenuManager.setNavMenuFocus();
-      } else {
-        navigation.setParams({
-          ...route.params,
-          fromEventDetails: false,
-        });
       }
     }
-  }, [isFocused, route, data.length, navigation]);
+  }, [isFocused, route, data.length, navigation, eventsLoaded]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -51,7 +48,6 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
       previewRef.current.setDigitalEvent(data[0]?.data[0]);
     }
   }, [data]);
-  console.log(route.params, 'params');
   if (!data.length) {
     return null;
   }
@@ -62,6 +58,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
+          sectionIndex={route.params.sectionIndex || 0}
           railStyle={styles.railStyle}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
@@ -74,27 +71,26 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
             item,
             section,
             index,
-            scrollToRail,
             sectionIndex,
             isFirstRail,
-            railItemIndex,
             isLastRail,
+            scrollToRail,
           }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
               event={item}
               hasTVPreferredFocus={
                 route.params.fromEventDetails &&
-                route.params.eventId === item.id
+                sectionIndex === route.params.sectionIndex &&
+                index === 0
               }
               ref={previewRef}
+              onFocus={scrollToRail}
               canMoveUp={!isFirstRail}
               canMoveDown={!isLastRail}
               canMoveRight={index !== section.data.length - 1}
-              onFocus={scrollToRail}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
-              railItemIndex={railItemIndex}
             />
           )}
         />

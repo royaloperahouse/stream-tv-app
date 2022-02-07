@@ -1,5 +1,5 @@
-import React, { useRef, useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useRef, useLayoutEffect, useMemo } from 'react';
+import { View, StyleSheet, Dimensions, VirtualizedList } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForHomePageSelector } from '@services/store/events/Selectors';
 import {
@@ -17,27 +17,47 @@ import {
 import { useMyList } from '@hooks/useMyList';
 import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
 import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
-import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type THomePageScreenProps = {};
-const HomePageScreen: React.FC<THomePageScreenProps> = () => {
-  const myList = useMyList();
-  const continueWatchingList = useContinueWatchingList();
-  const data = useSelector(
+const HomePageScreen: React.FC<THomePageScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const { data: myList, ejected: myListEjected } = useMyList();
+  const { data: continueWatchingList, ejected: continueWatchingListEjected } =
+    useContinueWatchingList();
+  const { data, eventsLoaded } = useSelector(
     digitalEventsForHomePageSelector(myList, continueWatchingList),
   );
   const previewRef = useRef(null);
   const isFocused = useIsFocused();
-  const route = useRoute<RouteProp<any, string>>();
+
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails && !data.length) {
-      navMenuManager.setNavMenuAccessible();
-      navMenuManager.showNavMenu();
-      navMenuManager.setNavMenuFocus();
+    if (
+      isFocused &&
+      myListEjected &&
+      continueWatchingListEjected &&
+      eventsLoaded
+    ) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      }
     }
-  }, [isFocused, route, data.length]);
-  if (!data.length) {
+  }, [
+    isFocused,
+    route,
+    data.length,
+    navigation,
+    continueWatchingListEjected,
+    myListEjected,
+    eventsLoaded,
+  ]);
+
+  if (!data.length || !continueWatchingListEjected || !myListEjected) {
     return null;
   }
   return (
@@ -47,6 +67,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
+          sectionIndex={route?.params?.sectionIndex || 0}
           railStyle={styles.railStyle}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
@@ -55,17 +76,33 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail, isFirstRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            scrollToRail,
+            isFirstRail,
+            isLastRail,
+            sectionIndex,
+          }) => (
             <DigitalEventItem
               event={item}
               ref={previewRef}
               screenNameFrom={route.name}
               canMoveUp={!isFirstRail}
-              hasTVPreferredFocus={isFirstRail && index === 0}
+              hasTVPreferredFocus={
+                route.params === undefined
+                  ? isFirstRail && index === 0
+                  : route.params.fromEventDetails &&
+                    sectionIndex === route.params.sectionIndex &&
+                    index === 0
+              }
               canMoveRight={index !== section.data.length - 1}
+              canMoveDown={!isLastRail}
               onFocus={scrollToRail}
               continueWatching={section.title === continueWatchingRailTitle}
               eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
             />
           )}
         />

@@ -16,7 +16,6 @@ const GoBack: React.FC<TGoBackProps> = () => {
     if (route.params?.screenNameFrom) {
       navigation.navigate(route.params.screenNameFrom, {
         fromEventDetails: true,
-        railItemIndex: route.params.railItemIndex,
         sectionIndex: route.params.sectionIndex,
         eventId: route.params.event.id,
       });
@@ -34,7 +33,6 @@ const GoBack: React.FC<TGoBackProps> = () => {
       if (route.params?.screenNameFrom) {
         navigation.navigate(route.params.screenNameFrom, {
           fromEventDetails: true,
-          railItemIndex: route.params.railItemIndex,
           sectionIndex: route.params.sectionIndex,
           eventId: route.params.event.id,
         });

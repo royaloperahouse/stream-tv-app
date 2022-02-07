@@ -15,23 +15,26 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
-import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type TBalletDanceScreenProps = {};
-const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
-  const data = useSelector(digitalEventsForBalletAndDanceSelector);
+const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
+  const { data, eventsLoaded } = useSelector(
+    digitalEventsForBalletAndDanceSelector,
+  );
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
   const isFocused = useIsFocused();
-  const route = useRoute<RouteProp<any, string>>();
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails && !data.length) {
-      navMenuManager.setNavMenuAccessible();
-      navMenuManager.showNavMenu();
-      navMenuManager.setNavMenuFocus();
+    if (isFocused && eventsLoaded) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      }
     }
-  }, [isFocused, route, data.length]);
+  }, [isFocused, route, data.length, eventsLoaded]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -53,6 +56,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
           railStyle={styles.railStyle}
+          sectionIndex={route.params.sectionIndex || 0}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
           renderHeader={section => (
@@ -60,15 +64,30 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            scrollToRail,
+            sectionIndex,
+            isFirstRail,
+            isLastRail,
+          }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
               event={item}
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
+              canMoveUp={!isFirstRail}
+              canMoveDown={!isLastRail}
+              hasTVPreferredFocus={
+                route.params.fromEventDetails &&
+                sectionIndex === route.params.sectionIndex &&
+                index === 0
+              }
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
               eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
             />
           )}
         />
