@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForOperaAndMusicSelector } from '@services/store/events/Selectors';
@@ -15,23 +15,29 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
-import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type TOperaMusicScreenProps = {};
-const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
-  const data = useSelector(digitalEventsForOperaAndMusicSelector);
+const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const { data, eventsLoaded } = useSelector(
+    digitalEventsForOperaAndMusicSelector,
+  );
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
   const isFocused = useIsFocused();
-  const route = useRoute<RouteProp<any, string>>();
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails && !data.length) {
-      navMenuManager.setNavMenuAccessible();
-      navMenuManager.showNavMenu();
-      navMenuManager.setNavMenuFocus();
+    if (isFocused && eventsLoaded) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      }
     }
-  }, [isFocused, route, data.length]);
+  }, [isFocused, route, data.length, navigation, eventsLoaded]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -52,6 +58,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
+          sectionIndex={route.params.sectionIndex || 0}
           railStyle={styles.railStyle}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
@@ -60,15 +67,30 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            sectionIndex,
+            isFirstRail,
+            isLastRail,
+            scrollToRail,
+          }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
               event={item}
+              hasTVPreferredFocus={
+                route.params.fromEventDetails &&
+                sectionIndex === route.params.sectionIndex &&
+                index === 0
+              }
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
-              canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
+              canMoveUp={!isFirstRail}
+              canMoveDown={!isLastRail}
+              canMoveRight={index !== section.data.length - 1}
               eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
             />
           )}
         />

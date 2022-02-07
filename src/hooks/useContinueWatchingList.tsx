@@ -2,7 +2,11 @@ import { useState, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/core';
 import { getListOfUniqueEventId } from '@services/bitMovinPlayer';
 
-export const useContinueWatchingList = (): Array<string> => {
+export const useContinueWatchingList = (): {
+  data: Array<string>;
+  ejected: boolean;
+} => {
+  const ejected = useRef<boolean>(false);
   const [continueWatchingList, setContinueWatchingList] = useState<
     Array<string>
   >([]);
@@ -12,6 +16,7 @@ export const useContinueWatchingList = (): Array<string> => {
       mountedRef.current = true;
       getListOfUniqueEventId().then(items => {
         if (mountedRef.current) {
+          ejected.current = true;
           setContinueWatchingList(items);
         }
       });
@@ -20,5 +25,5 @@ export const useContinueWatchingList = (): Array<string> => {
       };
     }, []),
   );
-  return continueWatchingList;
+  return { data: continueWatchingList, ejected: ejected.current };
 };

@@ -74,7 +74,8 @@ export const digitalEventsForHomePageSelector =
         arrayOfIdsForRemoveFromContinueWatchingList,
       );
     }
-    return eventSections;
+
+    return { data: eventSections, eventsLoaded: store.events.eventsLoaded };
   };
 
 export const digitalEventsForMyListScreenSelector =
@@ -147,14 +148,17 @@ export const digitalEventsForBalletAndDanceSelector = (store: {
     return acc;
   }, {});
   if (!eventsWithoutSubtags.data.length) {
-    return Object.values(eventSections);
+    return {
+      data: Object.values(eventSections),
+      eventsLoaded: store.events.eventsLoaded,
+    };
   }
   const sections = Object.values(eventSections).map(eventSection => ({
     ...eventSection,
     sectionIndex: ++eventSection.sectionIndex,
   }));
   sections.unshift(eventsWithoutSubtags);
-  return sections;
+  return { data: sections, eventsLoaded: store.events.eventsLoaded };
 };
 
 export const digitalEventsForOperaAndMusicSelector = (store: {
@@ -210,12 +214,15 @@ export const digitalEventsForOperaAndMusicSelector = (store: {
   }, {});
 
   if (!eventsWithoutSubtags.data.length) {
-    return Object.values(eventSections);
+    return {
+      data: Object.values(eventSections),
+      eventsLoaded: store.events.eventsLoaded,
+    };
   }
   const sections = Object.values(eventSections).map(eventSection => ({
     ...eventSection,
     sectionIndex: ++eventSection.sectionIndex,
   }));
   sections.unshift(eventsWithoutSubtags);
-  return sections;
+  return { data: sections, eventsLoaded: store.events.eventsLoaded };
 };

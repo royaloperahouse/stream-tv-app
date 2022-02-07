@@ -18,6 +18,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { searchQuerySelector } from '@services/store/events/Selectors';
 import { setSearchQuery } from '@services/store/events/Slices';
 import { useLayoutEffect } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const keyboardDataLocale: TKeyboardAdditionalLocales = [keyboardDataEng];
 
@@ -201,21 +202,32 @@ export const DisplayForVirtualKeyboard = forwardRef<
   const { containerStyle = {}, textStyle = {} } = props;
   const searchText = useSelector(searchQuerySelector, shallowEqual);
   const dispatch = useDispatch();
+  const route = useRoute();
+  const navigation = useNavigation();
 
   useImperativeHandle(
     ref,
     () => ({
       addLetterToSearch: (text: string): void => {
+        if (route?.params?.sectionIndex !== undefined) {
+          navigation.setParams({ sectionIndex: undefined });
+        }
         dispatch(setSearchQuery({ searchQuery: text }));
       },
       addSpaceToSearch: (): void => {
+        if (route?.params?.sectionIndex !== undefined) {
+          navigation.setParams({ sectionIndex: undefined });
+        }
         dispatch(setSearchQuery({ searchQuery: ' ' }));
       },
       removeLetterFromSearch: (): void => {
+        if (route?.params?.sectionIndex !== undefined) {
+          navigation.setParams({ sectionIndex: undefined });
+        }
         dispatch(setSearchQuery({ searchQuery: '' }));
       },
     }),
-    [dispatch],
+    [dispatch, route, navigation],
   );
   return (
     <View style={[dStyle.container, containerStyle]}>

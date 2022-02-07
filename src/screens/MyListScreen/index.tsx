@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { myListTitle, countOfItemsPeerRail } from '@configs/myListConfig';
 import { Colors } from '@themes/Styleguide';
 import { DigitalEventItem } from '@components/EventListComponents';
-import { RouteProp, useRoute, useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import {
   widthWithOutFocus,
   marginRightWithOutFocus,
@@ -17,19 +17,30 @@ import {
 import { navMenuManager } from '@components/NavMenu';
 
 type TMyListScreenProps = {};
-const MyListScreen: React.FC<TMyListScreenProps> = () => {
-  const myList = useMyList();
+const MyListScreen: React.FC<TMyListScreenProps> = ({ route }) => {
+  const { data: myList, ejected } = useMyList();
   const data = useSelector(digitalEventsForMyListScreenSelector(myList));
   const isFocused = useIsFocused();
-  const route = useRoute<RouteProp<any, string>>();
+  const listRef = useRef(null);
   const itemRef = useRef(null);
+  const selectedIndex =
+    route.params?.sectionIndex < data.length
+      ? route.params.sectionIndex
+      : data.length - 1;
   useLayoutEffect(() => {
-    if (isFocused && route?.params?.fromEventDetails && !data.length) {
-      navMenuManager.setNavMenuAccessible();
-      navMenuManager.showNavMenu();
-      navMenuManager.setNavMenuFocus();
+    if (isFocused && route?.params?.fromEventDetails && ejected) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      } else {
+        listRef.current.scrollToIndex({
+          animated: false,
+          index: Math.floor(selectedIndex / countOfItemsPeerRail),
+        });
+      }
     }
-  }, [isFocused, route, data.length]);
+  }, [isFocused, route, data.length, ejected, selectedIndex]);
 
   return (
     <View style={styles.root}>
@@ -37,7 +48,9 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
       {data.length ? (
         <FlatList
           data={data}
+          ref={listRef}
           keyExtractor={item => item.id}
+          onScrollToIndexFailed={() => {}}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           numColumns={countOfItemsPeerRail}
@@ -45,12 +58,16 @@ const MyListScreen: React.FC<TMyListScreenProps> = () => {
             <DigitalEventItem
               ref={itemRef}
               screenNameFrom={route.name}
+              hasTVPreferredFocus={
+                route.params.fromEventDetails && selectedIndex === index
+              }
               event={item}
               canMoveUp={index >= countOfItemsPeerRail}
               canMoveRight={
                 (index + 1) % countOfItemsPeerRail !== 0 &&
                 index !== data.length - 1
               }
+              sectionIndex={index}
             />
           )}
         />

@@ -1,6 +1,7 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, useRef } from 'react';
 import { View, ViewProps, VirtualizedList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { scaleSize } from '@utils/scaleSize';
 
 type TRailSectionsProps = {
   containerStyle?: ViewProps['style'];
@@ -15,6 +16,7 @@ type TRailSectionsProps = {
   renderItem: (info: { [key: string]: any }) => JSX.Element | null;
   sectionsWindowSize?: number;
   railWindowSize?: number;
+  sectionIndex?: number;
 };
 
 const RailSections: React.FC<TRailSectionsProps> = props => {
@@ -31,9 +33,11 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
     sectionsWindowSize = 2,
     railWindowSize = 5,
     renderItem,
+    sectionIndex = 0,
   } = props;
   const mountedRef = useRef<boolean>(false);
   const sectionsListRef = useRef<VirtualizedList<any> | null>(null);
+  const railItemsListRef = useRef<VirtualizedList<any> | null>(null);
   const getSectionCount = useCallback(data => data.length, []);
   const getSectionItemCount = useCallback(data => data.length, []);
   const scrollToRail = (index: number) => () => {
@@ -59,15 +63,20 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
       <VirtualizedList
         ref={sectionsListRef}
         data={sections}
-        keyExtractor={(item: Array<any>, index) =>
-          sectionKeyExtractor(item[index])
-        }
+        keyExtractor={item => sectionKeyExtractor(item)}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         initialNumToRender={sectionsInitialNumber}
+        initialScrollIndex={
+          !sections.length
+            ? 0
+            : sectionIndex < sections.length
+            ? sectionIndex
+            : sections.length - 1
+        }
         getItemCount={getSectionCount}
         windowSize={sectionsWindowSize}
-        getItem={data => [...data]}
+        getItem={(data, index) => data[index]}
         onScrollToIndexFailed={info => {
           const wait = new Promise(resolve => setTimeout(resolve, 500));
           wait.then(() => {
@@ -85,30 +94,57 @@ const RailSections: React.FC<TRailSectionsProps> = props => {
             });
           });
         }}
-        renderItem={({ item, index }) => (
+        renderItem={({ item: sectionItem, index: sectionItemIndex }) => (
           <View style={[railStyle]}>
             <View style={[headerContainerStyle]}>
-              {renderHeader(item[index])}
+              {renderHeader(sectionItem)}
             </View>
             <VirtualizedList
               horizontal
+              listKey={sectionItem.sectionIndex?.toString()}
               windowSize={railWindowSize}
-              getItem={data => [...data]}
-              data={item[index].data}
-              keyExtractor={(sectionItem: Array<any>, sectionIndex) =>
-                sectionItemKeyExtractor(sectionItem[sectionIndex])
+              initialNumToRender={sectionItemsInitialNumber}
+              getItem={(data, index) => data[index]}
+              data={sectionItem.data}
+              ref={
+                sectionItemIndex === sectionIndex ? railItemsListRef : undefined
               }
+              keyExtractor={(sectionItemForKeyExtracting: any) =>
+                sectionItemKeyExtractor(sectionItemForKeyExtracting)
+              }
+              onScrollToIndexFailed={info => {
+                const wait = new Promise(resolve => setTimeout(resolve, 1000));
+                wait.then(() => {
+                  if (
+                    !mountedRef ||
+                    !mountedRef.current ||
+                    info.index === undefined ||
+                    !railItemsListRef.current
+                  ) {
+                    return;
+                  }
+                  railItemsListRef.current.scrollToIndex({
+                    animated: false,
+                    index: info.index,
+                  });
+                });
+              }}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              initialNumToRender={sectionItemsInitialNumber}
               getItemCount={getSectionItemCount}
-              renderItem={({ index: itemIndex, item: sectionItem }) => {
+              renderItem={({
+                index: railItemIndexInList,
+                item: railItemInList,
+              }) => {
                 return renderItem({
-                  index: itemIndex,
-                  item: sectionItem[itemIndex],
-                  section: item[index],
-                  scrollToRail: scrollToRail(index),
-                  isFirstRail: index === 0,
+                  index: railItemIndexInList,
+                  item: railItemInList,
+                  section: sectionItem,
+                  scrollToRail: scrollToRail(sectionItemIndex),
+                  isFirstRail: sectionItemIndex === 0,
+                  sectionIndex: sectionItemIndex,
+                  railItemIndex: railItemIndexInList,
+                  isLastRail: sections.length - 1 === sectionItemIndex,
                 });
               }}
             />

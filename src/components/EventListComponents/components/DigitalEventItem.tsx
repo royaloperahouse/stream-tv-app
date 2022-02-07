@@ -1,11 +1,15 @@
 import React, { forwardRef } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
-import { useNavigation } from '@react-navigation/native';
+import {
+  useNavigation,
+  CommonActions,
+  useRoute,
+} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
@@ -14,12 +18,15 @@ import { Colors } from '@themes/Styleguide';
 type DigitalEventItemProps = {
   event: TEventContainer;
   canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  sectionIndex: number;
   hasTVPreferredFocus?: boolean;
   canMoveRight?: boolean;
   continueWatching?: boolean;
   onFocus?: (...[]: any[]) => void;
   screenNameFrom?: string;
   eventGroupTitle?: string;
+  selectedItemIndex?: number;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -33,10 +40,14 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       continueWatching,
       screenNameFrom = '',
       eventGroupTitle,
+      sectionIndex,
+      canMoveDown = true,
+      selectedItemIndex,
     },
     ref: any,
   ) => {
     const navigation = useNavigation();
+    const route = useRoute();
     const snapshotImageUrl: string = get(
       event.data,
       ['vs_event_image', 'wide_event_image', 'url'],
@@ -54,9 +65,24 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
 
     const onPressHandler = () => {
       navMenuManager.hideNavMenu();
-      navigation.navigate(
-        additionalRoutesWithoutNavMenuNavigation.eventDetails.navMenuScreenName,
-        { event, continueWatching, screenNameFrom },
+      navigation.dispatch(
+        CommonActions.reset({
+          routes: [
+            {
+              name: additionalRoutesWithoutNavMenuNavigation.eventDetails
+                .navMenuScreenName,
+              params: {
+                fromEventDetails: false,
+                event,
+                continueWatching,
+                screenNameFrom,
+                sectionIndex,
+                selectedItemIndex,
+              },
+            },
+          ],
+          index: 0,
+        }),
       );
     };
     return (
@@ -65,15 +91,21 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           underlayColor={Colors.defaultBlue}
           hasTVPreferredFocus={hasTVPreferredFocus}
           canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
           canMoveRight={canMoveRight}
           styleFocused={styles.imageContainerActive}
           style={styles.imageContainer}
           onFocus={() => {
             ref?.current?.setDigitalEvent(event, eventGroupTitle);
-            //ref?.current?.setShowContinueWatching(continueWatching)
             navMenuManager.setNavMenuAccessible();
             if (typeof onFocus === 'function') {
               onFocus();
+            }
+            if (route.params?.fromEventDetails) {
+              navigation.setParams({
+                ...route.params,
+                fromEventDetails: false,
+              });
             }
           }}
           onPress={onPressHandler}>
