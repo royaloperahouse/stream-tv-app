@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, StyleSheet, BackHandler } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
@@ -10,6 +10,18 @@ const WarningOfExitModal: React.FC<TGlobalModalContentProps> = ({
   confirmActionHandler: primaryActionHandler = () => {},
   rejectActionHandler: secondaryActionHandler = () => {},
 }) => {
+  useLayoutEffect(() => {
+    const handleBackButtonClick = () => {
+      return true;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, []);
   return (
     <View style={styles.root}>
       <View style={styles.contentContainer}>
