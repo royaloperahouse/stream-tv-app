@@ -433,7 +433,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           )}
         />
       </Animated.View>
-      {canExit && (
+      {canExit && isMenuFocused && (
         <Animated.View
           style={[
             styles.exitOfAppContainer,
