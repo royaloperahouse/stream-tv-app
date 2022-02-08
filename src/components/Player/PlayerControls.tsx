@@ -79,6 +79,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
     const subtitlesRef = useRef<null | TSubtitlesRef>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const controlPanelVisibleRef = useRef<boolean>(true);
+    const hasSubtitles = useRef<boolean>(false);
     const focusToSutitleButton = useCallback(() => {
       if (
         typeof subtitleButtonRef.current?.getRef === 'function' &&
@@ -122,6 +123,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           if (!controlMountedRef.current) {
             return;
           }
+          hasSubtitles.current = subtitles.length > 1;
           if (typeof subtitlesRef?.current?.setsubtitleList === 'function') {
             subtitlesRef.current.setsubtitleList(subtitles);
           }
@@ -287,12 +289,14 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               getControlPanelVisible={getControlPanelVisible}
             />
             <View style={styles.rightControls}>
-              <ControlButton
-                ref={subtitleButtonRef}
-                icon={PlayerIcons.subtitles}
-                onPress={openSubtitleListHandler}
-                getControlPanelVisible={getControlPanelVisible}
-              />
+              {hasSubtitles.current && (
+                <ControlButton
+                  ref={subtitleButtonRef}
+                  icon={PlayerIcons.subtitles}
+                  onPress={openSubtitleListHandler}
+                  getControlPanelVisible={getControlPanelVisible}
+                />
+              )}
             </View>
           </View>
         </Animated.View>
