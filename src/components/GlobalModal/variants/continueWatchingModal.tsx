@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, StyleSheet, BackHandler } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
@@ -9,10 +9,26 @@ import { TGlobalModalContentProps } from '@services/types/globalModal';
 const СontinueWatchingModal: React.FC<TGlobalModalContentProps> = ({
   confirmActionHandler: primaryActionHandler = () => {},
   rejectActionHandler: secondaryActionHandler = () => {},
+  cancelActionHandler: cancelActionHandler = () => {},
   videoTitle,
   fromTime,
 }) => {
   const resumeButtonTitle = `Resume from ${fromTime}`;
+  useLayoutEffect(() => {
+    const handleBackButtonClick = () => {
+      if (typeof cancelActionHandler === 'function') {
+        cancelActionHandler();
+      }
+      return true;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, [cancelActionHandler]);
   return (
     <View style={styles.root}>
       <View style={styles.contentContainer}>

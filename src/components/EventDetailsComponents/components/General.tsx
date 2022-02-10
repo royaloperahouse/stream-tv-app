@@ -234,6 +234,13 @@ const General: React.FC<Props> = ({
                   });
                 });
               },
+              cancelActionHandler: () => {
+                globalModalManager.closeModal(() => {
+                  if (typeof ref?.current?.setNativeProps === 'function') {
+                    ref.current.setNativeProps({ hasTVPreferredFocus: true });
+                  }
+                });
+              },
               videoTitle: title,
               fromTime: fromTime.toISOString().substr(11, 8),
             },
