@@ -18,6 +18,7 @@ import {
 } from '@services/types/bitmovinPlayer';
 
 import { scaleSize } from '@utils/scaleSize';
+import { ESeekOperations } from '@configs/playerConfig';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
@@ -76,6 +77,7 @@ type TPlayerProps = {
   onError?: (event: any) => void;
   title: string;
   subtitle?: string;
+  seekingTimePoint?: number;
   onClose?: (error: TBMPlayerErrorObject | null, stoppedTime: string) => void;
   configuration: {
     url: string;
@@ -117,6 +119,7 @@ const Player: React.FC<TPlayerProps> = props => {
     configuration,
     analytics,
     autoPlay = false,
+    seekingTimePoint = 10.0,
   } = cloneProps;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const controlRef = useRef<TPlayerControlsRef | null>(null);
@@ -183,8 +186,14 @@ const Player: React.FC<TPlayerProps> = props => {
     if (isNaN(floatTime)) {
       return;
     }
+    if (typeof controlRef.current?.setSeekQueueFree === 'function') {
+      controlRef.current.setSeekQueueFree();
+    }
     if (typeof controlRef.current?.setCurrentTime === 'function') {
       controlRef.current.setCurrentTime(floatTime);
+    }
+    if (typeof controlRef.current?.seekUpdatingFinished === 'function') {
+      controlRef.current.seekUpdatingFinished();
     }
   };
 
@@ -291,35 +300,45 @@ const Player: React.FC<TPlayerProps> = props => {
     ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
   }, [playerReady]);
 
-  const actionSeekForward = useCallback(async () => {
-    if (!playerReady) {
-      return;
-    }
-    const currentTime = await getCurrentTime();
-    if (currentTime === duration) {
-      return;
-    }
-    let seekTime = currentTime + 10.0;
-    if (seekTime > duration) {
-      seekTime = duration - 1;
-    }
-    ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), seekTime);
-  }, [playerReady, duration, getCurrentTime]);
+  const calculateTimeForSeeking = useCallback(
+    (
+      startTime: number,
+      countOfSeekingIteration: number,
+      seekOp: ESeekOperations,
+    ) => {
+      if (!playerReady) {
+        return -1;
+      }
+      const seekingDuration = countOfSeekingIteration * seekingTimePoint;
+      switch (seekOp) {
+        case ESeekOperations.fastForward: {
+          const calculatedSeekingTimePoint = startTime + seekingDuration;
+          if (startTime >= duration - 5) {
+            return -1;
+          }
+          return calculatedSeekingTimePoint >= duration - 5.0
+            ? duration - 5.0
+            : calculatedSeekingTimePoint;
+        }
+        case ESeekOperations.rewind: {
+          const calculatedSeekingTimePoint = startTime - seekingDuration;
+          if (startTime === 0.0) {
+            return -1;
+          }
+          return calculatedSeekingTimePoint < 0.0
+            ? 0.0
+            : calculatedSeekingTimePoint;
+        }
+        default:
+          return -1;
+      }
+    },
+    [playerReady, seekingTimePoint, duration],
+  );
 
-  const actionSeekBackward = useCallback(async () => {
-    if (!playerReady) {
-      return;
-    }
-    const currentTime = await getCurrentTime();
-    if (currentTime === 0.0) {
-      return;
-    }
-    let seekTime = currentTime - 10.0;
-    if (seekTime < 0) {
-      seekTime = 0.0;
-    }
-    ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), seekTime);
-  }, [playerReady, getCurrentTime]);
+  const seekTo = useCallback((time: number) => {
+    ROHBitmovinPlayerModule.seek(findNodeHandle(playerRef.current), time);
+  }, []);
 
   const actionRestart = useCallback(() => {
     if (!playerReady) {
@@ -370,13 +389,13 @@ const Player: React.FC<TPlayerProps> = props => {
         playerLoaded={playerReady}
         onPlayPress={actionPlay}
         onPausePress={actionPause}
-        onSeekForwardPress={actionSeekForward}
-        onSeekBackwardPress={actionSeekBackward}
         onRestartPress={actionRestart}
         onClose={actionClose}
         setSubtitle={setSubtitle}
         autoPlay={autoPlay}
         subtitleCue={subtitleCue}
+        calculateTimeForSeeking={calculateTimeForSeeking}
+        seekTo={seekTo}
       />
     </SafeAreaView>
   );
