@@ -7,11 +7,13 @@ import {
   homePageWhiteList,
   operaAndMusicWhiteList,
   balletAndDanceWhiteList,
+  currentRentalsRailTitle,
+  availableToRentRailTitle,
 } from '@configs/eventListScreensConfig';
 import get from 'lodash.get';
 import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
 import { removeItemsFromSavedPositionListByEventIds } from '@services/bitMovinPlayer';
-
+import difference from 'lodash.difference';
 export const digitalEventDetailsSearchSelector = (store: {
   [key: string]: any;
 }) =>
@@ -35,6 +37,22 @@ export const digitalEventsForHomePageSelector =
     const arrayOfIdsForRemoveFromMyList: Array<string> = [];
     const arrayOfIdsForRemoveFromContinueWatchingList: Array<string> = [];
     if (eventGroupsArray.length) {
+      if (store.auth.fullSubscription) {
+        eventGroupsArray.unshift([
+          '',
+          { title: currentRentalsRailTitle, ids: store.events.ppvEventsIds },
+        ]);
+        eventGroupsArray.unshift([
+          '',
+          {
+            title: availableToRentRailTitle,
+            ids: difference(
+              store.events.availablePPVEventsIds,
+              store.events.ppvEventsIds,
+            ),
+          },
+        ]);
+      }
       eventGroupsArray.unshift(['', { title: myListTitle, ids: myList }]);
       eventGroupsArray.unshift([
         '',
@@ -226,3 +244,13 @@ export const digitalEventsForOperaAndMusicSelector = (store: {
   sections.unshift(eventsWithoutSubtags);
   return { data: sections, eventsLoaded: store.events.eventsLoaded };
 };
+
+export const ppvEventsIdsSelector = (store: { [key: string]: any }) =>
+  store.events.ppvEventsIds;
+
+export const availablePPVEventsDateOfUpdateSelector = (store: {
+  [key: string]: any;
+}) => store.events.availablePPVEventsDateOfUpdate;
+
+export const availblePpvEventsIdsSelector = (store: { [key: string]: any }) =>
+  store.events.availablePPVEventsIds;

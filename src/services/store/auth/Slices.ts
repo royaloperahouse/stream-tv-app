@@ -30,6 +30,8 @@ const appSlice = createSlice({
   reducers: {
     startLoginLoop: state => state,
     endLoginLoop: state => state,
+    startFullSubscriptionLoop: state => state,
+    endFullSubscriptionLoop: state => state,
     switchOnIntroScreen: state => {
       state.showIntroScreen = true;
     },
@@ -41,7 +43,7 @@ const appSlice = createSlice({
     },
     checkDeviceSuccess: (state, { payload }) => {
       state.isAuthenticated = true;
-      state.customerId = payload.data.attributes.customerId;
+      state.customerId = 5158975 || payload.data.attributes.customerId; //5158973, 5158974, 5158975 for payPerViewv
       state.devicePin = payload.data.attributes.deviceId;
       state.isLoading = false;
       state.showIntroScreen = false;
@@ -61,6 +63,12 @@ const appSlice = createSlice({
     toggleSubscriptionMode: state => {
       state.fullSubscription = !state.fullSubscription;
     },
+    updateSubscriptionMode: (state, { payload }) => {
+      if (state.fullSubscription === payload.fullSubscription) {
+        return state;
+      }
+      state.fullSubscription = payload.fullSubscription;
+    },
   },
 });
 
@@ -74,6 +82,9 @@ export const {
   endLoginLoop,
   clearAuthState,
   toggleSubscriptionMode,
+  startFullSubscriptionLoop,
+  endFullSubscriptionLoop,
+  updateSubscriptionMode,
 } = appSlice.actions;
 
 export const { reducer, name } = appSlice;

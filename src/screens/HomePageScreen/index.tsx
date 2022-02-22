@@ -1,6 +1,16 @@
-import React, { useRef, useLayoutEffect, useMemo } from 'react';
-import { View, StyleSheet, Dimensions, VirtualizedList } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  AppState,
+  AppStateStatus,
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  startFullSubscriptionLoop,
+  endFullSubscriptionLoop,
+} from '@services/store/auth/Slices';
 import { digitalEventsForHomePageSelector } from '@services/store/events/Selectors';
 import {
   DigitalEventItem,
@@ -17,7 +27,7 @@ import {
 import { useMyList } from '@hooks/useMyList';
 import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
 import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
 
 type THomePageScreenProps = {};
@@ -25,6 +35,8 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
   navigation,
   route,
 }) => {
+  const dispatch = useDispatch();
+  const appState = useRef(AppState.currentState);
   const { data: myList, ejected: myListEjected } = useMyList();
   const { data: continueWatchingList, ejected: continueWatchingListEjected } =
     useContinueWatchingList();
@@ -56,6 +68,37 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
     myListEjected,
     eventsLoaded,
   ]);
+  useEffect(() => {
+    const _handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        dispatch(startFullSubscriptionLoop());
+      }
+      if (
+        appState.current === 'active' &&
+        nextAppState.match(/inactive|background/)
+      ) {
+        dispatch(endFullSubscriptionLoop());
+      }
+      appState.current = nextAppState;
+    };
+    AppState.addEventListener('change', _handleAppStateChange);
+
+    return () => {
+      AppState.removeEventListener('change', _handleAppStateChange);
+    };
+  }, [dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(startFullSubscriptionLoop());
+      return () => {
+        dispatch(endFullSubscriptionLoop());
+      };
+    }, []),
+  );
 
   if (!data.length || !continueWatchingListEjected || !myListEjected) {
     return null;

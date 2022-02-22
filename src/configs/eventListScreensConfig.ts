@@ -13,3 +13,6 @@ export const operaAndMusicWhiteList = Object.freeze({
 export const balletAndDanceWhiteList = Object.freeze({
   [balletAndDance]: balletAndDance,
 });
+
+export const currentRentalsRailTitle = 'current rentals';
+export const availableToRentRailTitle = 'available to rent';

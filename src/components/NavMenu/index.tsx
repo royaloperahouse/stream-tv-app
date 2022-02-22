@@ -50,7 +50,11 @@ import {
   clearEventState,
   getEventListLoopStop,
 } from '@services/store/events/Slices';
-import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
+import {
+  clearAuthState,
+  endLoginLoop,
+  endFullSubscriptionLoop,
+} from '@services/store/auth/Slices';
 import { useFeature } from 'flagged';
 
 type TNavMenuProps = {
@@ -203,10 +207,11 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
           confirmActionHandler: () => {
             globalModalManager.closeModal(() => {
               dispatch(getEventListLoopStop());
+              dispatch(endFullSubscriptionLoop());
               dispatch(endLoginLoop());
+              BackHandler.exitApp();
               dispatch(clearAuthState());
               dispatch(clearEventState());
-              BackHandler.exitApp();
             });
           },
           rejectActionHandler: () => {
