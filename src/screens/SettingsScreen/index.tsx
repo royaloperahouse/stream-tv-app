@@ -3,9 +3,9 @@ import { View, StyleSheet, Dimensions, FlatList } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
-import collectionOfSettingsSections, {
+import getCollectionOfSettingsSections, {
   settingsTitle,
-  settingsSectionsConfig,
+  getSettingsSectionsConfig,
 } from '@configs/settingsConfig';
 import { SettingsNavMenuItem } from '@components/SettingsComponents';
 import {
@@ -22,12 +22,13 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   const contentFactory = (contentKey: string) => {
     if (
       !contentKey ||
-      !(contentKey in settingsSectionsConfig) ||
-      typeof settingsSectionsConfig[contentKey].ContentComponent !== 'function'
+      !(contentKey in getSettingsSectionsConfig()) ||
+      typeof getSettingsSectionsConfig()[contentKey].ContentComponent !==
+        'function'
     ) {
       return View;
     }
-    return settingsSectionsConfig[contentKey].ContentComponent;
+    return getSettingsSectionsConfig()[contentKey].ContentComponent;
   };
   const Content = contentFactory(activeContentKey);
 
@@ -37,7 +38,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
         <View style={styles.navMenuContainer}>
           <RohText style={styles.pageTitle}>{settingsTitle}</RohText>
           <FlatList
-            data={collectionOfSettingsSections}
+            data={getCollectionOfSettingsSections()}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
@@ -45,7 +46,9 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
                 isFirst={index === 0}
                 isActive={item.key === activeContentKey}
                 title={item.navMenuItemTitle}
-                canMoveDown={index !== collectionOfSettingsSections.length - 1}
+                canMoveDown={
+                  index !== getCollectionOfSettingsSections().length - 1
+                }
                 canMoveUp={index !== 0}
                 onFocus={touchableRef => {
                   activeItemRef.current = touchableRef.current;

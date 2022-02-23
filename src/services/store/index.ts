@@ -10,12 +10,17 @@ import {
   reducer as eventsReducer,
   name as eventsReducerName,
 } from '@services/store/events/Slices';
+import {
+  reducer as settingsReducer,
+  name as settingsReducerName,
+} from '@services/store/settings/Slices';
 
 import { rootSaga } from '@services/store/rootSaga';
 
 const rootReducer = combineReducers({
   [authReducerName]: authReducer,
   [eventsReducerName]: eventsReducer,
+  [settingsReducerName]: settingsReducer,
 });
 
 const sagaMiddleware = createSagaMiddleware();

@@ -53,7 +53,11 @@ axiosClient.interceptors.response.use(
 );
 
 export const verifyDevice = () =>
-  axiosClient.get(ApiConfig.routes.verifyDevice);
+  axiosClient.get(ApiConfig.routes.verifyDevice, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const fetchVideoURL = (id: string) =>
   axiosClient.get(ApiConfig.routes.videoSource, {
@@ -61,23 +65,46 @@ export const fetchVideoURL = (id: string) =>
       id,
     },
     auth: ApiConfig.auth,
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
   });
 
-export const pinUnlink = () => axiosClient.delete(ApiConfig.routes.pinUnlink);
+export const pinUnlink = () =>
+  axiosClient.delete(ApiConfig.routes.pinUnlink, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const getSubscribeInfo = () =>
-  axiosClient.get(ApiConfig.routes.subscriptionInfo);
+  axiosClient.get(ApiConfig.routes.subscriptionInfo, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const getPurchasedStreams = () =>
-  axiosClient.get(ApiConfig.routes.checkoutPurchasedStreams);
+  axiosClient.get(ApiConfig.routes.checkoutPurchasedStreams, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const getAllEvalibleEventsForPPV = () =>
-  axiosClient.get(ApiConfig.routes.checkoutPayPerView);
+  axiosClient.get(ApiConfig.routes.checkoutPayPerView, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const getEventsByFeeIds = (feeIds: string) =>
   axiosClient.get(ApiConfig.routes.digitalEvents, {
     params: { feeIds },
     auth: ApiConfig.auth,
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
   });
 
 export const getAccessToWatchVideo = async (
