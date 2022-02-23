@@ -3,7 +3,7 @@ import {
   prismicApiEndpoint,
   prismicApiAccessToken as accessToken,
   documentTypes,
-  refLabelOfPublishing,
+  getRefLabelOfPublishing,
 } from '@configs/prismicApiConfig';
 import DefaultClient from '@prismicio/client/types/client';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
@@ -27,7 +27,7 @@ const getCommonQueryOptions = async (
   try {
     const resolvedApi = await prismicClient.api.get();
     const foundRef = resolvedApi.refs.find(
-      r => r.label === refLabelOfPublishing,
+      r => r.label === getRefLabelOfPublishing(),
     );
     if (foundRef?.ref) {
       commonQueryOptions.ref = foundRef?.ref;
@@ -37,23 +37,19 @@ const getCommonQueryOptions = async (
   }
 };
 
-const commonQuery = (function () {
-  let commonQueryOptions: TCommonQueryOptions = {};
-  let commonQueryOptionsLoaded: boolean = false;
-  return async function (queryObj: TQueryObj = {}): Promise<ApiSearchResponse> {
-    const { queryPredicates = '', queryOptions = {} } = queryObj;
-    if (!commonQueryOptionsLoaded) {
-      commonQueryOptions = {
-        ...(await getCommonQueryOptions(prismicApiClient)),
-      };
-      commonQueryOptionsLoaded = true;
-    }
-    return prismicApiClient.query(queryPredicates, {
-      ...commonQueryOptions,
-      ...queryOptions,
-    });
-  };
-})();
+const commonQuery = async function (
+  queryObj: TQueryObj = {},
+): Promise<ApiSearchResponse> {
+  let commonQueryOptions: TCommonQueryOptions = await getCommonQueryOptions(
+    prismicApiClient,
+  );
+  const { queryPredicates = '', queryOptions = {} } = queryObj;
+
+  return prismicApiClient.query(queryPredicates, {
+    ...commonQueryOptions,
+    ...queryOptions,
+  });
+};
 
 export const getDigitalEventDetails = (
   queryObj: TQueryObj = {},
