@@ -30,7 +30,13 @@ import {
   NonSubscribedModeAlert,
   СontinueWatchingModal,
   ErrorModal,
+  RentalStateStatusModal,
 } from '@components/GlobalModal/variants';
+import {
+  NonSubscribedStatusError,
+  NotRentedItemError,
+  UnableToCheckRentalStatusError,
+} from '@utils/customErrors';
 import Prismic from '@prismicio/client';
 import { fetchVideoURL, getAccessToWatchVideo } from '@services/apiClient';
 import { getVideoDetails } from '@services/prismicApiClient';
@@ -40,7 +46,7 @@ import {
   minResumeTime,
 } from '@configs/bitMovinPlayerConfig';
 import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHandler';
-
+import { promiseWait } from '@utils/promiseWait';
 type Props = {
   event: TEventContainer;
   nextScreenText: string;
@@ -95,9 +101,6 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           queryPredicates: [Prismic.predicates.any('document.id', videos)],
         }),
       );
-      if (!videoFromPrismic) {
-        return;
-      }
       const videoPositionInfo = await getBitMovinSavedPosition(
         videoFromPrismic.id,
         event.id,
@@ -119,28 +122,19 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
         if (!videos.length) {
           throw new Error('Something went wrong');
         }
-
-        const videoFromPrismic = await getAccessToWatchVideo(
-          getVideoDetails({
-            queryPredicates: [Prismic.predicates.any('document.id', videos)],
-          }),
+        globalModalManager.openModal({
+          contentComponent: RentalStateStatusModal,
+          contentProps: {
+            title,
+          },
+        });
+        const videoFromPrismic = await promiseWait(
+          getAccessToWatchVideo(
+            getVideoDetails({
+              queryPredicates: [Prismic.predicates.any('document.id', videos)],
+            }),
+          ),
         );
-
-        if (!videoFromPrismic) {
-          globalModalManager.openModal({
-            contentComponent: NonSubscribedModeAlert,
-            contentProps: {
-              confirmActionHandler: () => {
-                globalModalManager.closeModal(() => {
-                  if (typeof ref?.current?.setNativeProps === 'function') {
-                    ref.current.setNativeProps({ hasTVPreferredFocus: true });
-                  }
-                });
-              },
-            },
-          });
-          return;
-        }
 
         const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
         if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
@@ -160,8 +154,6 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           const rolledBackPos = intPosition - resumeRollbackTime;
           fromTime.setSeconds(intPosition);
           globalModalManager.openModal({
-            hasBackground: true,
-            hasLogo: true,
             contentComponent: СontinueWatchingModal,
             contentProps: {
               confirmActionHandler: () => {
@@ -203,7 +195,9 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
               cancelActionHandler: () => {
                 globalModalManager.closeModal(() => {
                   if (typeof ref?.current?.setNativeProps === 'function') {
-                    ref.current.setNativeProps({ hasTVPreferredFocus: true });
+                    ref.current.setNativeProps({
+                      hasTVPreferredFocus: true,
+                    });
                   }
                 });
               },
@@ -213,30 +207,47 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           });
           return;
         }
-        showPlayer({
-          videoId: videoFromPrismic.id,
-          url: manifestInfo.data.data.attributes.hlsManifestUrl,
-          title: videoFromPrismic.data?.video_title[0]?.text || title || '',
-          poster:
-            'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-          subtitle: '',
-          position: '0.0',
-          eventId: event.id,
-          savePosition: true,
+        globalModalManager.closeModal(() => {
+          showPlayer({
+            videoId: videoFromPrismic.id,
+            url: manifestInfo.data.data.attributes.hlsManifestUrl,
+            title: videoFromPrismic.data?.video_title[0]?.text || title || '',
+            poster:
+              'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+            subtitle: '',
+            position: '0.0',
+            eventId: event.id,
+            savePosition: true,
+          });
         });
       } catch (err: any) {
         globalModalManager.openModal({
-          contentComponent: ErrorModal,
+          contentComponent:
+            err instanceof NonSubscribedStatusError
+              ? NonSubscribedModeAlert
+              : ErrorModal,
           contentProps: {
             confirmActionHandler: () => {
               globalModalManager.closeModal(() => {
                 if (typeof ref?.current?.setNativeProps === 'function') {
-                  ref.current.setNativeProps({ hasTVPreferredFocus: true });
+                  ref.current.setNativeProps({
+                    hasTVPreferredFocus: true,
+                  });
                 }
               });
             },
-            title: 'Player Error',
-            subtitle: err.message,
+            title:
+              err instanceof NonSubscribedStatusError ||
+              err instanceof NotRentedItemError ||
+              err instanceof UnableToCheckRentalStatusError
+                ? err.message
+                : 'Player Error',
+            subtitle:
+              err instanceof NonSubscribedStatusError ||
+              err instanceof NotRentedItemError ||
+              err instanceof UnableToCheckRentalStatusError
+                ? undefined
+                : err.message,
           },
         });
       }

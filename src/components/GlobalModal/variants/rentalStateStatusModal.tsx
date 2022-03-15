@@ -1,48 +1,46 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import { View, StyleSheet, BackHandler } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { TGlobalModalContentProps } from '@services/types/globalModal';
+import Spinner from 'react-native-spinkit';
 
-const ErrorModal: React.FC<TGlobalModalContentProps> = ({
-  title = 'Error',
-  subtitle = '',
-  confirmActionHandler = () => {},
+const RentalStateStatusModal: React.FC<TGlobalModalContentProps> = ({
+  title = '',
 }) => {
+  const headerText = `Checking rental status of ${title}`;
+  useLayoutEffect(() => {
+    const handleBackButtonClick = () => {
+      return true;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, []);
   return (
     <View style={styles.root}>
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <RohText style={styles.headerText}>{title}</RohText>
+          <RohText style={styles.headerText}>{headerText}</RohText>
         </View>
-        {Boolean(subtitle) && (
-          <View style={styles.subHeader}>
-            <RohText style={styles.subHeaderText}>{subtitle}</RohText>
-          </View>
-        )}
-        <View>
-          <TouchableHighlightWrapper
-            style={styles.primaryActionButton}
-            hasTVPreferredFocus
-            canMoveDown={false}
-            canMoveLeft={false}
-            canMoveRight={false}
-            canMoveUp={false}
-            onPress={confirmActionHandler}>
-            <View style={styles.primaryActionButtonContainer}>
-              <RohText style={styles.primaryActionButtonText}>
-                Try again
-              </RohText>
-            </View>
-          </TouchableHighlightWrapper>
+        <View style={styles.subHeader}>
+          <Spinner
+            isVisible
+            size={scaleSize(158)}
+            type="ChasingDots"
+            color={Colors.tVMidGrey}
+          />
         </View>
       </View>
     </View>
   );
 };
-export default ErrorModal;
+export default RentalStateStatusModal;
 
 const styles = StyleSheet.create({
   root: {
@@ -55,6 +53,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: scaleSize(40),
+    flexDirection: 'row',
   },
   headerText: {
     fontSize: scaleSize(54),
@@ -64,11 +63,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   subHeader: {
-    marginBottom: scaleSize(40),
+    marginBottom: scaleSize(140),
+    alignItems: 'center',
   },
   subHeaderText: {
     fontSize: scaleSize(28),
-    lineHeight: scaleSize(40),
+    lineHeight: scaleSize(30),
     color: Colors.defaultTextColor,
   },
   primaryActionButton: {
