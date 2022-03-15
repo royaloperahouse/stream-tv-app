@@ -1,6 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiConfig } from '@configs/apiConfig';
 import { store } from '@services/store';
+import {
+  UnableToCheckRentalStatusError,
+  NotRentedItemError,
+  NonSubscribedStatusError,
+} from '@utils/customErrors';
 const axiosClient: AxiosInstance = axios.create({
   baseURL: ApiConfig.host,
   timeout: 20 * 1000,
@@ -109,45 +114,40 @@ export const getEventsByFeeIds = (feeIds: string) =>
 
 export const getAccessToWatchVideo = async (
   getVideoDetails: Promise<any>,
-): Promise<{ [key: string]: any } | null> => {
-  try {
-    const digitalEventVideoResponse = await getVideoDetails;
-    const videoFromPrismic = digitalEventVideoResponse.results.find(
-      (prismicResponseResult: any) =>
-        prismicResponseResult.data?.video?.video_type === 'performance',
-    );
+): Promise<{ [key: string]: any }> => {
+  const digitalEventVideoResponse = await getVideoDetails;
+  const videoFromPrismic = digitalEventVideoResponse.results.find(
+    (prismicResponseResult: any) =>
+      prismicResponseResult.data?.video?.video_type === 'performance',
+  );
 
-    if (videoFromPrismic === undefined || !videoFromPrismic.id) {
-      throw new Error();
-    }
-    const subscriptionResponse = await getSubscribeInfo();
-    if (
-      subscriptionResponse.status >= 200 &&
-      subscriptionResponse.status < 400 &&
-      subscriptionResponse?.data?.data?.attributes?.isSubscriptionActive
-    ) {
-      return videoFromPrismic;
-    }
-    const purchasedStreamsResponse = await getPurchasedStreams();
-    if (
-      purchasedStreamsResponse.status >= 200 &&
-      purchasedStreamsResponse.status < 400 &&
-      Array.isArray(
-        purchasedStreamsResponse?.data?.data?.attributes?.streams,
-      ) &&
-      purchasedStreamsResponse.data.data.attributes.streams.length
-    ) {
-      const ids: Array<string> =
-        purchasedStreamsResponse.data.data.attributes.streams.map(
-          (stream: {
-            stream_id: string;
-            stream_desc: string;
-            purchase_dt: string;
-          }) => stream.stream_id,
-        );
-      if (!ids.length) {
-        return null;
-      }
+  if (videoFromPrismic === undefined || !videoFromPrismic.id) {
+    throw new UnableToCheckRentalStatusError();
+  }
+  const subscriptionResponse = await getSubscribeInfo();
+  if (
+    subscriptionResponse.status >= 200 &&
+    subscriptionResponse.status < 400 &&
+    subscriptionResponse?.data?.data?.attributes?.isSubscriptionActive
+  ) {
+    return videoFromPrismic;
+  }
+  const purchasedStreamsResponse = await getPurchasedStreams();
+  if (
+    purchasedStreamsResponse.status >= 200 &&
+    purchasedStreamsResponse.status < 400 &&
+    Array.isArray(purchasedStreamsResponse?.data?.data?.attributes?.streams) &&
+    purchasedStreamsResponse.data.data.attributes.streams.length
+  ) {
+    const ids: Array<string> =
+      purchasedStreamsResponse.data.data.attributes.streams.map(
+        (stream: {
+          stream_id: string;
+          stream_desc: string;
+          purchase_dt: string;
+        }) => stream.stream_id,
+      );
+    if (ids.length) {
       const eventsForPPVPromiseSettledResponse: Array<
         PromiseSettledResult<AxiosResponse<any>>
       > = await eventsOnFeePromiseFill(ids);
@@ -178,11 +178,68 @@ export const getAccessToWatchVideo = async (
       ) {
         return videoFromPrismic;
       }
+      throw new NotRentedItemError();
+    } else {
+      const allAvalibleEventsForPPVResponse =
+        await getAllEvalibleEventsForPPV();
+      if (
+        allAvalibleEventsForPPVResponse.status >= 400 ||
+        !Array.isArray(
+          allAvalibleEventsForPPVResponse.data?.data?.attributes?.fees,
+        )
+      ) {
+        throw new UnableToCheckRentalStatusError();
+      }
+      const feesIds: Array<string> =
+        allAvalibleEventsForPPVResponse.data.data.attributes.fees.reduce(
+          (acc: Array<string>, item: any) => {
+            if (item.Id !== null && item.Id !== undefined) {
+              acc.push(item.Id.toString());
+            }
+            return acc;
+          },
+          [],
+        );
+      if (!feesIds.length) {
+        throw new NonSubscribedStatusError();
+      }
+      const availablePPVEventsWithPrismicRelationPromiseSettledResponse: Array<
+        PromiseSettledResult<AxiosResponse<any>>
+      > = await eventsOnFeePromiseFill(feesIds);
+      const availablePPVEventsWithPrismicRelation =
+        availablePPVEventsWithPrismicRelationPromiseSettledResponse.reduce<{
+          data: Array<any>;
+          included: Array<any>;
+        }>(
+          (acc, item) => {
+            if (item.status === 'fulfilled') {
+              acc.data = acc.data.concat(
+                Array.isArray(item.value.data?.data)
+                  ? item.value.data.data
+                  : [],
+              );
+              acc.included = acc.included.concat(
+                Array.isArray(item.value.data?.included)
+                  ? item.value.data.included
+                  : [],
+              );
+            }
+            return acc;
+          },
+          { data: [], included: [] },
+        );
+      if (
+        availablePPVEventsWithPrismicRelation.data
+          .filter(item => item.type === 'digitalEvent')
+          .some(item => item.id === videoFromPrismic.id)
+      ) {
+        throw new NotRentedItemError();
+      } else {
+        throw new NonSubscribedStatusError();
+      }
     }
-    return null;
-  } catch (err: any) {
-    throw new Error('Something went wrong');
   }
+  throw new UnableToCheckRentalStatusError();
 };
 
 export function eventsOnFeePromiseFill(

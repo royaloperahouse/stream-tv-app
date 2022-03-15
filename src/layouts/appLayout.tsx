@@ -60,7 +60,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
 
   useLayoutEffect(() => {
     // we need to setup splashscreen for tvOS(iOS)
-    if (Platform.OS === 'android' && deviceAuthInfoLoaded) {
+    if (Platform.OS === 'android') {
       RNBootSplash.getVisibilityStatus().then(status => {
         if (status !== 'hidden') {
           RNBootSplash.hide({ fade: true });
