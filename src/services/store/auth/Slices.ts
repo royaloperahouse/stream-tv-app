@@ -9,6 +9,7 @@ interface AuthState {
   showIntroScreen: boolean;
   errorString: string;
   fullSubscription: boolean;
+  fullSubscriptionUpdateDate: string;
   userEmail: string;
 }
 
@@ -21,6 +22,7 @@ const initialState: AuthState = {
   showIntroScreen: true,
   errorString: '',
   fullSubscription: false,
+  fullSubscriptionUpdateDate: '',
   userEmail: '',
 };
 
@@ -68,6 +70,7 @@ const appSlice = createSlice({
         return state;
       }
       state.fullSubscription = payload.fullSubscription;
+      state.fullSubscriptionUpdateDate = payload.fullSubscriptionUpdateDate;
     },
   },
 });

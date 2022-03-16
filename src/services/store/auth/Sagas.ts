@@ -19,7 +19,10 @@ import {
   //getEventListLoopStop, // fire on logout
 } from '@services/store/events/Slices';
 
-import { subscribedModeSelector } from '@services/store/auth/Selectors';
+import {
+  subscribedModeSelector,
+  subscribedModeUpdateDateSelector,
+} from '@services/store/auth/Selectors';
 import {
   ppvEventsIdsSelector,
   availablePPVEventsDateOfUpdateSelector,
@@ -126,6 +129,7 @@ function* loginLoopWorker(): any {
             updateSubscriptionMode({
               fullSubscription:
                 subscriptionResponse.data.data.attributes.isSubscriptionActive,
+              fullSubscriptionUpdateDate: moment().toISOString(),
             }),
           );
         }
@@ -148,25 +152,36 @@ function* fullSubscriptionLoopWorker(): any {
   const delayTimeInMS = 10 * 60 * 1000;
   let getAvailablePPVEventsDateOfUpdateTask: null | Task = null;
   while (true) {
-    try {
-      const subscriptionResponse = yield call(getSubscribeInfo);
-      if (
-        subscriptionResponse.status >= 200 &&
-        subscriptionResponse.status < 400 &&
-        subscriptionResponse?.data?.data?.attributes?.isSubscriptionActive !==
-          undefined
-      ) {
-        yield put(
-          updateSubscriptionMode({
-            fullSubscription:
-              subscriptionResponse.data.data.attributes.isSubscriptionActive,
-          }),
-        );
+    const fullSubscription = yield select(subscribedModeSelector);
+    const fullSubscriptionUpdateDate = yield select(
+      subscribedModeUpdateDateSelector,
+    );
+    if (
+      !fullSubscription ||
+      !moment(fullSubscriptionUpdateDate).isValid() ||
+      moment(fullSubscriptionUpdateDate).dayOfYear() !== moment().dayOfYear() ||
+      moment(fullSubscriptionUpdateDate).year() !== moment().year()
+    ) {
+      try {
+        const subscriptionResponse = yield call(getSubscribeInfo);
+        if (
+          subscriptionResponse.status >= 200 &&
+          subscriptionResponse.status < 400 &&
+          subscriptionResponse?.data?.data?.attributes?.isSubscriptionActive !==
+            undefined
+        ) {
+          yield put(
+            updateSubscriptionMode({
+              fullSubscription:
+                subscriptionResponse.data.data.attributes.isSubscriptionActive,
+              fullSubscriptionUpdateDate: moment().toISOString(),
+            }),
+          );
+        }
+      } catch (err: any) {
+        logError('something went wrong with subscription');
       }
-    } catch (err: any) {
-      logError('something went wrong with subscription');
     }
-
     if (!(yield select(subscribedModeSelector))) {
       try {
         if (
