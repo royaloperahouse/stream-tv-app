@@ -47,6 +47,8 @@ import {
 } from '@configs/bitMovinPlayerConfig';
 import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHandler';
 import { promiseWait } from '@utils/promiseWait';
+import { needSubscribedModeInfoUpdateSelector } from '@services/store/auth/Selectors';
+import { shallowEqual, useSelector } from 'react-redux';
 type Props = {
   event: TEventContainer;
   nextScreenText: string;
@@ -62,6 +64,10 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const watchNowButtonRef = useRef(null);
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
+  const needSubscribedModeInfoUpdate = useSelector(
+    needSubscribedModeInfoUpdateSelector,
+    shallowEqual,
+  );
   const [showContinueWatching, setShowContinueWatching] =
     useState<boolean>(false);
   const [hideWatchTrailerButton, setHideWatchTrailerButton] =
@@ -96,13 +102,23 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
       return;
     }
     try {
-      const videoFromPrismic = await getAccessToWatchVideo(
-        getVideoDetails({
-          queryPredicates: [Prismic.predicates.any('document.id', videos)],
-        }),
-      );
+      const videoFromPrismic = needSubscribedModeInfoUpdate
+        ? await getAccessToWatchVideo(
+            getVideoDetails({
+              queryPredicates: [Prismic.predicates.any('document.id', videos)],
+            }),
+          )
+        : (
+            await getVideoDetails({
+              queryPredicates: [Prismic.predicates.any('document.id', videos)],
+            })
+          ).results.find(
+            (prismicResponseResult: any) =>
+              prismicResponseResult.data?.video?.video_type === 'performance',
+          );
+
       const videoPositionInfo = await getBitMovinSavedPosition(
-        videoFromPrismic.id,
+        videoFromPrismic?.id || '',
         event.id,
       );
       if (
@@ -122,19 +138,35 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
         if (!videos.length) {
           throw new Error('Something went wrong');
         }
-        globalModalManager.openModal({
-          contentComponent: RentalStateStatusModal,
-          contentProps: {
-            title,
-          },
-        });
-        const videoFromPrismic = await promiseWait(
-          getAccessToWatchVideo(
-            getVideoDetails({
-              queryPredicates: [Prismic.predicates.any('document.id', videos)],
-            }),
-          ),
-        );
+        if (needSubscribedModeInfoUpdate) {
+          globalModalManager.openModal({
+            contentComponent: RentalStateStatusModal,
+            contentProps: {
+              title,
+            },
+          });
+        }
+
+        const videoFromPrismic = needSubscribedModeInfoUpdate
+          ? await promiseWait(
+              getAccessToWatchVideo(
+                getVideoDetails({
+                  queryPredicates: [
+                    Prismic.predicates.any('document.id', videos),
+                  ],
+                }),
+              ),
+            )
+          : (
+              await getVideoDetails({
+                queryPredicates: [
+                  Prismic.predicates.any('document.id', videos),
+                ],
+              })
+            ).results.find(
+              (prismicResponseResult: any) =>
+                prismicResponseResult.data?.video?.video_type === 'performance',
+            );
 
         const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
         if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
@@ -252,7 +284,7 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
         });
       }
     },
-    [event.id, showPlayer, title, videos],
+    [event.id, showPlayer, title, videos, needSubscribedModeInfoUpdate],
   );
 
   const getTrailerVideoUrl = async (ref?: RefObject<TouchableHighlight>) => {
