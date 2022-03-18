@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState, useRef, useCallback } from 'react';
+import React, {useLayoutEffect, useState, useRef, useCallback, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,6 +9,8 @@ import {
   Platform,
   HostComponent,
   ViewProps,
+  AppStateStatus,
+  AppState,
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
@@ -19,6 +21,7 @@ import {
 
 import { scaleSize } from '@utils/scaleSize';
 import { ESeekOperations } from '@configs/playerConfig';
+import { useIsFocused } from '@react-navigation/native';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
@@ -129,6 +132,25 @@ const Player: React.FC<TPlayerProps> = props => {
   const [loaded, setLoaded] = useState(false);
   const [duration, setDuration] = useState(0.0);
   const [subtitleCue, setSubtitleCue] = useState('');
+
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const _handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (
+          appState.current === 'active' &&
+          nextAppState === 'background'
+      ) {
+        ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
+      }
+      appState.current = nextAppState;
+    };
+    AppState.addEventListener('change', _handleAppStateChange);
+
+    return () => {
+      AppState.removeEventListener('change', _handleAppStateChange);
+    };
+  }, []);
 
   const onReady: TCallbackFunc = useCallback(data => {
     const payload: TOnReadyPayload = data.nativeEvent;
