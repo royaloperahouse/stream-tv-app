@@ -21,7 +21,6 @@ import {
 
 import { scaleSize } from '@utils/scaleSize';
 import { ESeekOperations } from '@configs/playerConfig';
-import { useIsFocused } from '@react-navigation/native';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
