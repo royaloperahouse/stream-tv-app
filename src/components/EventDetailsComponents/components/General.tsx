@@ -49,6 +49,10 @@ import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHan
 import { promiseWait } from '@utils/promiseWait';
 import { needSubscribedModeInfoUpdateSelector } from '@services/store/auth/Selectors';
 import { shallowEqual, useSelector } from 'react-redux';
+import moment from 'moment';
+import CountDown from '@components/EventDetailsComponents/commonControls/CountDown';
+import { useIsFocused } from '@react-navigation/native';
+
 type Props = {
   event: TEventContainer;
   nextScreenText: string;
@@ -58,11 +62,27 @@ type Props = {
 };
 
 const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
+  const isFocused = useIsFocused();
+  const nowDate = moment.utc(moment());
+  const [closeCountDown, setCloseCountDown] = useState(false);
+  const publishingDate = moment.utc(
+    get(
+      event.data,
+      'diese_activity.asset_availability_window.startDateTime',
+      null,
+    ),
+  );
+  const showCountDownTimer =
+    isFocused &&
+    !closeCountDown &&
+    publishingDate.isValid() &&
+    publishingDate.isAfter(nowDate);
   const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
   const tvEventFireCounter = useRef<number>(0);
   const generalMountedRef = useRef<boolean | undefined>(false);
   const addOrRemoveBusyRef = useRef<boolean>(true);
   const watchNowButtonRef = useRef(null);
+
   const [existInMyList, setExistInMyList] = useState<boolean>(false);
   const needSubscribedModeInfoUpdate = useSelector(
     needSubscribedModeInfoUpdateSelector,
@@ -375,6 +395,7 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           onPress: addOrRemoveItemIdFromMyListHandler,
           onFocus: () => console.log('Add to my list focus'),
           Icon: AddToMyList,
+          hasTVPreferredFocus: showCountDownTimer,
         },
         {
           key: 'WatchTrailer',
@@ -383,7 +404,12 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           onFocus: () => console.log('Watch trailer focus'),
           Icon: Trailer,
         },
-      ],
+      ].filter(item => {
+        if (showCountDownTimer && item.key === 'WatchNow') {
+          return false;
+        }
+        return true;
+      }),
       [EActionButtonListType.withoutTrailers]: [
         {
           key: 'WatchNow',
@@ -402,8 +428,14 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           onPress: addOrRemoveItemIdFromMyListHandler,
           onFocus: () => console.log('Add to my list focus'),
           Icon: AddToMyList,
+          hasTVPreferredFocus: showCountDownTimer,
         },
-      ],
+      ].filter(item => {
+        if (showCountDownTimer && item.key === 'WatchNow') {
+          return false;
+        }
+        return true;
+      }),
     };
     if (typeOfList in buttonListCollection) {
       return buttonListCollection[typeOfList];
@@ -437,7 +469,7 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
       });
   }, [event.id]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     generalMountedRef.current = true;
     return () => {
       if (generalMountedRef.current) {
@@ -453,7 +485,7 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
 
   useLayoutEffect(() => {
     tvEventHandler.current?.enable(null, async (_: any, eve: any) => {
-      if (eve?.eventType !== 'playPause') {
+      if (eve?.eventType !== 'playPause' || showCountDownTimer) {
         return;
       }
       if (tvEventFireCounter.current === 1) {
@@ -466,7 +498,7 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
     return () => {
       tvEventHandler?.current.disable();
     };
-  }, [getPerformanceVideoUrl]);
+  }, [getPerformanceVideoUrl, showCountDownTimer]);
 
   return (
     <View style={styles.generalContainer}>
@@ -476,6 +508,15 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
             {title.toUpperCase()}
           </RohText>
           <RohText style={styles.description}>{shortDescription}</RohText>
+          {showCountDownTimer && (
+            <CountDown
+              publishingDate={publishingDate}
+              nowDate={nowDate}
+              finishCB={() => {
+                setCloseCountDown(true);
+              }}
+            />
+          )}
           <View style={styles.buttonsContainer}>
             <ActionButtonList
               ref={watchNowButtonRef}
