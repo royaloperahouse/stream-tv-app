@@ -53,6 +53,7 @@ export type TEvent = {
   vs_tray_image: TVSTrayImage;
   vs_short_description: Array<TVSDescription>;
   vs_synopsis: Array<TVSSynops>;
+  vs_sponsors: Array<TVSSponsor>;
 };
 
 export type TVSTitle = {
@@ -253,3 +254,25 @@ export type TVSTrayImage = {
 };
 
 export type TVSSynops = { type: string; text: string; spans: Array<any> };
+export type TVSSponsor = {
+  sponsor_title: Array<{
+    type: string;
+    text: string;
+    spans: Array<any>;
+  }>;
+  sponsor_intro: Array<{
+    type: string;
+    text: string;
+    spans: Array<any>;
+  }>;
+  sponsor_logo: {
+    dimensions?: { width: number; height: number };
+    alt?: string | null;
+    copyright?: string | null;
+    url?: string;
+  };
+  sponsor_logo_link: {
+    link_type: string;
+  };
+  sponsor_description: Array<{ type: string; text: string; spans: Array<any> }>;
+};
