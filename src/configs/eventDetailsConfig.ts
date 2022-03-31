@@ -3,6 +3,7 @@ import {
   Cast,
   Creatives,
   Synopsis,
+  AboutProduction,
 } from '@components/EventDetailsComponents/';
 
 export type TEventDetailsSection = {
@@ -33,6 +34,11 @@ export const eventDetailsSectionsConfig: {
     key: 'synopsis',
     nextSectionTitle: 'SYNOPSIS & MORE',
     Component: Synopsis,
+  },
+  info: {
+    key: 'info',
+    nextSectionTitle: 'INFO & MORE',
+    Component: AboutProduction,
   },
 };
 
