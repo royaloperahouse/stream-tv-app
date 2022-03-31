@@ -19,6 +19,8 @@ import {
 } from '@services/store/events/Slices';
 import RNBootSplash from 'react-native-bootsplash';
 import { verifyDevice } from '@services/apiClient';
+import { useFeature } from "flagged";
+import LoginWithoutQRCodeScreen from '@screens/LoginWithoutQRCodeScreen';
 
 type TAppLayoutProps = {};
 const AppLayout: React.FC<TAppLayoutProps> = () => {
@@ -33,6 +35,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
     deviceAuthenticatedInfoLoadedSelector,
     shallowEqual,
   );
+  const hasQRCode = useFeature('hasQRCode');
   useEffect(() => {
     const _handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (
@@ -90,7 +93,7 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
     return <IntroScreen />;
   }
   if (!isAuthenticated) {
-    return <LoginScreen />;
+    return hasQRCode ? <LoginScreen /> : <LoginWithoutQRCodeScreen />;
   }
   return <MainLayout />;
 };

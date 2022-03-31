@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
@@ -14,7 +13,7 @@ import {
 
 type TLoginScreenProps = {};
 
-const LoginScreen: React.FC<TLoginScreenProps> = () => {
+const LoginWithoutQRCodeScreen: React.FC<TLoginScreenProps> = () => {
   const devicePin = useSelector(devicePinSelector, shallowEqual);
   const deviceAuthenticatedError = useSelector(
     deviceAuthenticatedErrorSelector,
@@ -25,24 +24,10 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
     <WithBackground>
       <WithLogo>
         <View style={styles.container}>
-          <View style={styles.leftContainer}>
+          <View style={styles.innerContainer}>
             <RohText style={styles.header}>Follow these steps on your</RohText>
             <RohText style={styles.header}>Computer, tablet or mobile</RohText>
-
-            <View style={styles.QRContainer}>
-              <RohText style={styles.blue}>QR Code</RohText>
-              <RohText style={styles.regular}>
-                Scan the QR code with your phone's camera
-              </RohText>
-            </View>
-
-            <View style={styles.orContainer}>
-              <RohText style={styles.address}>OR</RohText>
-            </View>
-
             <View style={styles.websiteContainer}>
-              <RohText style={styles.blue}>Website</RohText>
-
               <View style={styles.addressContainer}>
                 <RohText style={styles.regular}>Go to: </RohText>
                 <RohText style={styles.address}>ROH.ORG.UK/PIN</RohText>
@@ -59,15 +44,6 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
               </RohText>
             </View>
           </View>
-          <View style={styles.rightContainer}>
-            {Boolean(devicePin) && (
-              <QRCode
-                quietZone={5}
-                size={scaleSize(380)}
-                value={`https://www.roh.org.uk/account/pin?pin=${devicePin}`}
-              />
-            )}
-          </View>
         </View>
       </WithLogo>
     </WithBackground>
@@ -76,28 +52,18 @@ const LoginScreen: React.FC<TLoginScreenProps> = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: scaleSize(200),
     marginLeft: scaleSize(200),
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
   },
-  leftContainer: {
-    alignItems: 'flex-start',
+  innerContainer: {
+    alignItems: 'center',
     flex: 2,
-  },
-  rightContainer: {
-    marginTop: scaleSize(203),
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  QRContainer: {
-    marginTop: scaleSize(69),
-  },
-  orContainer: {
-    marginTop: scaleSize(60),
   },
   websiteContainer: {
     marginTop: scaleSize(60),
+    alignItems: 'center',
   },
   header: {
     color: 'white',
@@ -116,6 +82,7 @@ const styles = StyleSheet.create({
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    marginBottom: scaleSize(20),
   },
   address: {
     color: 'white',
@@ -129,4 +96,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default LoginWithoutQRCodeScreen;
