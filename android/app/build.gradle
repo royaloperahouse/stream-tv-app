@@ -132,8 +132,8 @@ android {
         applicationId "com.rohtvapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.6.8"
+        versionCode 22
+        versionName "1.6.9"
     }
     splits {
         abi {

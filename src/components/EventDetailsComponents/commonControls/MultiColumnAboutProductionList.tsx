@@ -145,7 +145,7 @@ const MultiColumnAboutProductionList: React.FC<
         data={splitedItems}
         initialNumToRender={2}
         maxToRenderPerBatch={2}
-        getItemCount={columns => columns?.length || 0}
+        getItemCount={columns => columns.length}
         keyExtractor={(_, index) => index.toString()}
         getItem={(data, index) => data[index]}
         windowSize={4}
@@ -158,7 +158,7 @@ const MultiColumnAboutProductionList: React.FC<
         }) => (
           <TouchableHighlightWrapper
             style={[styles.column, { height: columnHeight }]}
-            canMoveRight={index !== item.length - 1}
+            canMoveRight={index !== splitedItems.length - 1}
             onFocus={() => {
               if (
                 typeof scrollingPaginationRef.current?.setCurrentIndex ===
