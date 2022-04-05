@@ -101,6 +101,8 @@ type TPlayerProps = {
     customData6?: string;
     customData7?: string;
   };
+  guidance?: string;
+  guidanceDetails?: Array<any>;
 };
 
 const Player: React.FC<TPlayerProps> = props => {
@@ -122,6 +124,8 @@ const Player: React.FC<TPlayerProps> = props => {
     analytics,
     autoPlay = false,
     seekingTimePoint = 10.0,
+    guidance,
+    guidanceDetails,
   } = cloneProps;
   const playerRef = useRef<typeof NativeBitMovinPlayer | null>(null);
   const controlRef = useRef<TPlayerControlsRef | null>(null);
@@ -417,6 +421,8 @@ const Player: React.FC<TPlayerProps> = props => {
         subtitleCue={subtitleCue}
         calculateTimeForSeeking={calculateTimeForSeeking}
         seekTo={seekTo}
+        guidance={guidance}
+        guidanceDetails={guidanceDetails}
       />
     </SafeAreaView>
   );
