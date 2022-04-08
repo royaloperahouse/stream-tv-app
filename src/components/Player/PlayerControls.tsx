@@ -43,8 +43,6 @@ type TPlayerControlsProps = {
     seekOp: ESeekOperations,
   ) => number;
   seekTo: (time: number) => void;
-  guidance?: string;
-  guidanceDetails?: Array<any>;
 };
 
 export type TPlayerControlsRef = {
@@ -827,20 +825,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     flexDirection: 'row',
-  },
-  guidanceContainer: {
-    position: 'absolute',
-    top: scaleSize(130),
-    left: 0,
-  },
-  guidanceTitle: {
-    fontSize: scaleSize(26),
-    textTransform: 'uppercase',
-    color: Colors.defaultTextColor,
-  },
-  guidanceSubTitle: {
-    fontSize: scaleSize(26),
-    color: Colors.defaultTextColor,
   },
   titleContainer: {
     width: '100%',

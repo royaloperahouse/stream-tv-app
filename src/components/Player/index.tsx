@@ -467,8 +467,6 @@ const Player: React.FC<TPlayerProps> = props => {
         subtitleCue={subtitleCue}
         calculateTimeForSeeking={calculateTimeForSeeking}
         seekTo={seekTo}
-        guidance={guidance}
-        guidanceDetails={guidanceDetails}
       />
     </SafeAreaView>
   );
