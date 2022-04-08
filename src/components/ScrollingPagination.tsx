@@ -7,19 +7,20 @@ import React, {
   useLayoutEffect,
   useRef,
 } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 export type TScrolingPaginationRef = {
   setCurrentIndex?: (index: number) => void;
 };
 type TScrolingPaginationProps = {
   countOfItems: number;
   initialIndex?: number;
+  alignHorizontal?: ViewStyle['justifyContent'];
 };
 const ScrollingPagination = forwardRef<
   TScrolingPaginationRef,
   TScrolingPaginationProps
 >((props, ref) => {
-  const { countOfItems, initialIndex = 0 } = props;
+  const { countOfItems, initialIndex = 0, alignHorizontal = 'center' } = props;
   const [activeIndex, setActiveIndex] = useState<number>(initialIndex);
   const mounted = useRef<boolean>(false);
   const ceils = new Array(countOfItems).fill(null);
@@ -38,7 +39,7 @@ const ScrollingPagination = forwardRef<
     mounted.current = true;
   }, []);
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { justifyContent: alignHorizontal }]}>
       {ceils.map((_, index) => (
         <View
           key={index}

@@ -1,4 +1,10 @@
-import React, { useLayoutEffect } from 'react';
+import React, {
+  useLayoutEffect,
+  createRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { View, StyleSheet, Dimensions, BackHandler } from 'react-native';
 import { navMenuManager } from '@components/NavMenu';
 import { scaleSize } from '@utils/scaleSize';
@@ -6,11 +12,32 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
 import { globalModalManager } from '@components/GlobalModal';
+const goBackButtonRef = createRef<
+  Partial<{
+    showGoBackButton: () => void;
+    hideGoBackButton: () => void;
+  }>
+>();
+
+export const goBackButtonuManager = Object.freeze({
+  showGoBackButton: () => {
+    if (typeof goBackButtonRef.current?.showGoBackButton === 'function') {
+      goBackButtonRef.current.showGoBackButton();
+    }
+  },
+  hideGoBackButton: () => {
+    if (typeof goBackButtonRef.current?.hideGoBackButton === 'function') {
+      goBackButtonRef.current.hideGoBackButton();
+    }
+  },
+});
 
 type TGoBackProps = {};
 
 const GoBack: React.FC<TGoBackProps> = () => {
+  const [show, setShow] = useState<boolean>(true);
   const navigation = useNavigation();
+  const isMounted = useRef<boolean>(false);
   const route = useRoute<RouteProp<any, string>>();
   const onFocusHandler = () => {
     if (route.params?.screenNameFrom) {
@@ -27,7 +54,7 @@ const GoBack: React.FC<TGoBackProps> = () => {
   };
   useLayoutEffect(() => {
     const handleBackButtonClick = () => {
-      if (globalModalManager.isModalOpen()) {
+      if (globalModalManager.isModalOpen() || !show) {
         return true;
       }
       if (route.params?.screenNameFrom) {
@@ -50,8 +77,32 @@ const GoBack: React.FC<TGoBackProps> = () => {
         handleBackButtonClick,
       );
     };
-  }, [navigation, route.params]);
-
+  }, [navigation, route.params, show]);
+  useImperativeHandle(
+    goBackButtonRef,
+    () => ({
+      showGoBackButton: () => {
+        if (isMounted.current) {
+          setShow(true);
+        }
+      },
+      hideGoBackButton: () => {
+        if (isMounted.current) {
+          setShow(false);
+        }
+      },
+    }),
+    [],
+  );
+  useLayoutEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  if (!show) {
+    return null;
+  }
   return (
     <TouchableHighlightWrapper
       onFocus={onFocusHandler}

@@ -15,6 +15,12 @@ type Props = {
   onFocus?: () => void;
   hasTVPreferredFocus?: boolean;
   getControlPanelVisible: () => boolean;
+  canMoveUp?: boolean | undefined;
+  canMoveLeft?: boolean | undefined;
+  canMoveRight?: boolean | undefined;
+  canMoveDown?: boolean | undefined;
+  nextFocusDown?: number;
+  nextFocusUp?: number;
 };
 
 const ControlButton = forwardRef<any, Props>((props, ref) => {
@@ -26,6 +32,12 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
     onFocus,
     hasTVPreferredFocus = false,
     getControlPanelVisible,
+    canMoveUp,
+    canMoveLeft,
+    canMoveRight,
+    canMoveDown,
+    nextFocusDown,
+    nextFocusUp,
   } = props;
   const onFocusHandler = () => {
     setFocus(true);
@@ -53,7 +65,13 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
           text ? styles.buttonActiveWithPadding : styles.buttonActive
         }
         hasTVPreferredFocus={hasTVPreferredFocus}
+        canMoveUp={canMoveUp}
+        canMoveLeft={canMoveLeft}
+        canMoveRight={canMoveRight}
+        canMoveDown={canMoveDown}
         onFocus={onFocusHandler}
+        nextFocusDown={nextFocusDown}
+        nextFocusUp={nextFocusUp}
         onBlur={onBlurHandler}
         onPress={onPressHandler}>
         <View style={styles.wrapper}>
