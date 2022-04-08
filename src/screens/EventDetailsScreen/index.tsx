@@ -169,6 +169,8 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
           customData6: '',
           customData7: '',
         }}
+        guidance={event.data.vs_guidance}
+        guidanceDetails={event.data.vs_guidance_details}
       />
     );
   }
