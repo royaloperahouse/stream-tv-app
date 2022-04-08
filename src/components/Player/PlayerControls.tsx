@@ -86,13 +86,14 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
     const subtitlesRef = useRef<null | TSubtitlesRef>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const controlPanelVisibleRef = useRef<boolean>(true);
-    const hasSubtitles = useRef<boolean>(false);
+    const [hasSubtitles, setHasSubtitles] = useState<boolean>(false);
     const countOfFastForwardClicks = useRef<number>(0);
     const countOfRewindClicks = useRef<number>(0);
     const seekQueueuBusy = useRef<boolean>(false);
     const seekUpdatingOnDevice = useRef<boolean>(false);
     const startPointForSeek = useRef<number>(0.0);
     const seekOperation = useRef<ESeekOperations>(ESeekOperations.fastForward);
+    const exitButtonRef = useRef<any>();
     const focusToSutitleButton = useCallback(() => {
       if (
         typeof subtitleButtonRef.current?.getRef === 'function' &&
@@ -152,7 +153,9 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           if (!controlMountedRef.current) {
             return;
           }
-          hasSubtitles.current = subtitles.length > 1;
+          if (subtitles.length > 1) {
+            setHasSubtitles(true);
+          }
           if (typeof subtitlesRef?.current?.setsubtitleList === 'function') {
             subtitlesRef.current.setsubtitleList(subtitles);
           }
@@ -446,16 +449,23 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         <Animated.View style={[styles.container, { opacity: activeAnimation }]}>
           <View style={styles.topContainer}>
             <ControlButton
+              ref={exitButtonRef}
               icon={PlayerIcons.close}
               onPress={onClose}
               text="Exit"
+              canMoveLeft={false}
+              canMoveUp={false}
+              nextFocusDown={centralControlsRef.current?.getRwdNode()}
               getControlPanelVisible={getControlPanelVisible}
             />
             <ControlButton
               icon={PlayerIcons.restart}
               onPress={onRestartPress}
               text="Restart"
+              canMoveRight={false}
+              canMoveUp={false}
               getControlPanelVisible={getControlPanelVisible}
+              nextFocusDown={centralControlsRef.current?.getRwdNode()}
             />
           </View>
           <View style={styles.titleContainer}>
@@ -480,15 +490,28 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               onPausePress={onPausePress}
               onPlayPress={onPlayPress}
               ref={centralControlsRef}
+              hasSubtitles={hasSubtitles}
+              exitButtonNode={
+                exitButtonRef.current?.getNode
+                  ? exitButtonRef.current.getNode()
+                  : undefined
+              }
               getControlPanelVisible={getControlPanelVisible}
             />
             <View style={styles.rightControls}>
-              {hasSubtitles.current && (
+              {hasSubtitles && (
                 <ControlButton
                   ref={subtitleButtonRef}
                   icon={PlayerIcons.subtitles}
                   onPress={openSubtitleListHandler}
                   getControlPanelVisible={getControlPanelVisible}
+                  canMoveRight={false}
+                  canMoveDown={false}
+                  nextFocusUp={
+                    exitButtonRef.current?.getNode
+                      ? exitButtonRef.current.getNode()
+                      : undefined
+                  }
                 />
               )}
             </View>
@@ -736,6 +759,8 @@ type TCentralControlsProps = {
   onPausePress: () => void;
   onPlayPress: () => void;
   getControlPanelVisible: () => boolean;
+  hasSubtitles: boolean;
+  exitButtonNode?: number;
 };
 type TCentralControlsRef = {
   setPlay: (play: boolean) => void;
@@ -744,7 +769,13 @@ type TCentralControlsRef = {
 };
 const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
   (props, ref) => {
-    const { onPausePress, onPlayPress, getControlPanelVisible } = props;
+    const {
+      onPausePress,
+      onPlayPress,
+      getControlPanelVisible,
+      hasSubtitles,
+      exitButtonNode,
+    } = props;
     const centralControlsMounted = useRef<boolean>(false);
     const [isPlaying, setPlaying] = useState(false);
     const fwdRef = useRef<TTouchableHighlightWrapperRef | null>(null);
@@ -790,17 +821,25 @@ const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
           icon={PlayerIcons.seekBackward}
           ref={rwdRef}
           getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          canMoveLeft={false}
+          nextFocusUp={exitButtonNode}
         />
         <ControlButton
           icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
           onPress={isPlaying ? onPausePress : onPlayPress}
           hasTVPreferredFocus
           getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          nextFocusUp={exitButtonNode}
         />
         <ControlButton
           ref={fwdRef}
           icon={PlayerIcons.seekForward}
           getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          canMoveRight={hasSubtitles}
+          nextFocusUp={exitButtonNode}
         />
       </View>
     );

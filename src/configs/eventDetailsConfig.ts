@@ -4,6 +4,7 @@ import {
   Creatives,
   Synopsis,
   AboutProduction,
+  Extras,
 } from '@components/EventDetailsComponents/';
 
 export type TEventDetailsSection = {
@@ -39,6 +40,11 @@ export const eventDetailsSectionsConfig: {
     key: 'info',
     nextSectionTitle: 'INFO & MORE',
     Component: AboutProduction,
+  },
+  extra: {
+    key: 'extras',
+    nextSectionTitle: 'EXTRAS & MORE',
+    Component: Extras,
   },
 };
 
