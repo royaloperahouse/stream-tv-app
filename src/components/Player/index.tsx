@@ -1,4 +1,10 @@
-import React, {useLayoutEffect, useState, useRef, useCallback, useEffect} from 'react';
+import React, {
+  useLayoutEffect,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -11,6 +17,7 @@ import {
   ViewProps,
   AppStateStatus,
   AppState,
+  View,
 } from 'react-native';
 import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
@@ -21,6 +28,8 @@ import {
 
 import { scaleSize } from '@utils/scaleSize';
 import { ESeekOperations } from '@configs/playerConfig';
+import RohText from '@components/RohText';
+import { Colors } from '@themes/Styleguide';
 
 let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
@@ -140,10 +149,7 @@ const Player: React.FC<TPlayerProps> = props => {
 
   useEffect(() => {
     const _handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (
-          appState.current === 'active' &&
-          nextAppState === 'background'
-      ) {
+      if (appState.current === 'active' && nextAppState === 'background') {
         ROHBitmovinPlayerModule.pause(findNodeHandle(playerRef.current));
       }
       appState.current = nextAppState;
@@ -406,6 +412,46 @@ const Player: React.FC<TPlayerProps> = props => {
         style={loaded ? styles.playerLoaded : {}}
         autoPlay={autoPlay}
       />
+      {!playerReady && (
+        <SafeAreaView style={styles.overlayOuter}>
+          <View style={[styles.overlayContainer]}>
+            {guidance && (
+              <View style={styles.guidanceContainer}>
+                <RohText
+                  style={styles.guidanceTitle}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  guidance
+                </RohText>
+                <RohText
+                  style={styles.guidanceSubTitle}
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  {guidance}
+                </RohText>
+                {guidanceDetails &&
+                  guidanceDetails.map(guidanceDetail => (
+                    <RohText
+                      style={styles.guidanceSubTitle}
+                      ellipsizeMode="tail">
+                      {guidanceDetail}
+                      {'\n'}
+                    </RohText>
+                  ))}
+              </View>
+            )}
+            <View style={styles.titleContainer}>
+              <RohText
+                style={styles.title}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {title}
+              </RohText>
+            </View>
+          </View>
+        </SafeAreaView>
+      )}
+
       <PlayerControls
         ref={controlRef}
         title={title}
@@ -429,6 +475,45 @@ const Player: React.FC<TPlayerProps> = props => {
 };
 
 const styles = StyleSheet.create({
+  overlayOuter: {
+    flex: 1,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+  },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: scaleSize(60),
+    left: scaleSize(200),
+    bottom: scaleSize(64),
+    right: scaleSize(200),
+  },
+  guidanceContainer: {
+    position: 'absolute',
+    top: scaleSize(130),
+    left: 0,
+  },
+  guidanceTitle: {
+    fontSize: scaleSize(26),
+    textTransform: 'uppercase',
+    color: Colors.defaultTextColor,
+  },
+  guidanceSubTitle: {
+    fontSize: scaleSize(26),
+    color: Colors.defaultTextColor,
+  },
+  titleContainer: {
+    width: '100%',
+  },
+  title: {
+    fontSize: scaleSize(72),
+    textTransform: 'uppercase',
+    color: Colors.defaultTextColor,
+  },
   defaultPlayerStyle: {
     backgroundColor: 'black',
     flex: 1,

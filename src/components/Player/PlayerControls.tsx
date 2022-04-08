@@ -73,8 +73,6 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       subtitleCue,
       calculateTimeForSeeking,
       seekTo,
-      guidance,
-      guidanceDetails,
     } = props;
     const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
     const activeAnimation = useRef<Animated.Value>(
@@ -462,31 +460,6 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               getControlPanelVisible={getControlPanelVisible}
             />
           </View>
-          {guidance && (
-            <View style={styles.guidanceContainer}>
-              <RohText
-                style={styles.guidanceTitle}
-                numberOfLines={1}
-                ellipsizeMode="tail">
-                guidance
-              </RohText>
-              <RohText
-                style={styles.guidanceSubTitle}
-                numberOfLines={1}
-                ellipsizeMode="tail">
-                {guidance}
-              </RohText>
-              {guidanceDetails &&
-                guidanceDetails.map(guidanceDetail => (
-                  <RohText
-                    style={styles.guidanceSubTitle}
-                    numberOfLines={1}
-                    ellipsizeMode="tail">
-                    {guidanceDetail}
-                  </RohText>
-                ))}
-            </View>
-          )}
           <View style={styles.titleContainer}>
             <RohText
               style={styles.title}
