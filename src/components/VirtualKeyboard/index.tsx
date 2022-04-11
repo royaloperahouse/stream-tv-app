@@ -7,13 +7,10 @@ import React, {
 import { View, FlatList, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import keyboardDataEng from './components/translations/eng.json';
 import keyboardDataNumbers from './components/numbers.json';
-import keyboardDataSpecSymbols from './components/specSymbols.json';
 import Button from './components/button';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
-import Delete from '@assets/svg/virualKeybord/Delete.svg';
-import Space from '@assets/svg/virualKeybord/Space.svg';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { searchQuerySelector } from '@services/store/events/Selectors';
 import { setSearchQuery } from '@services/store/events/Slices';
@@ -48,9 +45,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
     },
     ref,
   ) => {
-    const [selectedLanguage, setSelectedLanguage] = useState<number>(0);
     const specSymbolsButtonRef = useRef(null);
-    const [isSpecSymbols, setIsSpecSymbols] = useState(false);
     const [specSymbolsButtonNode, setSpecSymbolsButtonNode] = useState<
       number | undefined
     >();
@@ -66,38 +61,52 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
     const removeLetterFromSearch = (): void => {
       ref?.current?.removeLetterFromSearch?.();
     };
-    const switchLanguage = () => {
-      if (keyboardDataLocale.length === 1) {
-        return;
-      }
-      if (selectedLanguage !== keyboardDataLocale.length - 1) {
-        setSelectedLanguage(prevState => (prevState += 1));
-        return;
-      }
-      setSelectedLanguage(0);
+    const clearLettersFromSearch = (): void => {
+      ref?.current?.clearLettersFromSearch?.();
     };
-    const keybordTypeSwitch = () => setIsSpecSymbols(prevState => !prevState);
-    const keyboardData = isSpecSymbols
-      ? keyboardDataSpecSymbols.cases
-      : [
-          ...keyboardDataLocale[selectedLanguage].letters,
-          ...keyboardDataNumbers,
-        ];
-    const specSymbolsButtonLabel = isSpecSymbols
-      ? keyboardDataLocale[selectedLanguage].switchSpecButton.text
-      : keyboardDataSpecSymbols.switchSpecButton.text;
+    const keyboardData = [
+      ...keyboardDataLocale[0].letters,
+      ...keyboardDataNumbers,
+    ];
     const startIndexOfLastRow: number =
       Math.floor(keyboardData.length / cols) * cols;
     useLayoutEffect(() => {
       setSpecSymbolsButtonNode(specSymbolsButtonRef.current?.getNode());
     }, []);
-    useLayoutEffect(() => {
-      setKeyboardDatalastItemButtonNode(
-        keyboardDatalastItemButtonRef.current?.getNode(),
-      );
-    }, [isSpecSymbols, selectedLanguage]);
     return (
       <View style={{ width: cols * cellWidth }}>
+        <View style={styles.supportButtonsContainer}>
+          <Button
+            text="space"
+            onPress={addSpaceToSearch}
+            canMoveDown={true}
+            style={{
+              height: cellHeight,
+              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
+            }}
+            textStyle={[dStyle.text, dStyle.textButton]}
+          />
+          <Button
+            text="delete"
+            onPress={removeLetterFromSearch}
+            canMoveDown={true}
+            style={{
+              height: cellHeight,
+              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
+            }}
+            textStyle={[dStyle.text, dStyle.textButton]}
+          />
+          <Button
+            text="clear"
+            onPress={clearLettersFromSearch}
+            canMoveDown={true}
+            style={{
+              height: cellHeight,
+              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
+            }}
+            textStyle={[dStyle.text, dStyle.textButton]}
+          />
+        </View>
         <FlatList
           style={{
             height: rows * cellHeight,
@@ -117,61 +126,12 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
               text={item.text}
               onPress={addLetterToSearch}
               style={{ width: cellWidth, height: cellHeight }}
-              canMoveUp={index >= cols}
               nextFocusDown={
                 index >= startIndexOfLastRow ? specSymbolsButtonNode : undefined
               }
             />
           )}
         />
-        <View style={styles.supportButtonsContainer}>
-          <Button
-            ref={specSymbolsButtonRef}
-            text={specSymbolsButtonLabel}
-            onPress={keybordTypeSwitch}
-            nextFocusUp={keyboardDatalastItemButtonNode}
-            canMoveDown={false}
-            textStyle={styles.specSymbolsLabelText}
-            style={{
-              height: cellHeight,
-              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
-            }}
-          />
-          {Boolean(keyboardDataLocale.length > 1) && (
-            <Button
-              text={
-                keyboardDataLocale[
-                  selectedLanguage + 1 < keyboardDataLocale.length
-                    ? selectedLanguage + 1
-                    : 0
-                ].langSwitchButton.text
-              }
-              canMoveDown={false}
-              nextFocusUp={keyboardDatalastItemButtonNode}
-              textStyle={styles.specSymbolsLabelText}
-              onPress={switchLanguage}
-              style={{ height: cellHeight, width: cellWidth * 1.5 }}
-            />
-          )}
-          <Button
-            Icon={Space}
-            onPress={addSpaceToSearch}
-            canMoveDown={false}
-            style={{
-              height: cellHeight,
-              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
-            }}
-          />
-          <Button
-            Icon={Delete}
-            onPress={removeLetterFromSearch}
-            canMoveDown={false}
-            style={{
-              height: cellHeight,
-              width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
-            }}
-          />
-        </View>
       </View>
     );
   },
@@ -226,6 +186,12 @@ export const DisplayForVirtualKeyboard = forwardRef<
         }
         dispatch(setSearchQuery({ searchQuery: '' }));
       },
+      clearLettersFromSearch: (): void => {
+        if (route?.params?.sectionIndex !== undefined) {
+          navigation.setParams({ sectionIndex: undefined });
+        }
+        dispatch(setSearchQuery({ searchQuery: 'clear' }));
+      },
     }),
     [dispatch, route, navigation],
   );
@@ -255,5 +221,8 @@ const dStyle = StyleSheet.create({
     lineHeight: scaleSize(30),
     letterSpacing: scaleSize(1),
     color: Colors.defaultTextColor,
+  },
+  textButton: {
+    paddingTop: 7,
   },
 });
