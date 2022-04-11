@@ -86,6 +86,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
             }}
+            canMoveUp={false}
             textStyle={[dStyle.text, dStyle.textButton]}
           />
           <Button
@@ -95,6 +96,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
             }}
+            canMoveUp={false}
             textStyle={[dStyle.text, dStyle.textButton]}
           />
           <Button
@@ -104,6 +106,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
             }}
+            canMoveUp={false}
             textStyle={[dStyle.text, dStyle.textButton]}
           />
         </View>
@@ -124,6 +127,7 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
                   : undefined
               }
               text={item.text}
+              canMoveDown={index <= cols * (rows - 1)}
               onPress={addLetterToSearch}
               style={{ width: cellWidth, height: cellHeight }}
               nextFocusDown={
