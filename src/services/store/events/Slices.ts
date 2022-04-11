@@ -34,9 +34,7 @@ const eventsSlice = createSlice({
     },
     getEventListLoopStop: state => state,
     setSearchQuery: (state, { payload }) => {
-      if (payload.searchQuery === 'clear') {
-        state.searchQueryString = '';
-      } else if (payload.searchQuery.length) {
+      if (payload.searchQuery.length) {
         state.searchQueryString += payload.searchQuery;
       } else {
         state.searchQueryString = state.searchQueryString.length

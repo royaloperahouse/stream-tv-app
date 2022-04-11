@@ -13,7 +13,10 @@ import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { searchQuerySelector } from '@services/store/events/Selectors';
-import { setSearchQuery } from '@services/store/events/Slices';
+import {
+  clearSearchQuery,
+  setSearchQuery,
+} from '@services/store/events/Slices';
 import { useLayoutEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -79,7 +82,6 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
           <Button
             text="space"
             onPress={addSpaceToSearch}
-            canMoveDown={true}
             style={{
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
@@ -89,7 +91,6 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
           <Button
             text="delete"
             onPress={removeLetterFromSearch}
-            canMoveDown={true}
             style={{
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
@@ -99,7 +100,6 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
           <Button
             text="clear"
             onPress={clearLettersFromSearch}
-            canMoveDown={true}
             style={{
               height: cellHeight,
               width: cellWidth * (keyboardDataLocale.length > 1 ? 1.5 : 2),
@@ -190,7 +190,7 @@ export const DisplayForVirtualKeyboard = forwardRef<
         if (route?.params?.sectionIndex !== undefined) {
           navigation.setParams({ sectionIndex: undefined });
         }
-        dispatch(setSearchQuery({ searchQuery: 'clear' }));
+        dispatch(clearSearchQuery());
       },
     }),
     [dispatch, route, navigation],
