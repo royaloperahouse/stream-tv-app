@@ -52,6 +52,7 @@ import { shallowEqual, useSelector } from 'react-redux';
 import moment from 'moment';
 import CountDown from '@components/EventDetailsComponents/commonControls/CountDown';
 import { useIsFocused } from '@react-navigation/native';
+import { Colors } from '@themes/Styleguide';
 
 type Props = {
   event: TEventContainer;
@@ -500,6 +501,8 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
     };
   }, [getPerformanceVideoUrl, showCountDownTimer]);
 
+  const { vs_guidance, vs_guidance_details } = event.data;
+
   return (
     <View style={styles.generalContainer}>
       <View style={styles.contentContainer}>
@@ -508,6 +511,20 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
             {title.toUpperCase()}
           </RohText>
           <RohText style={styles.description}>{shortDescription}</RohText>
+          {vs_guidance && (
+            <View style={styles.guidanceContainer}>
+              <RohText style={styles.description}>
+                {vs_guidance}
+              </RohText>
+              {vs_guidance_details &&
+                vs_guidance_details.map(guidanceDetail => (
+                  <RohText style={styles.description}>
+                    {guidanceDetail.text}
+                    {'\n'}
+                  </RohText>
+                ))}
+            </View>
+          )}
           {showCountDownTimer && (
             <CountDown
               publishingDate={publishingDate}
@@ -600,6 +617,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: scaleSize(272),
     marginTop: scaleSize(50),
+  },
+  guidanceContainer: {
+
+  },
+  guidanceSubTitle: {
+    fontSize: scaleSize(26),
+    color: Colors.defaultTextColor,
   },
 });
 

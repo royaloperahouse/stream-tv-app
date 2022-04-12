@@ -434,7 +434,7 @@ const Player: React.FC<TPlayerProps> = props => {
                     <RohText
                       style={styles.guidanceSubTitle}
                       ellipsizeMode="tail">
-                      {guidanceDetail}
+                      {guidanceDetail.text}
                       {'\n'}
                     </RohText>
                   ))}
