@@ -513,16 +513,14 @@ const General: React.FC<Props> = ({ event, showPlayer, continueWatching }) => {
           <RohText style={styles.description}>{shortDescription}</RohText>
           {vs_guidance && (
             <View style={styles.guidanceContainer}>
-              <RohText style={styles.description}>
-                {vs_guidance}
-              </RohText>
-              {vs_guidance_details &&
-                vs_guidance_details.map(guidanceDetail => (
-                  <RohText style={styles.description}>
-                    {guidanceDetail.text}
-                    {'\n'}
-                  </RohText>
-                ))}
+              <RohText style={styles.description}>{vs_guidance}</RohText>
+              {vs_guidance_details && (
+                <RohText style={styles.description}>
+                  {vs_guidance_details.map(
+                    guidanceDetail => `${guidanceDetail.text}\n`,
+                  )}
+                </RohText>
+              )}
             </View>
           )}
           {showCountDownTimer && (
@@ -618,9 +616,7 @@ const styles = StyleSheet.create({
     height: scaleSize(272),
     marginTop: scaleSize(50),
   },
-  guidanceContainer: {
-
-  },
+  guidanceContainer: {},
   guidanceSubTitle: {
     fontSize: scaleSize(26),
     color: Colors.defaultTextColor,

@@ -429,15 +429,13 @@ const Player: React.FC<TPlayerProps> = props => {
                   ellipsizeMode="tail">
                   {guidance}
                 </RohText>
-                {guidanceDetails &&
-                  guidanceDetails.map(guidanceDetail => (
-                    <RohText
-                      style={styles.guidanceSubTitle}
-                      ellipsizeMode="tail">
-                      {guidanceDetail.text}
-                      {'\n'}
-                    </RohText>
-                  ))}
+                {guidanceDetails && (
+                  <RohText style={styles.guidanceSubTitle}>
+                    {guidanceDetails.map(
+                      guidanceDetail => `${guidanceDetail.text}\n`,
+                    )}
+                  </RohText>
+                )}
               </View>
             )}
             <View style={styles.titleContainer}>
