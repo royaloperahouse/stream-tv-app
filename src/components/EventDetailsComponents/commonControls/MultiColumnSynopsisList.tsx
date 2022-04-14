@@ -43,7 +43,7 @@ const MultiColumnSynopsisList: React.FC<
   if (splitedItems.length === 1) {
     return (
       <TouchableHighlightWrapper>
-        <View style={styles.synopsisContainer}>
+        <View style={[{ height: columnHeight, width: columnWidth, overflow: 'hidden' }]}>
           {splitedItems.map(column =>
             column.map(synops => (
               <View style={styles.elementContainer} key={synops.key}>
@@ -57,7 +57,7 @@ const MultiColumnSynopsisList: React.FC<
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[{ height: columnHeight }]}>
       <VirtualizedList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -88,7 +88,7 @@ const MultiColumnSynopsisList: React.FC<
                 scrollingArrowPaginationRef.current.setCurrentIndex(index);
               }
             }}>
-            <View style={styles.columnContainer}>
+            <View style={[styles.columnContainer, { height: columnHeight }]}>
               {item[index].map(ceil => (
                 <View style={styles.elementContainer} key={ceil.key}>
                   <RohText style={styles.synopsis}>{ceil.text}</RohText>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
@@ -13,11 +13,15 @@ import MultiColumnAboutProductionList, {
 type AboutProductionProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
 const AboutProduction: React.FC<AboutProductionProps> = ({
   event,
   nextScreenText,
+  screenName,
+  setScreenAvailabilety,
 }) => {
   const aboutProduction: Array<{
     key: string;
@@ -147,6 +151,13 @@ const AboutProduction: React.FC<AboutProductionProps> = ({
     );
   }
 
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(aboutProduction.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [aboutProduction.length, screenName, setScreenAvailabilety]);
+
   if (!aboutProduction.length) {
     return null;
   }
@@ -185,7 +196,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(50),
     paddingBottom: scaleSize(60),
-    top: -scaleSize(110),
+    top: -scaleSize(85),
   },
   title: {
     flex: 1,

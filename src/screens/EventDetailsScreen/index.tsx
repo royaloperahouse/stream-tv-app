@@ -11,6 +11,7 @@ import { TEventContainer } from '@services/types/models';
 import collectionOfEventDetailsSections, {
   eventDetailsSectionsConfig,
   TEventDetailsSection,
+  TGeneralRef,
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
 import Player from '@components/Player';
@@ -26,6 +27,10 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { globalModalManager } from '@components/GlobalModal';
 import { ErrorModal } from '@components/GlobalModal/variants';
+import MoveToTopSectionButton, {
+  TMoveToTopSectionButtonRef,
+} from '@components/EventDetailsComponents/commonControls/MoveToTopSectionButton';
+import { scaleSize } from '@utils/scaleSize';
 
 type TEventDetailsScreenProps = StackScreenProps<
   { eventDetails: { event: TEventContainer } },
@@ -47,7 +52,8 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
       isBMPlayerShowingRef.current = true;
     }
   }, []);
-
+  const generalSectionRef = useRef<TGeneralRef>(null);
+  const moveToTopSectionButtonRef = useRef<TMoveToTopSectionButtonRef>(null);
   const closePlayer = async (
     error: TBMPlayerErrorObject | null,
     time: string,
@@ -79,6 +85,45 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
     isBMPlayerShowingRef.current = false;
   };
 
+  const moveToTopSectionCB = useCallback(() => {
+    if (typeof VirtualizedListRef.current?.scrollToOffset === 'function') {
+      typeof VirtualizedListRef.current.scrollToOffset({ offset: 0 });
+    }
+    if (
+      typeof generalSectionRef.current?.focusOnFirstAvalibleButton ===
+      'function'
+    ) {
+      generalSectionRef.current.focusOnFirstAvalibleButton();
+    }
+  }, []);
+
+  const setScreenAvailabilety = useCallback(
+    (screenName: string, availabilety?: boolean) => {
+      if (
+        typeof moveToTopSectionButtonRef.current?.setScreenAvailabilety ===
+        'function'
+      ) {
+        typeof moveToTopSectionButtonRef.current.setScreenAvailabilety(
+          screenName,
+          availabilety,
+        );
+      }
+    },
+    [],
+  );
+
+  const hideMoveToTopSectionButton = useCallback(() => {
+    if (typeof moveToTopSectionButtonRef.current?.hideButton === 'function') {
+      moveToTopSectionButtonRef.current.hideButton();
+    }
+  }, []);
+
+  const showMoveToTopSectionButton = useCallback(() => {
+    if (typeof moveToTopSectionButtonRef.current?.showButton === 'function') {
+      moveToTopSectionButtonRef.current.showButton();
+    }
+  }, []);
+
   const sectionsFactory = useCallback(
     (item: TEventDetailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
@@ -95,6 +140,7 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               continueWatching={continueWatching}
               isBMPlayerShowing={bMPlayerShowingData !== null}
               nextScreenText={item.nextSectionTitle}
+              ref={generalSectionRef}
             />
           );
         }
@@ -102,8 +148,12 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
           return (
             <Component
               key={item?.key || index}
+              screenName={item.key}
               event={event}
               nextScreenText={item?.nextSectionTitle}
+              setScreenAvailabilety={setScreenAvailabilety}
+              hideMoveToTopSectionButton={hideMoveToTopSectionButton}
+              showMoveToTopSectionButton={showMoveToTopSectionButton}
             />
           );
         }
@@ -177,58 +227,93 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
   return (
     <View style={styles.rootContainer}>
       <GoBack />
-      <VirtualizedList
-        ref={VirtualizedListRef}
-        style={styles.scrollView}
-        keyExtractor={(item, index) => item[index].key}
-        initialNumToRender={0}
-        data={collectionOfEventDetailsSections}
-        renderItem={({ item, index }) => {
-          return sectionsFactory(item[index], index);
-        }}
-        getItemCount={data => data?.length || 0}
-        windowSize={2}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 1,
-          waitForInteraction: false,
-          minimumViewTime: 100, //In milliseconds
-        }}
-        onViewableItemsChanged={info => {
-          let itemForScrolling: ViewToken | undefined;
-          if (
-            info.viewableItems.length > 1 &&
-            info.changed.length &&
-            (itemForScrolling = info.changed.find(item => item.isViewable)) !==
-              undefined &&
-            itemForScrolling.index !== null
-          ) {
-            VirtualizedListRef.current?.scrollToIndex({
-              animated: true,
-              index: itemForScrolling.index,
-            });
-          }
-        }}
-        getItem={data => [...data]}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        onScrollToIndexFailed={info => {
-          const wait = new Promise(resolve => setTimeout(resolve, 500));
-          wait.then(() => {
+      <View>
+        <View style={styles.moveToTopSectionButton}>
+          <MoveToTopSectionButton
+            ref={moveToTopSectionButtonRef}
+            focusCallback={moveToTopSectionCB}
+            screensNames={collectionOfEventDetailsSections
+              .slice(1)
+              .map(section => section.key)}
+          />
+        </View>
+        <VirtualizedList
+          ref={VirtualizedListRef}
+          style={styles.scrollView}
+          keyExtractor={item => item.key}
+          initialNumToRender={0}
+          data={collectionOfEventDetailsSections}
+          renderItem={({ item, index }) => {
+            return sectionsFactory(item, index);
+          }}
+          getItemCount={data => data?.length || 0}
+          windowSize={3}
+          viewabilityConfig={{
+            itemVisiblePercentThreshold: 1,
+            waitForInteraction: false,
+            minimumViewTime: 100, //In milliseconds
+          }}
+          onViewableItemsChanged={info => {
+            let itemForScrolling: ViewToken | undefined;
             if (
-              !eventDetailsScreenMounted ||
-              !eventDetailsScreenMounted.current ||
-              info.index === undefined ||
-              !VirtualizedListRef.current
+              info.viewableItems.length > 1 &&
+              info.changed.length &&
+              (itemForScrolling = info.changed.find(
+                item => item.isViewable,
+              )) !== undefined &&
+              itemForScrolling.index !== null
             ) {
-              return;
+              if (
+                typeof moveToTopSectionButtonRef.current?.hideButton ===
+                'function'
+              ) {
+                moveToTopSectionButtonRef.current.hideButton();
+              }
+              VirtualizedListRef.current?.scrollToIndex({
+                animated: true,
+                index: itemForScrolling.index,
+              });
             }
-            VirtualizedListRef.current.scrollToIndex({
-              animated: true,
-              index: info.index,
+            if (
+              info.viewableItems.length === 1 &&
+              typeof moveToTopSectionButtonRef.current?.setActiveScreenIndex ===
+                'function' &&
+              info.viewableItems[0].index !== null
+            ) {
+              moveToTopSectionButtonRef.current.setActiveScreenIndex(
+                info.viewableItems[0].index - 1,
+              );
+            }
+            if (
+              !info.viewableItems.length &&
+              typeof moveToTopSectionButtonRef.current?.hideButton ===
+                'function'
+            ) {
+              moveToTopSectionButtonRef.current.hideButton();
+            }
+          }}
+          getItem={(data, index) => data[index]}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          onScrollToIndexFailed={info => {
+            const wait = new Promise(resolve => setTimeout(resolve, 500));
+            wait.then(() => {
+              if (
+                !eventDetailsScreenMounted ||
+                !eventDetailsScreenMounted.current ||
+                info.index === undefined ||
+                !VirtualizedListRef.current
+              ) {
+                return;
+              }
+              VirtualizedListRef.current.scrollToIndex({
+                animated: true,
+                index: info.index,
+              });
             });
-          });
-        }}
-      />
+          }}
+        />
+      </View>
     </View>
   );
 };
@@ -242,6 +327,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   root: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  moveToTopSectionButton: {
+    position: 'absolute',
+    bottom: scaleSize(60),
+    left: 0,
+  },
 });
 
 export default EventDetailsScreen;

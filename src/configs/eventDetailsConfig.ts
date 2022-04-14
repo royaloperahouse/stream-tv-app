@@ -6,6 +6,7 @@ import {
   AboutProduction,
   Extras,
 } from '@components/EventDetailsComponents/';
+export type { TGeneralRef } from '@components/EventDetailsComponents/components//General';
 
 export type TEventDetailsSection = {
   key: string;

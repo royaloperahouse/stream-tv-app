@@ -45,7 +45,6 @@ const ExtrasInfoBlock = forwardRef<TExtrasInfoBlockRef, Props>((props, ref) => {
   const onLayoutEventHaandler = useCallback((event: LayoutChangeEvent) => {
     event.stopPropagation();
     event.persist();
-    console.log(event.nativeEvent.layout.height, scaleSize(550));
     const newstate = event.nativeEvent.layout.height >= scaleSize(550);
     setShowThreeDots(prevState =>
       prevState === newstate ? prevState : newstate,
@@ -93,7 +92,7 @@ const styles = StyleSheet.create({
   root: {
     marginTop: scaleSize(146),
     marginRight: scaleSize(15),
-    maxHeight: scaleSize(550),
+    maxHeight: scaleSize(490),
     borderWidth: 1,
     borderColor: 'transparent',
     overflow: 'hidden',

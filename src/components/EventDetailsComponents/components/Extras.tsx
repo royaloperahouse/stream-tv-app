@@ -31,8 +31,19 @@ import { ErrorModal } from '@components/GlobalModal/variants';
 type ExtrasProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety: boolean) => void;
+  screenName: string;
+  showMoveToTopSectionButton: () => void;
+  hideMoveToTopSectionButton: () => void;
 };
-const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
+const Extras: React.FC<ExtrasProps> = ({
+  event,
+  nextScreenText,
+  setScreenAvailabilety,
+  screenName,
+  showMoveToTopSectionButton,
+  hideMoveToTopSectionButton,
+}) => {
   const videosRefs = useRef<{
     [key: string]: any;
   }>({});
@@ -71,6 +82,7 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
               goBackButtonuManager.showGoBackButton();
               setSelectedVideo(null);
               isBMPlayerShowingRef.current = false;
+              showMoveToTopSectionButton();
             });
           },
           title: 'Player Error',
@@ -94,6 +106,7 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
       goBackButtonuManager.showGoBackButton();
       setSelectedVideo(null);
       isBMPlayerShowingRef.current = false;
+      showMoveToTopSectionButton();
     }
   };
   useEffect(() => {
@@ -105,6 +118,7 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
       ({ video }) => video.id,
     );
     if (!videos.length) {
+      setScreenAvailabilety(screenName, false);
       loading.current = false;
       return;
     }
@@ -121,9 +135,14 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
         );
         if (filteredResult.length && isMounted.current) {
           setVideosInfo(filteredResult);
+          setScreenAvailabilety(screenName, true);
+        } else {
+          setScreenAvailabilety(screenName, false);
         }
       })
-      .catch(console.log)
+      .catch(() => {
+        setScreenAvailabilety(screenName, false);
+      })
       .finally(() => {
         loading.current = false;
       });
@@ -141,7 +160,11 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
   }
 
   return (
-    <View style={styles.generalContainer}>
+    <View
+      style={[
+        styles.generalContainer,
+        selectedVideo ? { width: Dimensions.get('window').width } : {},
+      ]}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
       </View>
@@ -196,6 +219,7 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
                           throw new Error('Something went wrong');
                         }
                         goBackButtonuManager.hideGoBackButton();
+                        hideMoveToTopSectionButton();
                         setSelectedVideo({
                           videoId: item.id,
                           eventId: event.id,
@@ -255,6 +279,7 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
                                     });
                                 }
                                 isBMPlayerShowingRef.current = false;
+                                showMoveToTopSectionButton();
                               });
                             },
                             title: 'Player Error',
@@ -375,7 +400,6 @@ const Extras: React.FC<ExtrasProps> = ({ event, nextScreenText }) => {
 const styles = StyleSheet.create({
   generalContainer: {
     height: Dimensions.get('window').height,
-    //paddingRight: scaleSize(200),
   },
   wrapper: {
     flex: 1,
@@ -386,7 +410,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(50),
     paddingBottom: scaleSize(60),
-    top: -scaleSize(110),
+    top: -scaleSize(85),
   },
   title: {
     marginTop: scaleSize(105),
@@ -412,7 +436,7 @@ const styles = StyleSheet.create({
     marginLeft: scaleSize(147),
   },
   extrasGalleryOtherItemsContainer: {
-    marginRight: scaleSize(20),
+    marginLeft: scaleSize(20),
   },
   extrasGalleryItemFocusedContainer: {
     backgroundColor: Colors.defaultBlue,
@@ -429,7 +453,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     position: 'absolute',
-    bottom: scaleSize(100),
+    bottom: scaleSize(160),
     left: 0,
   },
 });
