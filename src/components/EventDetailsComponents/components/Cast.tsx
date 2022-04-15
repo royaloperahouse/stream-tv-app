@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer, TDieseActivityCast } from '@services/types/models';
@@ -11,9 +11,16 @@ import { Colors } from '@themes/Styleguide';
 type CastProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
-const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
+const Cast: React.FC<CastProps> = ({
+  event,
+  nextScreenText,
+  setScreenAvailabilety,
+  screenName,
+}) => {
   const castList: Array<TDieseActivityCast> =
     get(event.data, ['diese_activity', 'cast']) || [];
   const listOfEvalableCasts = castList.reduce<{ [key: string]: string }>(
@@ -37,6 +44,14 @@ const Cast: React.FC<CastProps> = ({ event, nextScreenText }) => {
   const data: Array<{ role: string; name: string }> = Object.entries(
     listOfEvalableCasts,
   ).map(([role, name]) => ({ role, name }));
+
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(data.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [data.length, screenName, setScreenAvailabilety]);
+
   if (!data.length) {
     return null;
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import {
@@ -14,9 +14,16 @@ import { Colors } from '@themes/Styleguide';
 type CreativesProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
-const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
+const Creatives: React.FC<CreativesProps> = ({
+  event,
+  nextScreenText,
+  setScreenAvailabilety,
+  screenName,
+}) => {
   const creativesList: Array<TDieseActitvityCreatives> = get(
     event.data,
     ['diese_activity', 'creatives'],
@@ -44,6 +51,12 @@ const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
     listOfEvalableCreatives,
   ).map(([role, name]) => ({ role, name }));
 
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(data.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [data.length, screenName, setScreenAvailabilety]);
   if (!data.length) {
     return null;
   }

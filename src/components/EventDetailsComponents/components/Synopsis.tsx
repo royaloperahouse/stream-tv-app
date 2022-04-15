@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEvent, TEventContainer, TVSSynops } from '@services/types/models';
@@ -11,9 +11,16 @@ import MultiColumnSynopsisList from '../commonControls/MultiColumnSynopsisList';
 type SynopsisProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
-const Synopsis: React.FC<SynopsisProps> = ({ event, nextScreenText }) => {
+const Synopsis: React.FC<SynopsisProps> = ({
+  event,
+  nextScreenText,
+  screenName,
+  setScreenAvailabilety,
+}) => {
   const synopsis: Array<TVSSynops> = event.data.vs_synopsis.filter(
     synops => synops.text.length,
   ).length
@@ -39,6 +46,13 @@ const Synopsis: React.FC<SynopsisProps> = ({ event, nextScreenText }) => {
         }
         return acc;
       }, []);
+
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(synopsis.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [synopsis.length, screenName, setScreenAvailabilety]);
 
   if (!synopsis.length) {
     return null;
@@ -81,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(50),
     paddingBottom: scaleSize(60),
-    top: -scaleSize(110),
+    top: -scaleSize(85),
   },
   title: {
     flex: 1,
@@ -97,7 +111,6 @@ const styles = StyleSheet.create({
     lineHeight: scaleSize(38),
   },
   synopsisContainer: {
-    height: '100%',
     width: scaleSize(740),
   },
 });

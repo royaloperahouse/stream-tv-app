@@ -42,7 +42,7 @@ const MultiColumnRoleNameList: React.FC<
   if (splitedItems.length < 3) {
     return (
       <TouchableHighlightWrapper>
-        <View style={styles.towColumnsList}>
+        <View style={[styles.towColumnsList, { height: columnHeight }]}>
           {splitedItems.map((column, index) => (
             <View style={styles.columnContainer} key={index}>
               {column.map(ceil => (
@@ -59,7 +59,7 @@ const MultiColumnRoleNameList: React.FC<
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[{ height: columnHeight }]}>
       <VirtualizedList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
