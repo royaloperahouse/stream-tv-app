@@ -56,6 +56,7 @@ import moment from 'moment';
 import CountDown from '@components/EventDetailsComponents/commonControls/CountDown';
 import { useIsFocused } from '@react-navigation/native';
 import { Colors } from '@themes/Styleguide';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 
 export type TGeneralRef = Partial<{ focusOnFirstAvalibleButton: () => void }>;
 
@@ -124,7 +125,9 @@ const General = forwardRef<TGeneralRef, Props>(
     const videos = get(event.data, 'vs_videos', []).map(
       ({ video }) => video.id,
     );
-    const { vs_guidance, vs_guidance_details } = event.data;
+    const vs_guidance = get(event.data, 'vs_guidance', '');
+    const vs_guidance_details = get(event.data, 'vs_guidance_details', []);
+
     const updateContinueWatching = async () => {
       if (continueWatching) {
         return;
@@ -534,34 +537,36 @@ const General = forwardRef<TGeneralRef, Props>(
       <View style={styles.generalContainer}>
         <View style={styles.contentContainer}>
           <View style={styles.descriptionContainer}>
-            <RohText style={styles.title} numberOfLines={2}>
-              {title.toUpperCase()}
-            </RohText>
-            <RohText style={styles.description}>{shortDescription}</RohText>
-            {vs_guidance && (
-              <View style={styles.guidanceContainer}>
+            <OverflowingContainer
+              fixedHeight
+              contentMaxVisibleHeight={scaleSize(368)}>
+              <RohText style={styles.title} numberOfLines={2}>
+                {title.toUpperCase()}
+              </RohText>
+              <RohText style={styles.description}>{shortDescription}</RohText>
+              {Boolean(vs_guidance) && (
                 <RohText style={styles.description}>{vs_guidance}</RohText>
-                {Array.isArray(vs_guidance_details) &&
-                  vs_guidance_details.length && (
-                    <RohText style={styles.description}>
-                      {vs_guidance_details.reduce(
-                        (acc: string, guidance_detail: any, i: number) => {
-                          if (guidance_detail.text) {
-                            acc +=
-                              guidance_detail.type === 'paragraph'
-                                ? guidance_detail.text + '\n'
-                                : i > 0
-                                ? ' ' + guidance_detail.text
-                                : guidance_detail.text;
-                          }
-                          return acc;
-                        },
-                        '',
-                      )}
-                    </RohText>
+              )}
+              {Array.isArray(vs_guidance_details) &&
+              vs_guidance_details.length ? (
+                <RohText style={styles.description}>
+                  {vs_guidance_details.reduce(
+                    (acc: string, guidance_detail: any, i: number) => {
+                      if (guidance_detail.text) {
+                        acc +=
+                          guidance_detail.type === 'paragraph'
+                            ? guidance_detail.text + '\n'
+                            : i > 0
+                            ? ' ' + guidance_detail.text
+                            : guidance_detail.text;
+                      }
+                      return acc;
+                    },
+                    '',
                   )}
-              </View>
-            )}
+                </RohText>
+              ) : null}
+            </OverflowingContainer>
             {showCountDownTimer && (
               <CountDown
                 publishingDate={publishingDate}

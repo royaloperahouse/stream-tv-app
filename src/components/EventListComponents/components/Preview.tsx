@@ -12,6 +12,7 @@ import RohText from '@components/RohText';
 import get from 'lodash.get';
 import FastImage from 'react-native-fast-image';
 import { Colors } from '@themes/Styleguide';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 
 export type TPreviewRef = {
   setDigitalEvent?: (
@@ -80,23 +81,27 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   return (
     <Animated.View
       style={[styles.previewContainer, { opacity: fadeAnimation }]}>
-      {Boolean(event) && (
-        <>
-          <View style={styles.descriptionContainer}>
-            <RohText style={styles.pageTitle}>{eventGroupTitle}</RohText>
-            <RohText style={styles.title}>{eventTitle}</RohText>
-            {/* <RohText style={styles.ellipsis}>{event.captionText}</RohText> */}
-            <RohText style={styles.description}>{shortDescription}</RohText>
-          </View>
-          <View style={styles.snapshotContainer}>
-            <FastImage
-              resizeMode={FastImage.resizeMode.cover}
-              style={styles.previewImage}
-              source={{ uri: snapshotImageUrl }}
-            />
-          </View>
-        </>
-      )}
+      <View style={styles.descriptionContainer}>
+        <OverflowingContainer
+          fixedHeight
+          contentMaxVisibleHeight={
+            styles.previewContainer.height -
+            styles.descriptionContainer.marginTop
+          }>
+          <RohText style={styles.pageTitle}>{eventGroupTitle}</RohText>
+          <RohText style={styles.title}>{eventTitle}</RohText>
+          {/* <RohText style={styles.ellipsis}>{event.captionText}</RohText> */}
+          <RohText style={styles.description}>{shortDescription}</RohText>
+        </OverflowingContainer>
+      </View>
+
+      <View style={styles.snapshotContainer}>
+        <FastImage
+          resizeMode={FastImage.resizeMode.cover}
+          style={styles.previewImage}
+          source={{ uri: snapshotImageUrl }}
+        />
+      </View>
     </Animated.View>
   );
 });

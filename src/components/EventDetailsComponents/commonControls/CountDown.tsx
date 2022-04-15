@@ -18,7 +18,7 @@ const CountDown: React.FC<TCountDownProps> = ({
   finishCB = () => {},
 }) => {
   return (
-    <View>
+    <View style={styles.countDownBlockContainer}>
       <View>
         <RohText style={styles.titleText}>Live stream starts in:</RohText>
       </View>
@@ -44,6 +44,9 @@ const CountDown: React.FC<TCountDownProps> = ({
 
 export default CountDown;
 const styles = StyleSheet.create({
+  countDownBlockContainer: {
+    marginTop: scaleSize(30),
+  },
   titleText: {
     lineHeight: scaleSize(24),
     fontSize: scaleSize(20),
