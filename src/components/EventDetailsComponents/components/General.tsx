@@ -86,6 +86,12 @@ const General = forwardRef<TGeneralRef, Props>(
       publishingDate.isValid() &&
       publishingDate.isAfter(nowDate);
     const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
+    const performanceVideoInFocus = useRef<
+      TouchableHighlight | null | undefined
+    >(null);
+    const trailerVideoInFocus = useRef<TouchableHighlight | null | undefined>(
+      null,
+    );
     const generalMountedRef = useRef<boolean | undefined>(false);
     const addOrRemoveBusyRef = useRef<boolean>(true);
     const watchNowButtonRef = useRef<TActionButtonListRef>(null);
@@ -168,7 +174,10 @@ const General = forwardRef<TGeneralRef, Props>(
     };
 
     const getPerformanceVideoUrl = useCallback(
-      async (ref?: RefObject<TouchableHighlight>) => {
+      async (
+        ref?: RefObject<TouchableHighlight>,
+        clearLoadingState?: () => void,
+      ) => {
         try {
           if (!videos.length) {
             throw new Error('Something went wrong');
@@ -262,6 +271,9 @@ const General = forwardRef<TGeneralRef, Props>(
                 },
                 cancelActionHandler: () => {
                   globalModalManager.closeModal(() => {
+                    if (typeof clearLoadingState === 'function') {
+                      clearLoadingState();
+                    }
                     if (typeof ref?.current?.setNativeProps === 'function') {
                       ref.current.setNativeProps({
                         hasTVPreferredFocus: true,
@@ -297,6 +309,9 @@ const General = forwardRef<TGeneralRef, Props>(
             contentProps: {
               confirmActionHandler: () => {
                 globalModalManager.closeModal(() => {
+                  if (typeof clearLoadingState === 'function') {
+                    clearLoadingState();
+                  }
                   if (typeof ref?.current?.setNativeProps === 'function') {
                     ref.current.setNativeProps({
                       hasTVPreferredFocus: true,
@@ -323,7 +338,10 @@ const General = forwardRef<TGeneralRef, Props>(
       [event.id, showPlayer, title, videos, needSubscribedModeInfoUpdate],
     );
 
-    const getTrailerVideoUrl = async (ref?: RefObject<TouchableHighlight>) => {
+    const getTrailerVideoUrl = async (
+      ref?: RefObject<TouchableHighlight>,
+      clearLoadingState?: () => void,
+    ) => {
       try {
         if (!videos.length) {
           throw new Error('Something went wrong');
@@ -359,6 +377,9 @@ const General = forwardRef<TGeneralRef, Props>(
           contentProps: {
             confirmActionHandler: () => {
               globalModalManager.closeModal(() => {
+                if (typeof clearLoadingState === 'function') {
+                  clearLoadingState();
+                }
                 if (typeof ref?.current?.setNativeProps === 'function') {
                   ref.current.setNativeProps({ hasTVPreferredFocus: true });
                 }
@@ -391,8 +412,45 @@ const General = forwardRef<TGeneralRef, Props>(
       });
     };
 
+    const setPerformanceVideoInFocus = useCallback(
+      (ref?: RefObject<TouchableHighlight>) => {
+        performanceVideoInFocus.current = ref?.current;
+      },
+      [],
+    );
+    const setTrailerVideoInFocus = useCallback(
+      (ref?: RefObject<TouchableHighlight>) => {
+        trailerVideoInFocus.current = ref?.current;
+      },
+      [],
+    );
+
+    const setPerformanceVideoBlur = useCallback(() => {
+      performanceVideoInFocus.current = null;
+    }, []);
+    const setTrailerVideoBlur = useCallback(() => {
+      trailerVideoInFocus.current = null;
+    }, []);
+
     const actionButtonListFactory = (typeOfList: EActionButtonListType) => {
-      const buttonListCollection = {
+      const buttonListCollection: {
+        [key: string]: Array<{
+          key: string;
+          text: string;
+          hasTVPreferredFocus?: boolean;
+          onPress: (
+            ref?: React.RefObject<TouchableHighlight> | undefined,
+            clearLoadingState?: () => void,
+          ) => Promise<void> | void;
+          onFocus?: (
+            ref?: React.RefObject<TouchableHighlight> | undefined,
+          ) => void;
+          onBlur?: () => void;
+          Icon: any;
+          showLoader?: boolean;
+          freezeButtonAfterPressing?: boolean;
+        }>;
+      } = {
         [EActionButtonListType.common]: [
           {
             key: 'WatchNow',
@@ -402,14 +460,16 @@ const General = forwardRef<TGeneralRef, Props>(
                 : 'Watch now',
             hasTVPreferredFocus: true,
             onPress: getPerformanceVideoUrl,
-            onFocus: () => console.log('Watch now focus'),
+            onFocus: setPerformanceVideoInFocus,
+            onBlur: setPerformanceVideoBlur,
             Icon: Watch,
+            showLoader: true,
+            freezeButtonAfterPressing: true,
           },
           {
             key: 'AddToMyList',
             text: (existInMyList ? 'Remove from' : 'Add to') + ' my list',
             onPress: addOrRemoveItemIdFromMyListHandler,
-            onFocus: () => console.log('Add to my list focus'),
             Icon: AddToMyList,
             hasTVPreferredFocus: showCountDownTimer,
           },
@@ -417,7 +477,10 @@ const General = forwardRef<TGeneralRef, Props>(
             key: 'WatchTrailer',
             text: 'Watch trailer',
             onPress: getTrailerVideoUrl,
-            onFocus: () => console.log('Watch trailer focus'),
+            onFocus: setTrailerVideoInFocus,
+            onBlur: setTrailerVideoBlur,
+            showLoader: true,
+            freezeButtonAfterPressing: true,
             Icon: Trailer,
           },
         ].filter(item => {
@@ -435,14 +498,16 @@ const General = forwardRef<TGeneralRef, Props>(
                 : 'Watch now',
             hasTVPreferredFocus: true,
             onPress: getPerformanceVideoUrl,
-            onFocus: () => console.log('Watch now focus'),
+            onFocus: setPerformanceVideoInFocus,
+            onBlur: setPerformanceVideoBlur,
+            showLoader: true,
+            freezeButtonAfterPressing: true,
             Icon: Watch,
           },
           {
             key: 'AddToMyList',
             text: (existInMyList ? 'Remove from' : 'Add to') + ' my list',
             onPress: addOrRemoveItemIdFromMyListHandler,
-            onFocus: () => console.log('Add to my list focus'),
             Icon: AddToMyList,
             hasTVPreferredFocus: showCountDownTimer,
           },
