@@ -458,6 +458,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
               onBlurRef.current = false;
               exitOfAppButtonGotFocus.current = true;
               setActiveMenuid('');
+              navigate('exit');
             }}
             styleFocused={styles.exitOfAppButtonActive}
             canCollapseNavMenu={false}
