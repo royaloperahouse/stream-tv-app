@@ -4,12 +4,12 @@ import React, {
   useLayoutEffect,
   useImperativeHandle,
   useState,
-  useCallback,
 } from 'react';
-import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 export type TExtrasInfoBlockRef = {
   setVideoInfo?: (
     info: Partial<{
@@ -23,7 +23,6 @@ type Props = {};
 
 const ExtrasInfoBlock = forwardRef<TExtrasInfoBlockRef, Props>((props, ref) => {
   const isMounted = useRef<boolean>(false);
-  const [showThreeDots, setShowThreeDots] = useState<boolean>(false);
   const [info, setInfo] = useState<
     Partial<{
       title: string;
@@ -42,14 +41,7 @@ const ExtrasInfoBlock = forwardRef<TExtrasInfoBlockRef, Props>((props, ref) => {
     }),
     [],
   );
-  const onLayoutEventHaandler = useCallback((event: LayoutChangeEvent) => {
-    event.stopPropagation();
-    event.persist();
-    const newstate = event.nativeEvent.layout.height >= scaleSize(550);
-    setShowThreeDots(prevState =>
-      prevState === newstate ? prevState : newstate,
-    );
-  }, []);
+
   useLayoutEffect(() => {
     isMounted.current = true;
     return () => {
@@ -58,7 +50,9 @@ const ExtrasInfoBlock = forwardRef<TExtrasInfoBlockRef, Props>((props, ref) => {
   }, []);
   return (
     <View style={styles.root}>
-      <View onLayout={onLayoutEventHaandler}>
+      <OverflowingContainer
+        contentMaxVisibleHeight={scaleSize(490)}
+        fixedHeight>
         {Boolean(info.title) && (
           <RohText style={styles.title}>{info.title}</RohText>
         )}
@@ -78,12 +72,7 @@ const ExtrasInfoBlock = forwardRef<TExtrasInfoBlockRef, Props>((props, ref) => {
             {info.descrription}
           </RohText>
         )}
-      </View>
-      {showThreeDots && (
-        <View style={styles.threeDotsContainer}>
-          <RohText style={styles.threeDotsText}>...</RohText>
-        </View>
-      )}
+      </OverflowingContainer>
     </View>
   );
 });
@@ -92,10 +81,6 @@ const styles = StyleSheet.create({
   root: {
     marginTop: scaleSize(146),
     marginRight: scaleSize(15),
-    maxHeight: scaleSize(490),
-    borderWidth: 1,
-    borderColor: 'transparent',
-    overflow: 'hidden',
   },
   title: {
     color: Colors.defaultTextColor,
@@ -116,18 +101,6 @@ const styles = StyleSheet.create({
     fontSize: scaleSize(22),
     textTransform: 'uppercase',
     lineHeight: scaleSize(28),
-    letterSpacing: scaleSize(2),
-  },
-  threeDotsContainer: {
-    position: 'absolute',
-    bottom: -scaleSize(5),
-    right: scaleSize(15),
-  },
-  threeDotsText: {
-    color: Colors.defaultTextColor,
-    fontSize: scaleSize(28),
-    textTransform: 'uppercase',
-    //lineHeight: scaleSize(8),
     letterSpacing: scaleSize(2),
   },
 });
