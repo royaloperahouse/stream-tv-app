@@ -1,5 +1,18 @@
-import React, { useState, useEffect, useRef, createRef } from 'react';
-import { View, StyleSheet, Dimensions, VirtualizedList } from 'react-native';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  createRef,
+  RefObject,
+  useCallback,
+} from 'react';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  VirtualizedList,
+  TouchableHighlight,
+} from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -11,6 +24,7 @@ import Prismic from '@prismicio/client';
 import ExtrasInfoBlock, {
   TExtrasInfoBlockRef,
 } from '../commonControls/ExtrasInfoBlock';
+import ExtrasVideoButton from '@components/EventDetailsComponents/commonControls/ExtrasVideoButton';
 import Player from '@components/Player';
 import { fetchVideoURL } from '@services/apiClient';
 import { goBackButtonuManager } from '@components/GoBack';
@@ -18,10 +32,6 @@ import {
   TBMPlayerShowingData,
   TBMPlayerErrorObject,
 } from '@services/types/bitmovinPlayer';
-import TouchableHighlightWrapper, {
-  TTouchableHighlightWrapperRef,
-} from '@components/TouchableHighlightWrapper';
-import FastImage from 'react-native-fast-image';
 import ScrollingPagination, {
   TScrolingPaginationRef,
 } from '@components/ScrollingPagination';
@@ -56,6 +66,9 @@ const Extras: React.FC<ExtrasProps> = ({
   const loaded = useRef<boolean>(false);
   const isMounted = useRef<boolean>(false);
   const loading = useRef<boolean>(false);
+  const extrasVideoInFocus = useRef<TouchableHighlight | null | undefined>(
+    null,
+  );
   const closePlayer = async (error: TBMPlayerErrorObject | null) => {
     if (!selectedVideo) {
       return;
@@ -70,14 +83,11 @@ const Extras: React.FC<ExtrasProps> = ({
               if (
                 videosRefs?.current[selectedVideo.videoId] !== undefined &&
                 typeof videosRefs.current[selectedVideo.videoId]?.current
-                  ?.getRef === 'function' &&
-                typeof videosRefs?.current[
-                  selectedVideo?.videoId
-                ].current?.getRef().current?.setNativeProps === 'function'
+                  ?.setNativeProps === 'function'
               ) {
-                videosRefs.current[selectedVideo.videoId].current
-                  ?.getRef()
-                  .current?.setNativeProps({ hasTVPreferredFocus: true });
+                videosRefs.current[
+                  selectedVideo.videoId
+                ].current.setNativeProps({ hasTVPreferredFocus: true });
               }
               goBackButtonuManager.showGoBackButton();
               setSelectedVideo(null);
@@ -94,14 +104,12 @@ const Extras: React.FC<ExtrasProps> = ({
     } else {
       if (
         videosRefs?.current[selectedVideo.videoId] !== undefined &&
-        typeof videosRefs.current[selectedVideo.videoId]?.current?.getRef ===
-          'function' &&
-        typeof videosRefs?.current[selectedVideo?.videoId].current?.getRef()
-          .current?.setNativeProps === 'function'
+        typeof videosRefs?.current[selectedVideo?.videoId].current
+          ?.setNativeProps === 'function'
       ) {
-        videosRefs.current[selectedVideo.videoId].current
-          ?.getRef()
-          .current?.setNativeProps({ hasTVPreferredFocus: true });
+        videosRefs.current[selectedVideo.videoId].current.setNativeProps({
+          hasTVPreferredFocus: true,
+        });
       }
       goBackButtonuManager.showGoBackButton();
       setSelectedVideo(null);
@@ -147,6 +155,10 @@ const Extras: React.FC<ExtrasProps> = ({
         loading.current = false;
       });
   });
+
+  const setExtrasrVideoBlur = useCallback(() => {
+    extrasVideoInFocus.current = null;
+  }, []);
 
   useEffect(() => {
     isMounted.current = true;
@@ -194,23 +206,22 @@ const Extras: React.FC<ExtrasProps> = ({
               [key: string]: any;
               item: any;
             }) => (
-              <TouchableHighlightWrapper
-                accessible={!selectedVideo}
+              <ExtrasVideoButton
+                uri={item.data.preview_image.url}
                 ref={
                   videosRefs.current[item.id]
                     ? videosRefs.current[item.id]
                     : (videosRefs.current[item.id] =
-                        createRef<TTouchableHighlightWrapperRef>())
+                        createRef<TouchableHighlight>())
                 }
-                style={[
+                containerStyle={[
                   styles.extrasGalleryItemContainer,
                   index === 0
                     ? styles.extrasGalleryFirstItemContainer
                     : styles.extrasGalleryOtherItemsContainer,
                 ]}
-                underlayColor={Colors.defaultBlue}
                 canMoveRight={index !== videosInfo.length - 1}
-                onPress={() => {
+                onPress={(_, clearLoadingState) => {
                   if (!isBMPlayerShowingRef.current) {
                     isBMPlayerShowingRef.current = true;
                     fetchVideoURL(item.id)
@@ -266,17 +277,13 @@ const Extras: React.FC<ExtrasProps> = ({
                                 if (
                                   videosRefs?.current[item.id] !== undefined &&
                                   typeof videosRefs.current[item.id]?.current
-                                    ?.getRef === 'function' &&
-                                  typeof videosRefs?.current[
-                                    item.id
-                                  ].current?.getRef().current
                                     ?.setNativeProps === 'function'
                                 ) {
-                                  videosRefs.current[item.id].current
-                                    ?.getRef()
-                                    .current?.setNativeProps({
-                                      hasTVPreferredFocus: true,
-                                    });
+                                  videosRefs.current[
+                                    item.id
+                                  ].current.setNativeProps({
+                                    hasTVPreferredFocus: true,
+                                  });
                                 }
                                 isBMPlayerShowingRef.current = false;
                                 showMoveToTopSectionButton();
@@ -286,10 +293,17 @@ const Extras: React.FC<ExtrasProps> = ({
                             subtitle: err.message,
                           },
                         });
+                      })
+                      .finally(() => {
+                        if (typeof clearLoadingState === 'function') {
+                          clearLoadingState();
+                        }
                       });
                   }
                 }}
-                onFocus={() => {
+                blurCallback={setExtrasrVideoBlur}
+                focusCallback={(ref?: RefObject<TouchableHighlight>) => {
+                  extrasVideoInFocus.current = ref?.current;
                   if (
                     typeof scrollingPaginationRef.current?.setCurrentIndex ===
                     'function'
@@ -346,13 +360,7 @@ const Extras: React.FC<ExtrasProps> = ({
                     });
                   }
                 }}
-                styleFocused={styles.extrasGalleryItemFocusedContainer}>
-                <FastImage
-                  style={styles.extrasGalleryItemImage}
-                  source={{ uri: item.data.preview_image.url }}
-                  resizeMode={FastImage.resizeMode.cover}
-                />
-              </TouchableHighlightWrapper>
+              />
             )}
           />
         </View>
@@ -437,14 +445,6 @@ const styles = StyleSheet.create({
   },
   extrasGalleryOtherItemsContainer: {
     marginLeft: scaleSize(20),
-  },
-  extrasGalleryItemFocusedContainer: {
-    backgroundColor: Colors.defaultBlue,
-  },
-  extrasGalleryItemImage: {
-    zIndex: 0,
-    width: scaleSize(749),
-    height: scaleSize(424),
   },
   list: {
     flex: 1,

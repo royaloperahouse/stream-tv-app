@@ -16,9 +16,12 @@ type TActionButton = {
   text: string;
   Icon: any;
   onPress: (...args: Array<any>) => void;
-  onFocus: (...args: Array<any>) => void;
+  onFocus?: (...args: Array<any>) => void;
+  onBlur?: (...args: Array<any>) => void;
   key: string;
   hasTVPreferredFocus?: boolean;
+  showLoader?: boolean;
+  freezeButtonAfterPressing?: boolean;
 };
 
 type ActionButtonListProps = {
@@ -86,7 +89,10 @@ const ActionButtonList = forwardRef<
           Icon={item.Icon}
           hasTVPreferredFocus={item.hasTVPreferredFocus || false}
           focusCallback={item.onFocus}
+          blurCallback={item.onBlur}
           onPress={item.onPress}
+          showLoader={item.showLoader}
+          freezeButtonAfterPressing={item.freezeButtonAfterPressing}
         />
       )}
       getItemCount={(data: Array<TActionButton>) => data?.length || 0}
