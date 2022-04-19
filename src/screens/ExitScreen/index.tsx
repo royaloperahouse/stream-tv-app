@@ -1,8 +1,7 @@
 import React from 'react';
-import WithBackground from '@components/WithBackground';
 
 type TExitScreenProps = {};
 
-const ExitScreen: React.FC<TExitScreenProps> = () => <WithBackground />;
+const ExitScreen: React.FC<TExitScreenProps> = () => null;
 
 export default ExitScreen;
