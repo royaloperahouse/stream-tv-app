@@ -198,7 +198,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   const exitOfAppButtonRef = useRef<TTouchableHighlightWrapperRef>(null);
   const dispatch = useDispatch();
   const exitOfApp = useCallback(
-    (isGlobakHandler?: boolean) => {
+    (isGlobalHandler?: boolean) => {
       globalModalManager.openModal({
         hasBackground: true,
         hasLogo: true,
@@ -209,14 +209,13 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
               dispatch(getEventListLoopStop());
               dispatch(endFullSubscriptionLoop());
               dispatch(endLoginLoop());
-              BackHandler.exitApp();
-              dispatch(clearAuthState());
               dispatch(clearEventState());
+              BackHandler.exitApp();
             });
           },
           rejectActionHandler: () => {
             globalModalManager.closeModal(() => {
-              if (isGlobakHandler) {
+              if (isGlobalHandler) {
                 return;
               }
               if (
