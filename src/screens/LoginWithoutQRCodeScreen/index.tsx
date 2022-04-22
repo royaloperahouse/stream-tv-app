@@ -20,6 +20,8 @@ const LoginWithoutQRCodeScreen: React.FC<TLoginScreenProps> = () => {
     shallowEqual,
   );
 
+  const defaultPinError = 'Sorry, there has been an error retrieving the pin code. Please try again later';
+
   return (
     <WithBackground>
       <WithLogo>
@@ -40,7 +42,9 @@ const LoginWithoutQRCodeScreen: React.FC<TLoginScreenProps> = () => {
                 {devicePin || 'Pin not found'}
               </RohText>
               <RohText style={styles.regular}>
-                {deviceAuthenticatedError}
+                {deviceAuthenticatedError === 'undefined'
+                  ? defaultPinError
+                  : deviceAuthenticatedError}
               </RohText>
             </View>
           </View>
