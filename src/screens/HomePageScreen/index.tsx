@@ -103,6 +103,19 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
   if (!data.length || !continueWatchingListEjected || !myListEjected) {
     return null;
   }
+
+  const hasTVPreferredFocus = (
+    isFirstRail: boolean,
+    index: number,
+    sectionIndex: number,
+  ) => {
+    return route.params === undefined || !route.params.fromEventDetails
+      ? isFirstRail && index === 0
+      : route.params.fromEventDetails &&
+          sectionIndex === route.params.sectionIndex &&
+          index === 0;
+  };
+
   return (
     <View style={styles.root}>
       <Preview ref={previewRef} />
@@ -133,13 +146,11 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
               ref={previewRef}
               screenNameFrom={route.name}
               canMoveUp={!isFirstRail}
-              hasTVPreferredFocus={
-                route.params === undefined
-                  ? isFirstRail && index === 0
-                  : route.params.fromEventDetails &&
-                    sectionIndex === route.params.sectionIndex &&
-                    index === 0
-              }
+              hasTVPreferredFocus={hasTVPreferredFocus(
+                isFirstRail,
+                index,
+                sectionIndex,
+              )}
               canMoveRight={index !== section.data.length - 1}
               canMoveDown={!isLastRail}
               onFocus={scrollToRail}
