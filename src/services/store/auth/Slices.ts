@@ -26,6 +26,9 @@ const initialState: AuthState = {
   userEmail: '',
 };
 
+const defaultPinError =
+  'Sorry, there has been an error retrieving the pin code. Please try again later';
+
 const appSlice = createSlice({
   name: 'auth',
   initialState,
@@ -56,7 +59,10 @@ const appSlice = createSlice({
     checkDeviceError: (state, { payload }) => {
       state.devicePin = payload?.detail || '';
       if (payload.status !== 401) {
-        state.errorString = `${payload.status} - ${payload?.title}`;
+        state.errorString =
+          payload.status || payload?.title
+            ? `${payload.status} - ${payload?.title}`
+            : defaultPinError;
       }
       state.isLoading = false;
       state.isLoaded = true;
