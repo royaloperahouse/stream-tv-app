@@ -91,6 +91,15 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
     };
   }, [dispatch]);
 
+  useLayoutEffect(() => {
+    if (
+      typeof previewRef.current?.setDigitalEvent === 'function' &&
+      data.length
+    ) {
+      previewRef.current?.setDigitalEvent(data[0]?.data[0]);
+    }
+  }, [data]);
+
   useFocusEffect(
     useCallback(() => {
       dispatch(startFullSubscriptionLoop());
@@ -109,7 +118,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
     index: number,
     sectionIndex: number,
   ) => {
-    return route.params === undefined || !route.params.fromEventDetails
+    return route.params === undefined
       ? isFirstRail && index === 0
       : route.params.fromEventDetails &&
           sectionIndex === route.params.sectionIndex &&
