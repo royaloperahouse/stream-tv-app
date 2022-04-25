@@ -5,6 +5,7 @@ import React, {
   useLayoutEffect,
   useRef,
   useCallback,
+  useEffect,
 } from 'react';
 import {
   View,
@@ -12,18 +13,18 @@ import {
   Animated,
   FlatList,
   SafeAreaView,
+  BackHandler,
 } from 'react-native';
-import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHandler';
 import { Colors, PlayerIcons } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 
 import ControlButton from './ControlButton';
 import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
 import RohText from '@components/RohText';
-import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import SubtitlesItem from './SubtitlesItem';
 import ArrowDropdown from '@assets/svg/player/ArrowDropdownForPlayer.svg';
 import { ESeekOperations } from '@configs/playerConfig';
+import { TVEventManager } from '@services/tvRCEventListener';
 
 type TPlayerControlsProps = {
   duration: number;
@@ -72,7 +73,7 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       calculateTimeForSeeking,
       seekTo,
     } = props;
-    const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
+    const otherRCTVEvents = useRef<Array<(_: any, event: any) => void>>([]);
     const activeAnimation = useRef<Animated.Value>(
       new Animated.Value(0),
     ).current;
@@ -93,7 +94,8 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
     const seekUpdatingOnDevice = useRef<boolean>(false);
     const startPointForSeek = useRef<number>(0.0);
     const seekOperation = useRef<ESeekOperations>(ESeekOperations.fastForward);
-    const exitButtonRef = useRef<any>();
+    const exitButtonRef = useRef<null | TTouchableHighlightWrapperRef>(null);
+    const restartButtonRef = useRef<null | TTouchableHighlightWrapperRef>(null);
     const focusToSutitleButton = useCallback(() => {
       if (
         typeof subtitleButtonRef.current?.getRef === 'function' &&
@@ -218,194 +220,200 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       }
     }, [autoPlay && playerLoaded]);
 
-    useLayoutEffect(() => {
-      tvEventHandler.current?.enable(null, (_: any, eve: any) => {
-        if (eve?.eventType === 'blur' || eve?.eventType === 'focus') {
-          return;
-        }
-        if (eve.eventKeyAction === 0) {
-          switch (eve.eventType) {
-            case 'select': {
-              if (
-                eve.target === centralControlsRef.current?.getFwdNode() &&
-                seekUpdatingOnDevice.current === false &&
-                (seekOperation.current === ESeekOperations.fastForward ||
-                  seekQueueuBusy.current === false)
-              ) {
+    useEffect(() => {
+      otherRCTVEvents.current = TVEventManager.getEventListeners();
+      return () => {
+        TVEventManager.setEventListeners(otherRCTVEvents.current);
+      };
+    }, []);
+
+    useEffect(() => {
+      TVEventManager.setEventListeners([
+        (_: any, eve: any) => {
+          if (eve?.eventType === 'blur' || eve?.eventType === 'focus') {
+            return;
+          }
+          if (eve.eventKeyAction === 0) {
+            switch (eve.eventType) {
+              case 'select': {
+                if (
+                  eve.target === centralControlsRef.current?.getFwdNode() &&
+                  seekUpdatingOnDevice.current === false &&
+                  (seekOperation.current === ESeekOperations.fastForward ||
+                    seekQueueuBusy.current === false)
+                ) {
+                  seekQueueuBusy.current = true;
+                  countOfFastForwardClicks.current++;
+                  seekOperation.current = ESeekOperations.fastForward;
+                  break;
+                }
+                if (
+                  eve.target === centralControlsRef.current?.getRwdNode() &&
+                  seekUpdatingOnDevice.current === false &&
+                  (seekOperation.current === ESeekOperations.rewind ||
+                    seekQueueuBusy.current === false)
+                ) {
+                  seekQueueuBusy.current = true;
+                  countOfRewindClicks.current++;
+                  seekOperation.current = ESeekOperations.rewind;
+                  break;
+                }
+                break;
+              }
+              case 'fastForward': {
+                if (
+                  seekUpdatingOnDevice.current ||
+                  (seekOperation.current !== ESeekOperations.fastForward &&
+                    seekQueueuBusy.current)
+                ) {
+                  break;
+                }
                 seekQueueuBusy.current = true;
                 countOfFastForwardClicks.current++;
                 seekOperation.current = ESeekOperations.fastForward;
                 break;
               }
-              if (
-                eve.target === centralControlsRef.current?.getRwdNode() &&
-                seekUpdatingOnDevice.current === false &&
-                (seekOperation.current === ESeekOperations.rewind ||
-                  seekQueueuBusy.current === false)
-              ) {
+              case 'rewind': {
+                if (
+                  seekUpdatingOnDevice.current ||
+                  (seekOperation.current !== ESeekOperations.rewind &&
+                    seekQueueuBusy.current)
+                ) {
+                  break;
+                }
                 seekQueueuBusy.current = true;
                 countOfRewindClicks.current++;
                 seekOperation.current = ESeekOperations.rewind;
                 break;
               }
-              break;
-            }
-            case 'fastForward': {
-              if (
-                seekUpdatingOnDevice.current ||
-                (seekOperation.current !== ESeekOperations.fastForward &&
-                  seekQueueuBusy.current)
-              ) {
+              default:
                 break;
-              }
-              seekQueueuBusy.current = true;
-              countOfFastForwardClicks.current++;
-              seekOperation.current = ESeekOperations.fastForward;
-              break;
             }
-            case 'rewind': {
-              if (
-                seekUpdatingOnDevice.current ||
-                (seekOperation.current !== ESeekOperations.rewind &&
-                  seekQueueuBusy.current)
-              ) {
-                break;
-              }
-              seekQueueuBusy.current = true;
-              countOfRewindClicks.current++;
-              seekOperation.current = ESeekOperations.rewind;
-              break;
-            }
-            default:
-              break;
           }
-        }
 
-        if (eve.eventKeyAction === 1) {
-          switch (eve.eventType) {
-            case 'select': {
-              if (
-                eve.target === centralControlsRef.current?.getFwdNode() &&
-                countOfFastForwardClicks.current &&
-                seekOperation.current === ESeekOperations.fastForward
-              ) {
-                seekUpdatingOnDevice.current = true;
-                const timeForSeeking: number = calculateTimeForSeeking(
-                  startPointForSeek.current,
-                  countOfFastForwardClicks.current,
-                  seekOperation.current,
-                );
-                if (timeForSeeking === -1) {
-                  countOfFastForwardClicks.current = 0;
-                  seekUpdatingOnDevice.current = false;
-                  seekQueueuBusy.current = false;
+          if (eve.eventKeyAction === 1) {
+            switch (eve.eventType) {
+              case 'select': {
+                if (
+                  eve.target === centralControlsRef.current?.getFwdNode() &&
+                  countOfFastForwardClicks.current &&
+                  seekOperation.current === ESeekOperations.fastForward
+                ) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfFastForwardClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfFastForwardClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
                   break;
                 }
-                seekTo(timeForSeeking);
+                if (
+                  eve.target === centralControlsRef.current?.getRwdNode() &&
+                  countOfRewindClicks.current &&
+                  seekOperation.current === ESeekOperations.rewind
+                ) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfRewindClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfRewindClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
+                }
                 break;
               }
-              if (
-                eve.target === centralControlsRef.current?.getRwdNode() &&
-                countOfRewindClicks.current &&
-                seekOperation.current === ESeekOperations.rewind
-              ) {
-                seekUpdatingOnDevice.current = true;
-                const timeForSeeking: number = calculateTimeForSeeking(
-                  startPointForSeek.current,
-                  countOfRewindClicks.current,
-                  seekOperation.current,
-                );
-                if (timeForSeeking === -1) {
-                  countOfRewindClicks.current = 0;
-                  seekUpdatingOnDevice.current = false;
-                  seekQueueuBusy.current = false;
-                  break;
+              case 'fastForward': {
+                if (countOfFastForwardClicks.current) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfFastForwardClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfFastForwardClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
                 }
-                seekTo(timeForSeeking);
+                break;
               }
-              break;
-            }
-            case 'fastForward': {
-              if (countOfFastForwardClicks.current) {
-                seekUpdatingOnDevice.current = true;
-                const timeForSeeking: number = calculateTimeForSeeking(
-                  startPointForSeek.current,
-                  countOfFastForwardClicks.current,
-                  seekOperation.current,
-                );
-                if (timeForSeeking === -1) {
-                  countOfFastForwardClicks.current = 0;
-                  seekUpdatingOnDevice.current = false;
-                  seekQueueuBusy.current = false;
-                  break;
+              case 'rewind': {
+                if (countOfRewindClicks.current) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfRewindClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfRewindClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
                 }
-                seekTo(timeForSeeking);
+                break;
               }
-              break;
-            }
-            case 'rewind': {
-              if (countOfRewindClicks.current) {
-                seekUpdatingOnDevice.current = true;
-                const timeForSeeking: number = calculateTimeForSeeking(
-                  startPointForSeek.current,
-                  countOfRewindClicks.current,
-                  seekOperation.current,
-                );
-                if (timeForSeeking === -1) {
-                  countOfRewindClicks.current = 0;
-                  seekUpdatingOnDevice.current = false;
-                  seekQueueuBusy.current = false;
-                  break;
-                }
-                seekTo(timeForSeeking);
+              case 'playPause': {
+                const currentPlayerAction = isPlayingRef.current
+                  ? onPausePress
+                  : onPlayPress;
+                currentPlayerAction();
+                break;
               }
-              break;
+              default:
+                break;
             }
-            case 'playPause': {
-              const currentPlayerAction = isPlayingRef.current
-                ? onPausePress
-                : onPlayPress;
-              currentPlayerAction();
-              break;
-            }
-            default:
-              break;
           }
-        }
 
-        if (eve.eventKeyAction === 0) {
-          Animated.timing(activeAnimation, {
-            toValue: 1,
-            useNativeDriver: true,
-            duration: 500,
-          }).start(({ finished }) => {
-            if (!finished) {
-              activeAnimation.setValue(1);
-            }
-            controlPanelVisibleRef.current = true;
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            timeoutRef.current = setTimeout(() => {
-              if (!isPlayingRef.current) {
-                return;
+          if (eve.eventKeyAction === 0) {
+            Animated.timing(activeAnimation, {
+              toValue: 1,
+              useNativeDriver: true,
+              duration: 500,
+            }).start(({ finished }) => {
+              if (!finished) {
+                activeAnimation.setValue(1);
               }
-              Animated.timing(activeAnimation, {
-                toValue: 0,
-                useNativeDriver: true,
-                duration: 500,
-              }).start(({ finished: animationFinished }) => {
-                if (animationFinished) {
-                  controlPanelVisibleRef.current = false;
+              controlPanelVisibleRef.current = true;
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
+              timeoutRef.current = setTimeout(() => {
+                if (!isPlayingRef.current) {
+                  return;
                 }
-              });
-            }, 5000);
-          });
-        }
-      });
-      return () => {
-        tvEventHandler?.current.disable();
-      };
+                Animated.timing(activeAnimation, {
+                  toValue: 0,
+                  useNativeDriver: true,
+                  duration: 500,
+                }).start(({ finished: animationFinished }) => {
+                  if (animationFinished) {
+                    controlPanelVisibleRef.current = false;
+                  }
+                });
+              }, 5000);
+            });
+          }
+        },
+      ]);
     }, [onPausePress, onPlayPress, calculateTimeForSeeking, seekTo]);
 
     useLayoutEffect(() => {
@@ -455,15 +463,18 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               text="Exit"
               canMoveLeft={false}
               canMoveUp={false}
+              nextFocusRight={restartButtonRef.current?.getNode?.()}
               nextFocusDown={centralControlsRef.current?.getRwdNode()}
               getControlPanelVisible={getControlPanelVisible}
             />
             <ControlButton
+              ref={restartButtonRef}
               icon={PlayerIcons.restart}
               onPress={onRestartPress}
               text="Restart"
               canMoveRight={false}
               canMoveUp={false}
+              nextFocusLeft={exitButtonRef?.current?.getNode?.()}
               getControlPanelVisible={getControlPanelVisible}
               nextFocusDown={centralControlsRef.current?.getRwdNode()}
             />
@@ -491,12 +502,9 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
               onPlayPress={onPlayPress}
               ref={centralControlsRef}
               hasSubtitles={hasSubtitles}
-              exitButtonNode={
-                exitButtonRef.current?.getNode
-                  ? exitButtonRef.current.getNode()
-                  : undefined
-              }
+              exitButtonNode={exitButtonRef.current?.getNode?.()}
               getControlPanelVisible={getControlPanelVisible}
+              subtitlesButtonNode={subtitleButtonRef.current?.getNode?.()}
             />
             <View style={styles.rightControls}>
               {hasSubtitles && (
@@ -507,11 +515,8 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
                   getControlPanelVisible={getControlPanelVisible}
                   canMoveRight={false}
                   canMoveDown={false}
-                  nextFocusUp={
-                    exitButtonRef.current?.getNode
-                      ? exitButtonRef.current.getNode()
-                      : undefined
-                  }
+                  nextFocusUp={exitButtonRef.current?.getNode?.()}
+                  nextFocusLeft={centralControlsRef.current?.getFwdNode?.()}
                 />
               )}
             </View>
@@ -691,13 +696,23 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
     subtitlesMountedRef.current = true;
   }, []);
 
-  useAndroidBackHandler(() => {
-    if (showList) {
-      hideSubtitles();
-      return true;
-    }
-    return false;
-  });
+  useEffect(() => {
+    const handleBackButtonClick = () => {
+      if (showList) {
+        hideSubtitles();
+        return true;
+      }
+      return false;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, [showList, hideSubtitles]);
+
   return (
     <SafeAreaView style={styles.subtitlesContainer}>
       <Animated.View
@@ -761,6 +776,7 @@ type TCentralControlsProps = {
   getControlPanelVisible: () => boolean;
   hasSubtitles: boolean;
   exitButtonNode?: number;
+  subtitlesButtonNode?: number;
 };
 type TCentralControlsRef = {
   setPlay: (play: boolean) => void;
@@ -775,11 +791,13 @@ const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
       getControlPanelVisible,
       hasSubtitles,
       exitButtonNode,
+      subtitlesButtonNode,
     } = props;
     const centralControlsMounted = useRef<boolean>(false);
     const [isPlaying, setPlaying] = useState(false);
     const fwdRef = useRef<TTouchableHighlightWrapperRef | null>(null);
     const rwdRef = useRef<TTouchableHighlightWrapperRef | null>(null);
+    const playRef = useRef<TTouchableHighlightWrapperRef | null>(null);
 
     useImperativeHandle(
       ref,
@@ -823,22 +841,28 @@ const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
           getControlPanelVisible={getControlPanelVisible}
           canMoveDown={false}
           canMoveLeft={false}
+          nextFocusRight={playRef.current?.getNode?.()}
           nextFocusUp={exitButtonNode}
         />
         <ControlButton
+          ref={playRef}
           icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
           onPress={isPlaying ? onPausePress : onPlayPress}
           hasTVPreferredFocus
           getControlPanelVisible={getControlPanelVisible}
           canMoveDown={false}
           nextFocusUp={exitButtonNode}
+          nextFocusLeft={rwdRef.current?.getNode?.()}
+          nextFocusRight={fwdRef.current?.getNode?.()}
         />
         <ControlButton
           ref={fwdRef}
           icon={PlayerIcons.seekForward}
           getControlPanelVisible={getControlPanelVisible}
           canMoveDown={false}
+          nextFocusLeft={playRef.current?.getNode?.()}
           canMoveRight={hasSubtitles}
+          nextFocusRight={subtitlesButtonNode}
           nextFocusUp={exitButtonNode}
         />
       </View>

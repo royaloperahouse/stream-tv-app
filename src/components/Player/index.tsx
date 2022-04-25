@@ -4,6 +4,7 @@ import React, {
   useRef,
   useCallback,
   useEffect,
+  useMemo,
 } from 'react';
 import {
   SafeAreaView,
@@ -18,8 +19,8 @@ import {
   AppStateStatus,
   AppState,
   View,
+  BackHandler,
 } from 'react-native';
-import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import PlayerControls, { TPlayerControlsRef } from './PlayerControls';
 import {
   TBitmoviPlayerNativeProps,
@@ -31,7 +32,7 @@ import { ESeekOperations } from '@configs/playerConfig';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 
-let NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
+const NativeBitMovinPlayer: HostComponent<TBitmoviPlayerNativeProps> =
   requireNativeComponent('ROHBitMovinPlayer');
 
 const ROHBitmovinPlayerModule = NativeModules.ROHBitMovinPlayerControl;
@@ -81,7 +82,7 @@ type TOnDestoyPayload = {
   time: string;
 };
 
-type TPlayerProps = {
+export type TPlayerProps = {
   autoPlay?: boolean;
   style?: ViewProps['style'];
   onEvent?: (event: any) => void;
@@ -111,7 +112,7 @@ type TPlayerProps = {
     customData7?: string;
   };
   guidance?: string;
-  guidanceDetails?: Array<any>;
+  guidanceDetails?: string;
 };
 
 const Player: React.FC<TPlayerProps> = props => {
@@ -398,10 +399,20 @@ const Player: React.FC<TPlayerProps> = props => {
       ),
     [],
   );
-  useAndroidBackHandler(() => {
-    actionClose();
-    return true;
-  });
+
+  useEffect(() => {
+    const handleBackButtonClick = () => {
+      actionClose();
+      return true;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, [actionClose]);
 
   return (
     <SafeAreaView style={styles.defaultPlayerStyle}>
@@ -415,7 +426,7 @@ const Player: React.FC<TPlayerProps> = props => {
       {!playerReady && (
         <SafeAreaView style={styles.overlayOuter}>
           <View style={[styles.overlayContainer]}>
-            {guidance && (
+            {Boolean(guidance) ? (
               <View style={styles.guidanceContainer}>
                 <RohText
                   style={styles.guidanceTitle}
@@ -429,15 +440,13 @@ const Player: React.FC<TPlayerProps> = props => {
                   ellipsizeMode="tail">
                   {guidance}
                 </RohText>
-                {guidanceDetails && (
+                {Boolean(guidanceDetails) ? (
                   <RohText style={styles.guidanceSubTitle}>
-                    {guidanceDetails.map(
-                      guidanceDetail => `${guidanceDetail.text}\n`,
-                    )}
+                    {guidanceDetails}
                   </RohText>
-                )}
+                ) : null}
               </View>
-            )}
+            ) : null}
             <View style={styles.titleContainer}>
               <RohText
                 style={styles.title}

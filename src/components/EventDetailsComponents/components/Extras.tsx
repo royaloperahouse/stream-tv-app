@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useRef,
   createRef,
-  RefObject,
   useCallback,
 } from 'react';
 import {
@@ -25,18 +24,15 @@ import ExtrasInfoBlock, {
   TExtrasInfoBlockRef,
 } from '../commonControls/ExtrasInfoBlock';
 import ExtrasVideoButton from '@components/EventDetailsComponents/commonControls/ExtrasVideoButton';
-import Player from '@components/Player';
 import { fetchVideoURL } from '@services/apiClient';
 import { goBackButtonuManager } from '@components/GoBack';
-import {
-  TBMPlayerShowingData,
-  TBMPlayerErrorObject,
-} from '@services/types/bitmovinPlayer';
 import ScrollingPagination, {
   TScrolingPaginationRef,
 } from '@components/ScrollingPagination';
 import { globalModalManager } from '@components/GlobalModal';
 import { ErrorModal } from '@components/GlobalModal/variants';
+import { useFocusEffect } from '@react-navigation/native';
+import { TVEventManager } from '@services/tvRCEventListener';
 
 type ExtrasProps = {
   event: TEventContainer;
@@ -45,6 +41,9 @@ type ExtrasProps = {
   screenName: string;
   showMoveToTopSectionButton: () => void;
   hideMoveToTopSectionButton: () => void;
+  closePlayer: (...args: any[]) => void;
+  openPlayer: (...args: any[]) => void;
+  closeModal: (...args: any[]) => void;
 };
 const Extras: React.FC<ExtrasProps> = ({
   event,
@@ -53,6 +52,9 @@ const Extras: React.FC<ExtrasProps> = ({
   screenName,
   showMoveToTopSectionButton,
   hideMoveToTopSectionButton,
+  closePlayer,
+  openPlayer,
+  closeModal,
 }) => {
   const videosRefs = useRef<{
     [key: string]: any;
@@ -61,62 +63,26 @@ const Extras: React.FC<ExtrasProps> = ({
   const isBMPlayerShowingRef = useRef<boolean>(false);
   const extrasInfoBlockRef = useRef<TExtrasInfoBlockRef>(null);
   const [videosInfo, setVideosInfo] = useState<Array<Document>>([]);
-  const [selectedVideo, setSelectedVideo] =
-    useState<TBMPlayerShowingData | null>(null);
   const loaded = useRef<boolean>(false);
   const isMounted = useRef<boolean>(false);
   const loading = useRef<boolean>(false);
-  const extrasVideoInFocus = useRef<TouchableHighlight | null | undefined>(
+  const extrasVideoInFocusRef = useRef<TouchableHighlight | null | undefined>(
     null,
   );
-  const closePlayer = async (error: TBMPlayerErrorObject | null) => {
-    if (!selectedVideo) {
-      return;
-    }
-
-    if (error) {
-      globalModalManager.openModal({
-        contentComponent: ErrorModal,
-        contentProps: {
-          confirmActionHandler: () => {
-            globalModalManager.closeModal(() => {
-              if (
-                videosRefs?.current[selectedVideo.videoId] !== undefined &&
-                typeof videosRefs.current[selectedVideo.videoId]?.current
-                  ?.setNativeProps === 'function'
-              ) {
-                videosRefs.current[
-                  selectedVideo.videoId
-                ].current.setNativeProps({ hasTVPreferredFocus: true });
-              }
-              goBackButtonuManager.showGoBackButton();
-              setSelectedVideo(null);
-              isBMPlayerShowingRef.current = false;
-              showMoveToTopSectionButton();
-            });
-          },
-          title: 'Player Error',
-          subtitle: `Something went wrong.\n${error.errCode}: ${
-            error.errMessage
-          }\n${error.url || ''}`,
-        },
-      });
-    } else {
-      if (
-        videosRefs?.current[selectedVideo.videoId] !== undefined &&
-        typeof videosRefs?.current[selectedVideo?.videoId].current
-          ?.setNativeProps === 'function'
-      ) {
-        videosRefs.current[selectedVideo.videoId].current.setNativeProps({
-          hasTVPreferredFocus: true,
-        });
-      }
-      goBackButtonuManager.showGoBackButton();
-      setSelectedVideo(null);
+  const extrasVideoInFocus = useRef<any | null>(null);
+  const extrasVideoInFocusPressing = useRef<{
+    pressingHandler: () => void;
+  } | null>(null);
+  const closeModalCB = useCallback(
+    (...rest: any[]) => {
+      closeModal(...rest);
       isBMPlayerShowingRef.current = false;
+      goBackButtonuManager.showGoBackButton();
       showMoveToTopSectionButton();
-    }
-  };
+    },
+    [showMoveToTopSectionButton, closeModal],
+  );
+
   useEffect(() => {
     if (loaded.current || loading.current) {
       return;
@@ -156,8 +122,96 @@ const Extras: React.FC<ExtrasProps> = ({
       });
   });
 
+  const pressHandler = useCallback(
+    (ref, clearLoadingState) => {
+      if (!isBMPlayerShowingRef.current && extrasVideoInFocus.current) {
+        isBMPlayerShowingRef.current = true;
+        fetchVideoURL(extrasVideoInFocus.current.id)
+          .then(response => {
+            if (!response?.data?.data?.attributes?.hlsManifestUrl) {
+              throw new Error('Something went wrong');
+            }
+            const videoTitle =
+              extrasVideoInFocus.current.data.video_title.reduce(
+                (acc: string, title: any, i: number) => {
+                  if (title.text) {
+                    title.type === 'paragraph'
+                      ? title.text + '\n'
+                      : i > 0
+                      ? ' ' + title.text
+                      : title.text;
+                  }
+                  return acc;
+                },
+                '',
+              );
+
+            const subtitle =
+              extrasVideoInFocus.current.data.participant_details.reduce(
+                (acc: string, participant_detail: any, i: number) => {
+                  if (participant_detail.text) {
+                    acc +=
+                      participant_detail.type === 'paragraph'
+                        ? participant_detail.text + '\n'
+                        : i > 0
+                        ? ' ' + participant_detail.text
+                        : participant_detail.text;
+                  }
+                  return acc;
+                },
+                '',
+              );
+            hideMoveToTopSectionButton();
+            openPlayer({
+              url: response.data.data.attributes.hlsManifestUrl,
+              poster:
+                'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+              title: videoTitle,
+              subtitle,
+              onClose: closePlayer({
+                eventId: event.id,
+                clearLoadingState,
+                ref,
+                closeModalCB,
+              }),
+            });
+          })
+          .catch(err => {
+            globalModalManager.openModal({
+              contentComponent: ErrorModal,
+              contentProps: {
+                confirmActionHandler: () => {
+                  globalModalManager.closeModal(() => {
+                    closeModalCB(ref, clearLoadingState);
+                  });
+                },
+                title: 'Player Error',
+                subtitle: err.message,
+              },
+            });
+          })
+          .finally(() => {
+            if (typeof clearLoadingState === 'function') {
+              clearLoadingState();
+            }
+          });
+      } else {
+        clearLoadingState();
+      }
+    },
+    [
+      closeModalCB,
+      closePlayer,
+      event.id,
+      openPlayer,
+      hideMoveToTopSectionButton,
+    ],
+  );
+
   const setExtrasrVideoBlur = useCallback(() => {
+    extrasVideoInFocusRef.current = null;
     extrasVideoInFocus.current = null;
+    extrasVideoInFocusPressing.current = null;
   }, []);
 
   useEffect(() => {
@@ -167,16 +221,32 @@ const Extras: React.FC<ExtrasProps> = ({
     };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const cb = (_: any, eve: any) => {
+        if (
+          eve?.eventType !== 'playPause' ||
+          eve.eventKeyAction === 0 ||
+          typeof extrasVideoInFocusPressing.current?.pressingHandler !==
+            'function'
+        ) {
+          return;
+        }
+        extrasVideoInFocusPressing.current.pressingHandler();
+      };
+      TVEventManager.addEventListener(cb);
+      return () => {
+        TVEventManager.removeEventListener(cb);
+      };
+    }, []),
+  );
+
   if (!videosInfo.length) {
     return null;
   }
 
   return (
-    <View
-      style={[
-        styles.generalContainer,
-        selectedVideo ? { width: Dimensions.get('window').width } : {},
-      ]}>
+    <View style={[styles.generalContainer]}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
       </View>
@@ -221,89 +291,13 @@ const Extras: React.FC<ExtrasProps> = ({
                     : styles.extrasGalleryOtherItemsContainer,
                 ]}
                 canMoveRight={index !== videosInfo.length - 1}
-                onPress={(_, clearLoadingState) => {
-                  if (!isBMPlayerShowingRef.current) {
-                    isBMPlayerShowingRef.current = true;
-                    fetchVideoURL(item.id)
-                      .then(response => {
-                        if (!response?.data?.data?.attributes?.hlsManifestUrl) {
-                          throw new Error('Something went wrong');
-                        }
-                        goBackButtonuManager.hideGoBackButton();
-                        hideMoveToTopSectionButton();
-                        setSelectedVideo({
-                          videoId: item.id,
-                          eventId: event.id,
-                          url: response.data.data.attributes.hlsManifestUrl,
-                          title: item.data.video_title.reduce(
-                            (acc: string, title: any, i: number) => {
-                              if (title.text) {
-                                title.type === 'paragraph'
-                                  ? title.text + '\n'
-                                  : i > 0
-                                  ? ' ' + title.text
-                                  : title.text;
-                              }
-                              return acc;
-                            },
-                            '',
-                          ),
-                          subtitle: item.data.participant_details.reduce(
-                            (
-                              acc: string,
-                              participant_detail: any,
-                              i: number,
-                            ) => {
-                              if (participant_detail.text) {
-                                acc +=
-                                  participant_detail.type === 'paragraph'
-                                    ? participant_detail.text + '\n'
-                                    : i > 0
-                                    ? ' ' + participant_detail.text
-                                    : participant_detail.text;
-                              }
-                              return acc;
-                            },
-                            '',
-                          ),
-                        });
-                      })
-                      .catch(err => {
-                        globalModalManager.openModal({
-                          contentComponent: ErrorModal,
-                          contentProps: {
-                            confirmActionHandler: () => {
-                              globalModalManager.closeModal(() => {
-                                if (
-                                  videosRefs?.current[item.id] !== undefined &&
-                                  typeof videosRefs.current[item.id]?.current
-                                    ?.setNativeProps === 'function'
-                                ) {
-                                  videosRefs.current[
-                                    item.id
-                                  ].current.setNativeProps({
-                                    hasTVPreferredFocus: true,
-                                  });
-                                }
-                                isBMPlayerShowingRef.current = false;
-                                showMoveToTopSectionButton();
-                              });
-                            },
-                            title: 'Player Error',
-                            subtitle: err.message,
-                          },
-                        });
-                      })
-                      .finally(() => {
-                        if (typeof clearLoadingState === 'function') {
-                          clearLoadingState();
-                        }
-                      });
-                  }
-                }}
+                onPress={pressHandler}
                 blurCallback={setExtrasrVideoBlur}
-                focusCallback={(ref?: RefObject<TouchableHighlight>) => {
-                  extrasVideoInFocus.current = ref?.current;
+                focusCallback={(pressingHandler?: () => void) => {
+                  extrasVideoInFocus.current = item;
+                  if (pressingHandler) {
+                    extrasVideoInFocusPressing.current = { pressingHandler };
+                  }
                   if (
                     typeof scrollingPaginationRef.current?.setCurrentIndex ===
                     'function'
@@ -371,33 +365,6 @@ const Extras: React.FC<ExtrasProps> = ({
             ref={scrollingPaginationRef}
             countOfItems={videosInfo.length}
             alignHorizontal="flex-start"
-          />
-        </View>
-      )}
-      {selectedVideo && (
-        <View style={StyleSheet.absoluteFillObject}>
-          <Player
-            autoPlay
-            configuration={{
-              url: selectedVideo.url,
-              offset: '0.0',
-            }}
-            title={selectedVideo.title}
-            subtitle={selectedVideo.subtitle}
-            onClose={closePlayer}
-            analytics={{
-              videoId: selectedVideo.videoId,
-              title: selectedVideo.title,
-              userId: '',
-              experiment: '',
-              customData1: '',
-              customData2: '',
-              customData3: '',
-              customData4: '',
-              customData5: '',
-              customData6: '',
-              customData7: '',
-            }}
           />
         </View>
       )}
