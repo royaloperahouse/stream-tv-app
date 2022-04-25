@@ -15,7 +15,7 @@ export type TGlobalModalConfig = {
   hasLogo?: boolean;
   hasBackground?: boolean;
   backgroundImageUrl?: string;
-  contentComponent: React.FC<TGlobalModalContentProps>;
+  contentComponent: React.FC<TGlobalModalContentProps | any>;
   contentProps: TGlobalModalContentProps;
 };
 const globalModalRef = createRef<

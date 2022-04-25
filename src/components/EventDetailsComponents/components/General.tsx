@@ -48,28 +48,33 @@ import {
   resumeRollbackTime,
   minResumeTime,
 } from '@configs/bitMovinPlayerConfig';
-import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHandler';
+import { TVEventManager } from '@services/tvRCEventListener';
 import { promiseWait } from '@utils/promiseWait';
 import { needSubscribedModeInfoUpdateSelector } from '@services/store/auth/Selectors';
 import { shallowEqual, useSelector } from 'react-redux';
 import moment from 'moment';
 import CountDown from '@components/EventDetailsComponents/commonControls/CountDown';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import { Colors } from '@themes/Styleguide';
 import { OverflowingContainer } from '@components/OverflowingContainer';
+import {
+  removeBitMovinSavedPositionByIdAndEventId,
+  savePosition,
+} from '@services/bitMovinPlayer';
 
 export type TGeneralRef = Partial<{ focusOnFirstAvalibleButton: () => void }>;
 
 type Props = {
   event: TEventContainer;
   nextScreenText: string;
-  isBMPlayerShowing: boolean;
   continueWatching: boolean;
-  showPlayer: (...args: any[]) => void;
+  closePlayer: (...args: any[]) => void;
+  openPlayer: (...args: any[]) => void;
+  closeModal: (...args: any[]) => void;
 };
 
 const General = forwardRef<TGeneralRef, Props>(
-  ({ event, showPlayer, continueWatching }, ref) => {
+  ({ event, continueWatching, closePlayer, openPlayer, closeModal }, ref) => {
     const isFocused = useIsFocused();
     const nowDate = moment.utc(moment());
     const [closeCountDown, setCloseCountDown] = useState(false);
@@ -85,13 +90,12 @@ const General = forwardRef<TGeneralRef, Props>(
       !closeCountDown &&
       publishingDate.isValid() &&
       publishingDate.isAfter(nowDate);
-    const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
     const performanceVideoInFocus = useRef<
-      TouchableHighlight | null | undefined
+      { pressingHandler: () => void } | null | undefined
     >(null);
-    const trailerVideoInFocus = useRef<TouchableHighlight | null | undefined>(
-      null,
-    );
+    const trailerVideoInFocus = useRef<
+      { pressingHandler: () => void } | null | undefined
+    >(null);
     const generalMountedRef = useRef<boolean | undefined>(false);
     const addOrRemoveBusyRef = useRef<boolean>(true);
     const watchNowButtonRef = useRef<TActionButtonListRef>(null);
@@ -102,7 +106,7 @@ const General = forwardRef<TGeneralRef, Props>(
       shallowEqual,
     );
     const [showContinueWatching, setShowContinueWatching] =
-      useState<boolean>(false);
+      useState<boolean>(continueWatching);
     const [hideWatchTrailerButton, setHideWatchTrailerButton] =
       useState<boolean>(true);
     const title: string =
@@ -132,12 +136,23 @@ const General = forwardRef<TGeneralRef, Props>(
       ({ video }) => video.id,
     );
     const vs_guidance = get(event.data, 'vs_guidance', '');
-    const vs_guidance_details = get(event.data, 'vs_guidance_details', []);
+    const vs_guidance_details =
+      get(event.data, 'vs_guidance_details', [])?.reduce(
+        (acc: string, guidance_detail: any, i: number) => {
+          if (guidance_detail.text) {
+            acc +=
+              guidance_detail.type === 'paragraph'
+                ? guidance_detail.text + '\n'
+                : i > 0
+                ? ' ' + guidance_detail.text
+                : guidance_detail.text;
+          }
+          return acc;
+        },
+        '',
+      ) || '';
 
-    const updateContinueWatching = async () => {
-      if (continueWatching) {
-        return;
-      }
+    const setContinueWatching = async () => {
       try {
         const videoFromPrismic = needSubscribedModeInfoUpdate
           ? await getAccessToWatchVideo(
@@ -162,16 +177,30 @@ const General = forwardRef<TGeneralRef, Props>(
           videoFromPrismic?.id || '',
           event.id,
         );
-        if (
-          videoPositionInfo !== null &&
-          parseInt(videoPositionInfo.position) > minResumeTime &&
-          generalMountedRef &&
-          generalMountedRef.current
-        ) {
-          setShowContinueWatching(true);
+        if (!generalMountedRef.current) {
+          return;
         }
-      } catch (err: any) {}
+
+        setShowContinueWatching(videoPositionInfo !== null);
+      } catch (err: any) {
+        setShowContinueWatching(false);
+      }
     };
+
+    const savePositionCB = useCallback(async ({ time, videoId, eventId }) => {
+      const floatTime = parseFloat(time);
+      if (isNaN(floatTime) || floatTime < minResumeTime) {
+        await removeBitMovinSavedPositionByIdAndEventId(videoId, eventId);
+        setShowContinueWatching(false);
+      } else {
+        await savePosition({
+          id: videoId,
+          position: time,
+          eventId,
+        });
+        setShowContinueWatching(true);
+      }
+    }, []);
 
     const getPerformanceVideoUrl = useCallback(
       async (
@@ -221,11 +250,9 @@ const General = forwardRef<TGeneralRef, Props>(
             videoFromPrismic.id,
             event.id,
           );
-          if (
-            videoPositionInfo &&
-            videoPositionInfo?.position &&
-            parseInt(videoPositionInfo?.position) > minResumeTime
-          ) {
+          const videoTitle =
+            videoFromPrismic.data?.video_title[0]?.text || title || '';
+          if (videoPositionInfo && videoPositionInfo?.position) {
             const fromTime = new Date(0);
             const intPosition = parseInt(videoPositionInfo.position);
             const rolledBackPos = intPosition - resumeRollbackTime;
@@ -234,71 +261,77 @@ const General = forwardRef<TGeneralRef, Props>(
               contentComponent: СontinueWatchingModal,
               contentProps: {
                 confirmActionHandler: () => {
-                  globalModalManager.closeModal(() => {
-                    showPlayer({
+                  openPlayer({
+                    url: manifestInfo.data.data.attributes.hlsManifestUrl,
+                    poster:
+                      'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+                    offset: rolledBackPos.toString(),
+                    title: videoTitle,
+                    onClose: closePlayer({
+                      savePositionCB,
                       videoId: videoFromPrismic.id,
-                      url: manifestInfo.data.data.attributes.hlsManifestUrl,
-                      title:
-                        videoFromPrismic.data?.video_title[0]?.text ||
-                        title ||
-                        '',
-                      poster:
-                        'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                      subtitle: '',
-                      position: rolledBackPos.toString(),
                       eventId: event.id,
-                      savePosition: true,
-                    });
+                      clearLoadingState,
+                      ref,
+                    }),
+                    analytics: {
+                      videoId: videoFromPrismic.id,
+                      title: videoTitle,
+                    },
+                    guidance: vs_guidance,
+                    guidanceDetails: vs_guidance_details,
                   });
                 },
                 rejectActionHandler: () => {
-                  globalModalManager.closeModal(() => {
-                    showPlayer({
+                  openPlayer({
+                    url: manifestInfo.data.data.attributes.hlsManifestUrl,
+                    poster:
+                      'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+                    title: videoTitle,
+                    onClose: closePlayer({
+                      savePositionCB,
                       videoId: videoFromPrismic.id,
-                      url: manifestInfo.data.data.attributes.hlsManifestUrl,
-                      title:
-                        videoFromPrismic.data?.video_title[0]?.text ||
-                        title ||
-                        '',
-                      poster:
-                        'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-                      subtitle: '',
-                      position: '0.0',
                       eventId: event.id,
-                      savePosition: true,
-                    });
+                      clearLoadingState,
+                      ref,
+                    }),
+                    analytics: {
+                      videoId: videoFromPrismic.id,
+                      title: videoTitle,
+                    },
+                    guidance: vs_guidance,
+                    guidanceDetails: vs_guidance_details,
                   });
                 },
                 cancelActionHandler: () => {
                   globalModalManager.closeModal(() => {
-                    if (typeof clearLoadingState === 'function') {
-                      clearLoadingState();
-                    }
-                    if (typeof ref?.current?.setNativeProps === 'function') {
-                      ref.current.setNativeProps({
-                        hasTVPreferredFocus: true,
-                      });
-                    }
+                    closeModal(ref, clearLoadingState);
                   });
                 },
-                videoTitle: title,
+                videoTitle: videoTitle,
                 fromTime: fromTime.toISOString().substr(11, 8),
               },
             });
             return;
           }
-          globalModalManager.closeModal(() => {
-            showPlayer({
+          openPlayer({
+            url: manifestInfo.data.data.attributes.hlsManifestUrl,
+            poster:
+              'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
+            title: videoTitle,
+            onClose: closePlayer({
+              savePositionCB,
               videoId: videoFromPrismic.id,
-              url: manifestInfo.data.data.attributes.hlsManifestUrl,
-              title: videoFromPrismic.data?.video_title[0]?.text || title || '',
-              poster:
-                'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-              subtitle: '',
-              position: '0.0',
               eventId: event.id,
-              savePosition: true,
-            });
+              clearLoadingState,
+              ref,
+            }),
+            analytics: {
+              videoId: videoFromPrismic.id,
+              title: videoTitle,
+            },
+            guidance: vs_guidance,
+            guidanceDetails: vs_guidance_details,
           });
         } catch (err: any) {
           globalModalManager.openModal({
@@ -309,14 +342,7 @@ const General = forwardRef<TGeneralRef, Props>(
             contentProps: {
               confirmActionHandler: () => {
                 globalModalManager.closeModal(() => {
-                  if (typeof clearLoadingState === 'function') {
-                    clearLoadingState();
-                  }
-                  if (typeof ref?.current?.setNativeProps === 'function') {
-                    ref.current.setNativeProps({
-                      hasTVPreferredFocus: true,
-                    });
-                  }
+                  closeModal(ref, clearLoadingState);
                 });
               },
               title:
@@ -335,7 +361,18 @@ const General = forwardRef<TGeneralRef, Props>(
           });
         }
       },
-      [event.id, showPlayer, title, videos, needSubscribedModeInfoUpdate],
+      [
+        closePlayer,
+        event.id,
+        needSubscribedModeInfoUpdate,
+        openPlayer,
+        title,
+        videos,
+        vs_guidance,
+        vs_guidance_details,
+        savePositionCB,
+        closeModal,
+      ],
     );
 
     const getTrailerVideoUrl = async (
@@ -361,15 +398,18 @@ const General = forwardRef<TGeneralRef, Props>(
         if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
           throw new Error('Something went wrong');
         }
-        showPlayer({
-          videoId: videoFromPrismic.id,
+        const videoTitle =
+          videoFromPrismic.data?.video_title[0]?.text || title || '';
+        openPlayer({
           url: manifestInfo.data.data.attributes.hlsManifestUrl,
-          title: videoFromPrismic.data?.video_title[0]?.text || title || '',
           poster:
             'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
-          subtitle: '',
-          eventId: event.id,
-          position: '0.0',
+          title: videoTitle,
+          onClose: closePlayer({
+            eventId: event.id,
+            clearLoadingState,
+            ref,
+          }),
         });
       } catch (err: any) {
         globalModalManager.openModal({
@@ -377,12 +417,7 @@ const General = forwardRef<TGeneralRef, Props>(
           contentProps: {
             confirmActionHandler: () => {
               globalModalManager.closeModal(() => {
-                if (typeof clearLoadingState === 'function') {
-                  clearLoadingState();
-                }
-                if (typeof ref?.current?.setNativeProps === 'function') {
-                  ref.current.setNativeProps({ hasTVPreferredFocus: true });
-                }
+                closeModal(ref, clearLoadingState);
               });
             },
             title: 'Player Error',
@@ -413,14 +448,14 @@ const General = forwardRef<TGeneralRef, Props>(
     };
 
     const setPerformanceVideoInFocus = useCallback(
-      (ref?: RefObject<TouchableHighlight>) => {
-        performanceVideoInFocus.current = ref?.current;
+      (pressingHandler: () => void) => {
+        performanceVideoInFocus.current = { pressingHandler };
       },
       [],
     );
     const setTrailerVideoInFocus = useCallback(
-      (ref?: RefObject<TouchableHighlight>) => {
-        trailerVideoInFocus.current = ref?.current;
+      (pressingHandler: () => void) => {
+        trailerVideoInFocus.current = { pressingHandler };
       },
       [],
     );
@@ -442,9 +477,7 @@ const General = forwardRef<TGeneralRef, Props>(
             ref?: React.RefObject<TouchableHighlight> | undefined,
             clearLoadingState?: () => void,
           ) => Promise<void> | void;
-          onFocus?: (
-            ref?: React.RefObject<TouchableHighlight> | undefined,
-          ) => void;
+          onFocus?: (pressingHandler: () => void) => void;
           onBlur?: () => void;
           Icon: any;
           showLoader?: boolean;
@@ -575,28 +608,33 @@ const General = forwardRef<TGeneralRef, Props>(
     }, []);
 
     useEffect(() => {
-      updateContinueWatching();
+      setContinueWatching();
       showWatchTrailerButton();
     }, []);
 
-    /* todo disable tvEventHandler on section blur and enable when section in focus
-
-  useLayoutEffect(() => {
-    tvEventHandler.current?.enable(null, async (_: any, eve: any) => {
-      if (eve?.eventType !== 'playPause' || showCountDownTimer) {
-        return;
-      }
-      if (eve.eventKeyAction === 1) {
-        tvEventFireCounter.current = 0;
-        await getPerformanceVideoUrl(watchNowButtonRef);
-        return;
-      }
-      tvEventFireCounter.current += 1;
-    });
-    return () => {
-      tvEventHandler?.current.disable();
-    };
-  }, [getPerformanceVideoUrl, showCountDownTimer]); */
+    useFocusEffect(
+      useCallback(() => {
+        const cb = (_: any, eve: any) => {
+          if (eve?.eventType !== 'playPause' || eve.eventKeyAction === 0) {
+            return;
+          }
+          if (
+            typeof performanceVideoInFocus?.current?.pressingHandler ===
+            'function'
+          ) {
+            performanceVideoInFocus.current.pressingHandler();
+          } else if (
+            typeof trailerVideoInFocus?.current?.pressingHandler === 'function'
+          ) {
+            trailerVideoInFocus.current.pressingHandler();
+          }
+        };
+        TVEventManager.addEventListener(cb);
+        return () => {
+          TVEventManager.removeEventListener(cb);
+        };
+      }, []),
+    );
 
     return (
       <View style={styles.generalContainer}>
@@ -612,23 +650,9 @@ const General = forwardRef<TGeneralRef, Props>(
               {Boolean(vs_guidance) && (
                 <RohText style={styles.description}>{vs_guidance}</RohText>
               )}
-              {Array.isArray(vs_guidance_details) &&
-              vs_guidance_details.length ? (
+              {vs_guidance_details.length ? (
                 <RohText style={styles.description}>
-                  {vs_guidance_details.reduce(
-                    (acc: string, guidance_detail: any, i: number) => {
-                      if (guidance_detail.text) {
-                        acc +=
-                          guidance_detail.type === 'paragraph'
-                            ? guidance_detail.text + '\n'
-                            : i > 0
-                            ? ' ' + guidance_detail.text
-                            : guidance_detail.text;
-                      }
-                      return acc;
-                    },
-                    '',
-                  )}
+                  {vs_guidance_details}
                 </RohText>
               ) : null}
             </OverflowingContainer>

@@ -17,7 +17,7 @@ import Spinner from 'react-native-spinkit';
 type Props = {
   Icon: any;
   text: string;
-  focusCallback?: (val?: RefObject<TouchableHighlight>) => void;
+  focusCallback?: (pressingHandler?: () => void) => void;
   blurCallback?: () => void;
   onPress?: (
     val?: RefObject<TouchableHighlight>,
@@ -47,13 +47,29 @@ const ExpandableButton = forwardRef<any, Props>(
     const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
     const isMounted = useRef<boolean>(false);
     const clearLoadingState = () => {
-      if (freezeButton) {
-        setFreezeButton(false);
+      setFreezeButton(false);
+      setLoading(false);
+    };
+
+    const pressingHandler = () => {
+      if (isMounted.current && showLoader) {
+        setLoading(true);
       }
-      if (loading) {
-        setLoading(false);
+      if (isMounted.current && freezeButtonAfterPressing) {
+        setFreezeButton(true);
+      }
+      if (typeof onPress === 'function') {
+        onPress(
+          typeof buttonRef.current?.getRef === 'function'
+            ? buttonRef.current.getRef()
+            : undefined,
+          showLoader || freezeButtonAfterPressing
+            ? clearLoadingState
+            : undefined,
+        );
       }
     };
+
     useLayoutEffect(() => {
       if (ref !== null && typeof buttonRef.current?.getRef === 'function') {
         ref.current = buttonRef.current.getRef().current;
@@ -83,29 +99,10 @@ const ExpandableButton = forwardRef<any, Props>(
           }}
           onFocus={() => {
             if (typeof focusCallback === 'function') {
-              focusCallback(
-                typeof buttonRef.current?.getRef === 'function'
-                  ? buttonRef.current.getRef()
-                  : undefined,
-              );
+              focusCallback(pressingHandler);
             }
           }}
-          onPress={() => {
-            if (isMounted.current && showLoader) {
-              setLoading(true);
-            }
-            if (isMounted.current && freezeButtonAfterPressing) {
-              setFreezeButton(true);
-            }
-            if (typeof onPress === 'function') {
-              onPress(
-                typeof buttonRef.current?.getRef === 'function'
-                  ? buttonRef.current.getRef()
-                  : undefined,
-                clearLoadingState,
-              );
-            }
-          }}>
+          onPress={pressingHandler}>
           <View style={styles.wrapper}>
             {Icon && <Icon width={scaleSize(40)} height={scaleSize(40)} />}
             {

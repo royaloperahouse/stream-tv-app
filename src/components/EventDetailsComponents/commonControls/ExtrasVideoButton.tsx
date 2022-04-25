@@ -15,7 +15,7 @@ import Spinner from 'react-native-spinkit';
 import FastImage from 'react-native-fast-image';
 
 type Props = {
-  focusCallback?: (val?: RefObject<TouchableHighlight>) => void;
+  focusCallback?: (pressingHandler?: () => void) => void;
   blurCallback?: () => void;
   onPress?: (
     val?: RefObject<TouchableHighlight>,
@@ -51,6 +51,23 @@ const ExtrasVideoButton = forwardRef<any, Props>(
         setLoading(false);
       }
     };
+    const pressingHandler = () => {
+      if (isMounted.current) {
+        setLoading(true);
+      }
+      if (isMounted.current) {
+        setFreezeButton(true);
+      }
+      if (typeof onPress === 'function') {
+        onPress(
+          typeof buttonRef.current?.getRef === 'function'
+            ? buttonRef.current.getRef()
+            : undefined,
+          clearLoadingState,
+        );
+      }
+    };
+
     useLayoutEffect(() => {
       if (ref !== null && typeof buttonRef.current?.getRef === 'function') {
         ref.current = buttonRef.current.getRef().current;
@@ -80,29 +97,10 @@ const ExtrasVideoButton = forwardRef<any, Props>(
         }}
         onFocus={() => {
           if (typeof focusCallback === 'function') {
-            focusCallback(
-              typeof buttonRef.current?.getRef === 'function'
-                ? buttonRef.current.getRef()
-                : undefined,
-            );
+            focusCallback(pressingHandler);
           }
         }}
-        onPress={() => {
-          if (isMounted.current) {
-            setLoading(true);
-          }
-          if (isMounted.current) {
-            setFreezeButton(true);
-          }
-          if (typeof onPress === 'function') {
-            onPress(
-              typeof buttonRef.current?.getRef === 'function'
-                ? buttonRef.current.getRef()
-                : undefined,
-              clearLoadingState,
-            );
-          }
-        }}>
+        onPress={pressingHandler}>
         <View>
           <FastImage
             style={styles.extrasGalleryItemImage}
