@@ -21,6 +21,8 @@ type Props = {
   canMoveDown?: boolean | undefined;
   nextFocusDown?: number;
   nextFocusUp?: number;
+  nextFocusLeft?: number;
+  nextFocusRight?: number;
 };
 
 const ControlButton = forwardRef<any, Props>((props, ref) => {
@@ -38,6 +40,8 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
     canMoveDown,
     nextFocusDown,
     nextFocusUp,
+    nextFocusLeft,
+    nextFocusRight
   } = props;
   const onFocusHandler = () => {
     setFocus(true);
@@ -72,6 +76,8 @@ const ControlButton = forwardRef<any, Props>((props, ref) => {
         onFocus={onFocusHandler}
         nextFocusDown={nextFocusDown}
         nextFocusUp={nextFocusUp}
+        nextFocusLeft={nextFocusLeft}
+        nextFocusRight={nextFocusRight}
         onBlur={onBlurHandler}
         onPress={onPressHandler}>
         <View style={styles.wrapper}>

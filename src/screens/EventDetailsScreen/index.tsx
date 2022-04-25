@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
 import {
   View,
@@ -14,76 +14,27 @@ import collectionOfEventDetailsSections, {
   TGeneralRef,
 } from '@configs/eventDetailsConfig';
 import GoBack from '@components/GoBack';
-import Player from '@components/Player';
-import {
-  removeBitMovinSavedPositionByIdAndEventId,
-  savePosition,
-} from '@services/bitMovinPlayer';
-import {
-  TBMPlayerShowingData,
-  TBMPlayerErrorObject,
-} from '@services/types/bitmovinPlayer';
 
 import { useFocusEffect } from '@react-navigation/native';
-import { globalModalManager } from '@components/GlobalModal';
-import { ErrorModal } from '@components/GlobalModal/variants';
 import MoveToTopSectionButton, {
   TMoveToTopSectionButtonRef,
 } from '@components/EventDetailsComponents/commonControls/MoveToTopSectionButton';
 import { scaleSize } from '@utils/scaleSize';
-
+import { goBackButtonuManager } from '@components/GoBack';
+import { globalModalManager } from '@components/GlobalModal';
+import { ErrorModal, PlayerModal } from '@components/GlobalModal/variants';
+import { TBMPlayerErrorObject } from '@services/types/bitmovinPlayer';
 type TEventDetailsScreenProps = StackScreenProps<
-  { eventDetails: { event: TEventContainer } },
+  { eventDetails: { event: TEventContainer; continueWatching?: boolean } },
   'eventDetails'
 >;
 
 const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
-  const [bMPlayerShowingData, setIsBMPlayerShowing] =
-    useState<TBMPlayerShowingData | null>(null);
-  const [bMPlayerError, setBMPlayerError] =
-    useState<TBMPlayerErrorObject | null>(null);
-  const isBMPlayerShowingRef = useRef<boolean>(false);
   const { event, continueWatching } = route.params;
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
-  const showPlayer = useCallback((playerItem: TBMPlayerShowingData) => {
-    if (!isBMPlayerShowingRef.current && eventDetailsScreenMounted.current) {
-      setIsBMPlayerShowing(playerItem);
-      isBMPlayerShowingRef.current = true;
-    }
-  }, []);
   const generalSectionRef = useRef<TGeneralRef>(null);
   const moveToTopSectionButtonRef = useRef<TMoveToTopSectionButtonRef>(null);
-  const closePlayer = async (
-    error: TBMPlayerErrorObject | null,
-    time: string,
-  ) => {
-    if (bMPlayerShowingData === null) {
-      return;
-    }
-    const floatTime = parseFloat(time);
-    if (bMPlayerShowingData.savePosition) {
-      if (isNaN(floatTime) || floatTime === 0.0) {
-        await removeBitMovinSavedPositionByIdAndEventId(
-          bMPlayerShowingData.videoId,
-          bMPlayerShowingData.eventId,
-        );
-      } else {
-        await savePosition({
-          id: bMPlayerShowingData.videoId,
-          position: time,
-          eventId: bMPlayerShowingData.eventId,
-        });
-      }
-    }
-
-    if (error) {
-      setBMPlayerError(error);
-      return;
-    }
-    setIsBMPlayerShowing(null);
-    isBMPlayerShowingRef.current = false;
-  };
 
   const moveToTopSectionCB = useCallback(() => {
     if (typeof VirtualizedListRef.current?.scrollToOffset === 'function') {
@@ -124,6 +75,93 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
     }
   }, []);
 
+  const openPlayer = useCallback(
+    ({
+      url,
+      poster = '',
+      offset = '0.0',
+      title: playerTitle = '',
+      subtitle = '',
+      onClose = () => {},
+      analytics = {},
+      guidance = '',
+      guidanceDetails = [],
+    }) => {
+      goBackButtonuManager.hideGoBackButton();
+      globalModalManager.openModal({
+        contentComponent: PlayerModal,
+        contentProps: {
+          autoPlay: true,
+          configuration: {
+            url,
+            poster,
+            offset,
+          },
+          title: playerTitle,
+          subtitle,
+          onClose,
+          analytics,
+          guidance,
+          guidanceDetails,
+        },
+      });
+    },
+    [],
+  );
+
+  const closeModal = useCallback((ref, clearLoadingState) => {
+    if (typeof ref?.current?.setNativeProps === 'function') {
+      ref.current.setNativeProps({
+        hasTVPreferredFocus: true,
+      });
+    }
+    goBackButtonuManager.showGoBackButton();
+    if (typeof clearLoadingState === 'function') {
+      clearLoadingState();
+    }
+  }, []);
+
+  const closePlayer = useCallback(
+    ({
+        savePositionCB,
+        videoId,
+        eventId,
+        ref,
+        clearLoadingState,
+        closeModalCB = closeModal,
+      }) =>
+      async (error: TBMPlayerErrorObject | null, time: string) => {
+        if (typeof savePositionCB === 'function') {
+          await savePositionCB({ time, videoId, eventId });
+        }
+        if (error) {
+          globalModalManager.openModal({
+            contentComponent: ErrorModal,
+            contentProps: {
+              confirmActionHandler: () => {
+                globalModalManager.closeModal(() => {
+                  if (typeof closeModalCB === 'function') {
+                    closeModalCB(ref, clearLoadingState);
+                  }
+                });
+              },
+              title: 'Player Error',
+              subtitle: `Something went wrong.\n${error.errCode}: ${
+                error.errMessage
+              }\n${error.url || ''}`,
+            },
+          });
+        } else {
+          globalModalManager.closeModal(() => {
+            if (typeof closeModalCB === 'function') {
+              closeModalCB(ref, clearLoadingState);
+            }
+          });
+        }
+      },
+    [closeModal],
+  );
+
   const sectionsFactory = useCallback(
     (item: TEventDetailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
@@ -136,11 +174,12 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
             <Component
               key={item?.key || index}
               event={event}
-              showPlayer={showPlayer}
-              continueWatching={continueWatching}
-              isBMPlayerShowing={bMPlayerShowingData !== null}
+              continueWatching={Boolean(continueWatching)}
               nextScreenText={item.nextSectionTitle}
               ref={generalSectionRef}
+              openPlayer={openPlayer}
+              closePlayer={closePlayer}
+              closeModal={closeModal}
             />
           );
         }
@@ -154,34 +193,25 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               setScreenAvailabilety={setScreenAvailabilety}
               hideMoveToTopSectionButton={hideMoveToTopSectionButton}
               showMoveToTopSectionButton={showMoveToTopSectionButton}
+              openPlayer={openPlayer}
+              closePlayer={closePlayer}
+              closeModal={closeModal}
             />
           );
         }
       }
     },
-    [bMPlayerShowingData, event, showPlayer],
+    [
+      event,
+      continueWatching,
+      hideMoveToTopSectionButton,
+      setScreenAvailabilety,
+      showMoveToTopSectionButton,
+      closePlayer,
+      openPlayer,
+      closeModal,
+    ],
   );
-
-  useLayoutEffect(() => {
-    if (bMPlayerError) {
-      globalModalManager.openModal({
-        contentComponent: ErrorModal,
-        contentProps: {
-          confirmActionHandler: () => {
-            setIsBMPlayerShowing(null);
-            isBMPlayerShowingRef.current = false;
-            globalModalManager.closeModal(() => {
-              setBMPlayerError(null);
-            });
-          },
-          title: 'Player Error',
-          subtitle: `Something went wrong.\n${bMPlayerError.errCode}: ${
-            bMPlayerError.errMessage
-          }\n${bMPlayerError.url || ''}`,
-        },
-      });
-    }
-  }, [bMPlayerError]);
 
   useFocusEffect(
     useCallback(() => {
@@ -194,36 +224,6 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
     }, []),
   );
 
-  if (bMPlayerShowingData !== null) {
-    return (
-      <Player
-        autoPlay
-        configuration={{
-          url: bMPlayerShowingData.url,
-          poster: bMPlayerShowingData.poster,
-          offset: bMPlayerShowingData.position || '0.0',
-        }}
-        title={bMPlayerShowingData.title}
-        subtitle={bMPlayerShowingData.subtitle}
-        onClose={closePlayer}
-        analytics={{
-          videoId: bMPlayerShowingData.videoId,
-          title: bMPlayerShowingData.title,
-          userId: '',
-          experiment: '',
-          customData1: '',
-          customData2: '',
-          customData3: '',
-          customData4: '',
-          customData5: '',
-          customData6: '',
-          customData7: '',
-        }}
-        guidance={event.data.vs_guidance}
-        guidanceDetails={event.data.vs_guidance_details}
-      />
-    );
-  }
   return (
     <View style={styles.rootContainer}>
       <GoBack />

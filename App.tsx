@@ -33,7 +33,12 @@ const App: React.FC<TAppProps> = () => {
   return (
     <Provider store={store}>
       <FlagsProvider
-        features={{ hasOpera: false, canExit: true, showLiveStream: false, hasQRCode: false }}>
+        features={{
+          hasOpera: false,
+          canExit: true,
+          showLiveStream: false,
+          hasQRCode: false,
+        }}>
         <AppLayout />
       </FlagsProvider>
     </Provider>
