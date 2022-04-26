@@ -59,9 +59,10 @@ const appSlice = createSlice({
     checkDeviceError: (state, { payload }) => {
       state.devicePin = payload?.detail || '';
       if (payload.status !== 401) {
-        state.errorString = `${payload.status} - ${
-          payload?.title ? payload.title : defaultPinError
-        }`;
+        state.errorString =
+          payload.status && payload.title
+            ? `${payload.status} - ${payload.title}`
+            : defaultPinError;
       }
       state.isLoading = false;
       state.isLoaded = true;
