@@ -284,12 +284,13 @@ const Extras: React.FC<ExtrasProps> = ({
                     : (videosRefs.current[item.id] =
                         createRef<TouchableHighlight>())
                 }
-                containerStyle={[
-                  styles.extrasGalleryItemContainer,
-                  index === 0
-                    ? styles.extrasGalleryFirstItemContainer
-                    : styles.extrasGalleryOtherItemsContainer,
-                ]}
+                paddingLeft={index === 0 ? scaleSize(147) : scaleSize(10)}
+                paddingRight={
+                  videosInfo.length > 0 && index === videosInfo.length - 1
+                    ? scaleSize(147)
+                    : scaleSize(10)
+                }
+                containerStyle={[styles.extrasGalleryItemContainer]}
                 canMoveRight={index !== videosInfo.length - 1}
                 onPress={pressHandler}
                 blurCallback={setExtrasrVideoBlur}

@@ -88,6 +88,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
               onFocus={scrollToRail}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
+              lastItem={index === section.data.length - 1}
             />
           )}
         />

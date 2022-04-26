@@ -25,6 +25,8 @@ type Props = {
   uri: string;
   containerStyle: any;
   canMoveRight: boolean;
+  paddingLeft: number;
+  paddingRight: number;
 };
 
 const ExtrasVideoButton = forwardRef<any, Props>(
@@ -37,6 +39,8 @@ const ExtrasVideoButton = forwardRef<any, Props>(
       uri,
       containerStyle,
       canMoveRight,
+      paddingLeft,
+      paddingRight,
     },
     ref: any,
   ) => {
@@ -44,6 +48,7 @@ const ExtrasVideoButton = forwardRef<any, Props>(
     const [freezeButton, setFreezeButton] = useState<boolean>(false);
     const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
     const isMounted = useRef<boolean>(false);
+    const [focused, setFocused] = useState(false);
 
     const clearLoadingState = () => {
       if (isMounted.current) {
@@ -86,22 +91,30 @@ const ExtrasVideoButton = forwardRef<any, Props>(
         canMoveUp={!freezeButton}
         canMoveLeft={!freezeButton}
         hasTVPreferredFocus={hasTVPreferredFocus}
-        style={containerStyle}
-        underlayColor={Colors.defaultBlue}
+        style={[{ paddingLeft, paddingRight }]}
         canMoveRight={!freezeButton && canMoveRight}
-        styleFocused={styles.extrasGalleryItemFocusedContainer}
         onBlur={() => {
+          if (isMounted.current) {
+            setFocused(false);
+          }
           if (typeof blurCallback === 'function') {
             blurCallback();
           }
         }}
         onFocus={() => {
+          if (isMounted.current) {
+            setFocused(true);
+          }
           if (typeof focusCallback === 'function') {
             focusCallback(pressingHandler);
           }
         }}
         onPress={pressingHandler}>
-        <View>
+        <View
+          style={[
+            containerStyle,
+            focused ? styles.extrasGalleryItemFocusedContainer : {},
+          ]}>
           <FastImage
             style={styles.extrasGalleryItemImage}
             source={{ uri }}

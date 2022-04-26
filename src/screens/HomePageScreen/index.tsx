@@ -166,6 +166,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
               continueWatching={section.title === continueWatchingRailTitle}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
+              lastItem={index === section.data.length - 1}
             />
           )}
         />

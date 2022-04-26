@@ -91,6 +91,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
               canMoveRight={index !== section.data.length - 1}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
+              lastItem={index === section.data.length - 1}
             />
           )}
         />

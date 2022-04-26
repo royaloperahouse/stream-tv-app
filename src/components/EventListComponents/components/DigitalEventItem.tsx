@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
@@ -27,6 +27,7 @@ type DigitalEventItemProps = {
   screenNameFrom?: string;
   eventGroupTitle?: string;
   selectedItemIndex?: number;
+  lastItem?: boolean;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -43,11 +44,14 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       sectionIndex,
       canMoveDown = true,
       selectedItemIndex,
+      lastItem = false,
     },
     ref: any,
   ) => {
     const navigation = useNavigation();
     const route = useRoute();
+    const isMounted = useRef(false);
+    const [focused, setFocused] = useState(false);
     const snapshotImageUrl: string = get(
       event.data,
       ['vs_event_image', 'wide_event_image', 'url'],
@@ -85,38 +89,58 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
         }),
       );
     };
+
+    useLayoutEffect(() => {
+      isMounted.current = true;
+      return () => {
+        isMounted.current = false;
+      };
+    }, []);
+
     return (
-      <View style={styles.container}>
-        <TouchableHighlightWrapper
-          underlayColor={Colors.defaultBlue}
-          hasTVPreferredFocus={hasTVPreferredFocus}
-          canMoveUp={canMoveUp}
-          canMoveDown={canMoveDown}
-          canMoveRight={canMoveRight}
-          styleFocused={styles.imageContainerActive}
-          style={styles.imageContainer}
-          onFocus={() => {
-            ref?.current?.setDigitalEvent(event, eventGroupTitle);
-            navMenuManager.setNavMenuAccessible();
-            if (typeof onFocus === 'function') {
-              onFocus();
-            }
-            if (route.params?.fromEventDetails) {
-              navigation.setParams({
-                ...route.params,
-                fromEventDetails: false,
-              });
-            }
-          }}
-          onPress={onPressHandler}>
-          <FastImage
-            resizeMode={FastImage.resizeMode.cover}
-            style={styles.image}
-            source={{ uri: snapshotImageUrl }}
-          />
-        </TouchableHighlightWrapper>
-        <RohText style={styles.title}>{eventTitle}</RohText>
-      </View>
+      <TouchableHighlightWrapper
+        hasTVPreferredFocus={hasTVPreferredFocus}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        canMoveRight={canMoveRight}
+        style={[lastItem ? styles.containeForListItem : styles.container]}
+        onBlur={() => {
+          if (isMounted.current) {
+            setFocused(false);
+          }
+        }}
+        onFocus={() => {
+          if (isMounted.current) {
+            setFocused(true);
+          }
+          ref?.current?.setDigitalEvent(event, eventGroupTitle);
+          navMenuManager.setNavMenuAccessible();
+          if (typeof onFocus === 'function') {
+            onFocus();
+          }
+          if (route.params?.fromEventDetails) {
+            navigation.setParams({
+              ...route.params,
+              fromEventDetails: false,
+            });
+          }
+        }}
+        onPress={onPressHandler}>
+        <View style={styles.container}>
+          <View
+            style={[
+              styles.imageContainer,
+              focused ? styles.imageContainerActive : {},
+            ]}>
+            <FastImage
+              resizeMode={FastImage.resizeMode.cover}
+              style={styles.image}
+              source={{ uri: snapshotImageUrl }}
+            />
+          </View>
+          <RohText style={styles.title}>{eventTitle}</RohText>
+        </View>
+      </TouchableHighlightWrapper>
     );
   },
 );
@@ -125,6 +149,11 @@ const styles = StyleSheet.create({
   container: {
     width: scaleSize(377),
     minHeight: scaleSize(262),
+  },
+  containeForListItem: {
+    width: scaleSize(397),
+    minHeight: scaleSize(262),
+    paddingRight: scaleSize(20),
   },
   title: {
     color: 'white',
@@ -139,10 +168,7 @@ const styles = StyleSheet.create({
     height: scaleSize(220),
   },
   imageContainerActive: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: scaleSize(377),
-    height: scaleSize(220),
+    backgroundColor: Colors.defaultBlue,
   },
   image: {
     width: scaleSize(357),
