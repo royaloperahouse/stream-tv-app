@@ -9,6 +9,7 @@ import ScrollingPagination, {
   TScrolingPaginationRef,
 } from '@components/ScrollingPagination';
 import FastImage from 'react-native-fast-image';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 
 export enum ECellItemKey {
   'guidance' = 'guidance',
@@ -119,17 +120,30 @@ const MultiColumnAboutProductionList: React.FC<
   }
   if (splitedItems.length < 3) {
     return (
-      <TouchableHighlightWrapper>
+      <TouchableHighlightWrapper canMoveRight={false}>
         <View style={[styles.towColumnsList, { height: columnHeight }]}>
-          {splitedItems.map((column, index) => (
-            <View style={styles.columnContainer} key={index}>
-              {column.map((ceil: any) => (
-                <View style={styles.elementContainer} key={ceil.key}>
-                  {contentItemsFabric(ceil)}
-                </View>
-              ))}
-            </View>
-          ))}
+          {splitedItems.map((column, index) =>
+            column.needToWrap ? (
+              <OverflowingContainer
+                fixedHeight
+                contentMaxVisibleHeight={columnHeight}
+                contentMaxVisibleWidth={columnWidth}>
+                {column.items.map((ceil: any) => (
+                  <View style={styles.elementContainer} key={ceil.key}>
+                    {contentItemsFabric(ceil)}
+                  </View>
+                ))}
+              </OverflowingContainer>
+            ) : (
+              <View style={styles.columnContainer} key={index}>
+                {column.items.map((ceil: any) => (
+                  <View style={styles.elementContainer} key={ceil.key}>
+                    {contentItemsFabric(ceil)}
+                  </View>
+                ))}
+              </View>
+            ),
+          )}
         </View>
       </TouchableHighlightWrapper>
     );
@@ -154,7 +168,10 @@ const MultiColumnAboutProductionList: React.FC<
           index,
         }: {
           [key: string]: any;
-          item: TMultiColumnAboutProductionListProps['data'];
+          item: {
+            items: TMultiColumnAboutProductionListProps['data'];
+            needToWrap: boolean;
+          };
         }) => (
           <TouchableHighlightWrapper
             style={[styles.column, { height: columnHeight }]}
@@ -168,13 +185,26 @@ const MultiColumnAboutProductionList: React.FC<
               }
             }}
             styleFocused={styles.columnInFocus}>
-            <View style={styles.columnContainer}>
-              {item.map(ceil => (
-                <View style={styles.elementContainer} key={ceil.key}>
-                  {contentItemsFabric(ceil)}
-                </View>
-              ))}
-            </View>
+            {item.needToWrap ? (
+              <OverflowingContainer
+                fixedHeight
+                contentMaxVisibleHeight={columnHeight}
+                contentMaxVisibleWidth={columnWidth}>
+                {item.items.map(ceil => (
+                  <View style={styles.elementContainer} key={ceil.key}>
+                    {contentItemsFabric(ceil)}
+                  </View>
+                ))}
+              </OverflowingContainer>
+            ) : (
+              <View style={styles.columnContainer}>
+                {item.items.map(ceil => (
+                  <View style={styles.elementContainer} key={ceil.key}>
+                    {contentItemsFabric(ceil)}
+                  </View>
+                ))}
+              </View>
+            )}
           </TouchableHighlightWrapper>
         )}
       />

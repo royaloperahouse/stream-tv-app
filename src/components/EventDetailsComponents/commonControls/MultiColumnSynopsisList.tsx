@@ -8,6 +8,7 @@ import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import ScrollingArrowPagination, {
   TScrollingArrowPaginationRef,
 } from '@components/ScrollingArrowPagination';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 
 type TMultiColumnSynopsisListProps = {
   data: Array<{ key: string; text: string }>;
@@ -42,14 +43,36 @@ const MultiColumnSynopsisList: React.FC<
   }
   if (splitedItems.length === 1) {
     return (
-      <TouchableHighlightWrapper>
-        <View style={[{ height: columnHeight, width: columnWidth, overflow: 'hidden' }]}>
-          {splitedItems.map(column =>
-            column.map(synops => (
-              <View style={styles.elementContainer} key={synops.key}>
-                <RohText style={styles.synopsis}>{synops.text}</RohText>
+      <TouchableHighlightWrapper canMoveRight={false}>
+        <View>
+          {splitedItems.map((column, index) =>
+            column.needToWrap ? (
+              <OverflowingContainer
+                fixedHeight
+                key={index}
+                contentMaxVisibleHeight={columnHeight}
+                contentMaxVisibleWidth={columnWidth}>
+                {column.items.map(synops => (
+                  <View style={styles.elementContainer} key={synops.key}>
+                    <RohText style={styles.synopsis}>{synops.text}</RohText>
+                  </View>
+                ))}
+              </OverflowingContainer>
+            ) : (
+              <View
+                style={[
+                  {
+                    height: columnHeight,
+                    width: columnWidth,
+                  },
+                ]}>
+                {column.items.map(synops => (
+                  <View style={styles.elementContainer} key={synops.key}>
+                    <RohText style={styles.synopsis}>{synops.text}</RohText>
+                  </View>
+                ))}
               </View>
-            )),
+            ),
           )}
         </View>
       </TouchableHighlightWrapper>
@@ -68,18 +91,22 @@ const MultiColumnSynopsisList: React.FC<
         maxToRenderPerBatch={2}
         getItemCount={columns => columns?.length || 0}
         keyExtractor={(_, index) => index.toString()}
-        getItem={columns => [...columns]}
+        getItem={(columns, index) => columns[index]}
         windowSize={4}
         renderItem={({
           item,
           index,
         }: {
           [key: string]: any;
-          item: Array<TMultiColumnSynopsisListProps['data']>;
+          item: {
+            items: Array<{
+              [key: string]: any;
+            }>;
+            needToWrap: boolean;
+          };
         }) => (
           <TouchableHighlightWrapper
-            style={[{ height: columnHeight }]}
-            canMoveRight={index !== item.length - 1}
+            canMoveRight={index !== splitedItems.length - 1}
             onFocus={() => {
               if (
                 typeof scrollingArrowPaginationRef.current?.setCurrentIndex ===
@@ -88,12 +115,34 @@ const MultiColumnSynopsisList: React.FC<
                 scrollingArrowPaginationRef.current.setCurrentIndex(index);
               }
             }}>
-            <View style={[styles.columnContainer, { height: columnHeight }]}>
-              {item[index].map(ceil => (
-                <View style={styles.elementContainer} key={ceil.key}>
-                  <RohText style={styles.synopsis}>{ceil.text}</RohText>
+            <View>
+              {item.needToWrap ? (
+                <OverflowingContainer
+                  fixedHeight
+                  key={index}
+                  contentMaxVisibleHeight={columnHeight}
+                  contentMaxVisibleWidth={columnWidth}>
+                  {item.items.map(synops => (
+                    <View style={styles.elementContainer} key={synops.key}>
+                      <RohText style={styles.synopsis}>{synops.text}</RohText>
+                    </View>
+                  ))}
+                </OverflowingContainer>
+              ) : (
+                <View
+                  style={[
+                    {
+                      height: columnHeight,
+                      width: columnWidth,
+                    },
+                  ]}>
+                  {item.items.map(synops => (
+                    <View style={styles.elementContainer} key={synops.key}>
+                      <RohText style={styles.synopsis}>{synops.text}</RohText>
+                    </View>
+                  ))}
                 </View>
-              ))}
+              )}
             </View>
           </TouchableHighlightWrapper>
         )}
