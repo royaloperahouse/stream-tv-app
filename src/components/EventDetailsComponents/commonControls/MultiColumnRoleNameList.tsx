@@ -41,7 +41,7 @@ const MultiColumnRoleNameList: React.FC<
   }
   if (splitedItems.length < 3) {
     return (
-      <TouchableHighlightWrapper>
+      <TouchableHighlightWrapper canMoveRight={false}>
         <View style={[styles.towColumnsList, { height: columnHeight }]}>
           {splitedItems.map((column, index) => (
             <View style={styles.columnContainer} key={index}>
@@ -70,18 +70,18 @@ const MultiColumnRoleNameList: React.FC<
         maxToRenderPerBatch={2}
         getItemCount={columns => columns?.length || 0}
         keyExtractor={(_, index) => index.toString()}
-        getItem={columns => [...columns]}
+        getItem={(columns, index) => columns[index]}
         windowSize={4}
         renderItem={({
           item,
           index,
         }: {
           [key: string]: any;
-          item: Array<TMultiColumnRoleNameListProps['data']>;
+          item: TMultiColumnRoleNameListProps['data'];
         }) => (
           <TouchableHighlightWrapper
             style={[styles.column, { height: columnHeight }]}
-            canMoveRight={index !== item.length - 1}
+            canMoveRight={index !== splitedItems.length - 1}
             onFocus={() => {
               if (
                 typeof scrpllingPaginationRef.current?.setCurrentIndex ===
@@ -92,7 +92,7 @@ const MultiColumnRoleNameList: React.FC<
             }}
             styleFocused={styles.columnInFocus}>
             <View style={styles.columnContainer}>
-              {item[index].map(ceil => (
+              {item.map(ceil => (
                 <View style={styles.elementContainer} key={ceil.role}>
                   <RohText style={styles.role}>{ceil.role}</RohText>
                   <RohText style={styles.name}>{ceil.name}</RohText>
