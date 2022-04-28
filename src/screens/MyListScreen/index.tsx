@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
   root: { flex: 1, marginTop: scaleSize(189) },
   emptyListContainer: {
     flex: 1,
-    marginLeft: scaleSize(20),
     marginTop: scaleSize(25),
   },
   emptyListText: {
