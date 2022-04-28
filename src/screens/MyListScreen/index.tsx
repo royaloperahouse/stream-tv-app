@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     lineHeight: scaleSize(30),
     letterSpacing: scaleSize(1),
     color: Colors.defaultTextColor,
-    opacity: 0.7,
   },
   pageTitle: {
     color: Colors.defaultTextColor,
