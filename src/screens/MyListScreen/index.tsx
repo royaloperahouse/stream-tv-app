@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     marginTop: scaleSize(25),
   },
   emptyListText: {
-    fontSize: scaleSize(26),
+    fontSize: scaleSize(22),
     lineHeight: scaleSize(30),
     letterSpacing: scaleSize(1),
     color: Colors.defaultTextColor,
