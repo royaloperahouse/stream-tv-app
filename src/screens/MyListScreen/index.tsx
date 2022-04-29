@@ -86,15 +86,13 @@ const styles = StyleSheet.create({
   root: { flex: 1, marginTop: scaleSize(189) },
   emptyListContainer: {
     flex: 1,
-    marginLeft: scaleSize(20),
     marginTop: scaleSize(25),
   },
   emptyListText: {
-    fontSize: scaleSize(26),
+    fontSize: scaleSize(22),
     lineHeight: scaleSize(30),
     letterSpacing: scaleSize(1),
     color: Colors.defaultTextColor,
-    opacity: 0.7,
   },
   pageTitle: {
     color: Colors.defaultTextColor,
