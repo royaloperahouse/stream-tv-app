@@ -1,0 +1,691 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.13">
+    
+    
+      
+        <title>Developer setup - ROH TV App Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.e411adfe.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cc9b2e1e.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#developer-setup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="ROH TV App Docs" class="md-header__button md-logo" aria-label="ROH TV App Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ROH TV App Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Developer setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ROH TV App Docs" class="md-nav__button md-logo" aria-label="ROH TV App Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    ROH TV App Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Developer setup
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Developer setup
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started-using-the-app-on-devices-and-emulatorssimulators" class="md-nav__link">
+    Getting started using the app on devices and emulators/simulators
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started using the app on devices and emulators/simulators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#android" class="md-nav__link">
+    Android
+  </a>
+  
+    <nav class="md-nav" aria-label="Android">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#amazon-fire-tv" class="md-nav__link">
+    Amazon Fire TV
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios" class="md-nav__link">
+    IOS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appletv" class="md-nav__link">
+    AppleTV
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feature-flags" class="md-nav__link">
+    Feature flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technologies-used" class="md-nav__link">
+    Technologies used:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-notes" class="md-nav__link">
+    Architecture notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/" class="md-nav__link">
+        Writing documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        Testing
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started-using-the-app-on-devices-and-emulatorssimulators" class="md-nav__link">
+    Getting started using the app on devices and emulators/simulators
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started using the app on devices and emulators/simulators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#android" class="md-nav__link">
+    Android
+  </a>
+  
+    <nav class="md-nav" aria-label="Android">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#amazon-fire-tv" class="md-nav__link">
+    Amazon Fire TV
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios" class="md-nav__link">
+    IOS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#appletv" class="md-nav__link">
+    AppleTV
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feature-flags" class="md-nav__link">
+    Feature flags
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technologies-used" class="md-nav__link">
+    Technologies used:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-notes" class="md-nav__link">
+    Architecture notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="developer-setup">Developer setup</h1>
+<p>We are currently aiming to support Amazon FireStick. Other platforms are preferrably to be supported at any point, but is not a priority.</p>
+<p>At the moment the most actual React Native version is <code>0.64.2</code>, however versions <code>0.64.*</code> have a bug, that Touchable components do not invoke <code>onFocus</code> callbacks when focused (which is the only way for us to handle highlighting while navigating via remote control).
+https://github.com/facebook/react-native/issues/31391</p>
+<p>Thus, the application is currently running <code>0.63.4</code>.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>React Native 0.63.4</li>
+<li>Node (we use 15.10.0 currently on nvm) </li>
+<li>Xcode (we use 12.5.1)</li>
+<li>Cocoapods (Currently using 1.10.1)</li>
+<li>Android studio (we use 4.1.2 - 4.2.2)</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>You should be familiar with React Native and mobile development.</p>
+<p>We recommend installing Node and Watchman using Homebrew. Run the following commands in a terminal after installing Homebrew:</p>
+<p><code>$ brew install node</code></p>
+<p><code>$ brew install watchman</code></p>
+<p><code>$ npm install</code> or <code>$ yarn install</code></p>
+<p>Install Xcode: https://reactnative.dev/docs/environment-setup#xcode</p>
+<p>Install CocoaPods:
+<code>$ sudo gem install cocoapods</code></p>
+<p>In ios directory:
+<code>$ pod install</code> (you will possibly need to run <code>$ pod repo update</code> prior to this)</p>
+<p>Java Development Kit:
+<code>$ brew install --cask adoptopenjdk/openjdk/adoptopenjdk8</code></p>
+<p>Install Android Studio: https://reactnative.dev/docs/environment-setup#installing-dependencies</p>
+<h2 id="run">Run</h2>
+<p>Start Metro:
+<code>$ npx react-native start</code></p>
+<h2 id="getting-started-using-the-app-on-devices-and-emulatorssimulators">Getting started using the app on devices and emulators/simulators</h2>
+<ul>
+<li>Once you have the app running, press the "Getting Started" button on the start screen. </li>
+<li>You will then be presented with a QR Code login screen.</li>
+<li>You will need to provide your public IP address to ROH so that they can add it to their database.</li>
+<li>Once that is done, you will see a code on-screen (No need to refresh as the login updates regularly). </li>
+<li>You will then need again to provide this code to ROH. Once they have added it to their database, you will (again, no need to refresh) see and be able to use the rest of the app.</li>
+</ul>
+<h3 id="android">Android</h3>
+<p><code>$ npx react-native run-android</code></p>
+<p>NB: If you have issues with the emulator hanging, you are probably running macOS Big Sur ;) See https://stackoverflow.com/a/67304587/1861645 for more info. In Android studio, go to <code>SDK Manager</code> -&gt; <code>SDK Tools Tab</code> -&gt; uncheck <code>Android Emulator</code>and Apply, then go back in and re-check the emulator. This will trigger the update that fixes the problem.</p>
+<p><em>(Status: It is currently possible to run on an Android TV emulator (in fact on an Android emulator, but the experience really only works well on a TV emulator), but there are certain issues. The recommended experience is on an Amazon Fire Stick.)</em></p>
+<h4 id="amazon-fire-tv">Amazon Fire TV</h4>
+<p>Please follow the steps at Amazon for <a href="https://developer.amazon.com/docs/fire-tv/connecting-adb-to-device.html">connecting to your Fire TV Device</a></p>
+<p>You should then be able to deploy your React Native app to your device from Android Studio (note that you will need to restart <code>adb</code> on occasion)</p>
+<h3 id="ios">IOS</h3>
+<p><code>$ npx react-native run-ios</code></p>
+<p><em>(Status: Will build, but not currently operational)</em></p>
+<h3 id="appletv">AppleTV</h3>
+<p><code>$ npx react-native run-ios  --simulator "Apple TV" --scheme "RohTVApp-tvOS"</code></p>
+<p>Follow the getting started follow described above.</p>
+<p>NB: If you need to refresh/restart the app at any point, hold down the space bar until you see the debug menu and choose 'reload'</p>
+<h2 id="development">Development</h2>
+<h3 id="feature-flags">Feature flags</h3>
+<p>All new features should be developed under feature flags. We use <a href="https://github.com/sergiodxa/flagged">flagged</a>.
+Consult the documentation for more details but in short:</p>
+<p>First, we wrap our <code>App</code> component in flagged's <code>FeatureProvider</code>, defining flags in an object prop:</p>
+<pre><code>    &lt;FlagsProvider features={{ hasOpera: false }}&gt;
+        &lt;AppLayout /&gt;
+    &lt;/FlagsProvider&gt;
+</code></pre>
+<p>Then, consume the feature flag in the code in question, typically to switch in/out a component, for example:</p>
+<pre><code>const OperaMusicScreen: React.FC&lt;TOperaMusicScreenProps&gt; = () =&gt; {
+  const hasOpera = useFeature('hasOpera');
+  console.log(&quot;hasOpera: &quot;, hasOpera);
+  return (
+    &lt;View style={styles.root}&gt;
+      { 
+        hasOpera ?
+          &lt;RohText style={styles.rootText} bold&gt;
+            Opera &amp; Music Screen is here!
+          &lt;/RohText&gt; :
+          &lt;RohText style={styles.rootText} bold&gt;
+            Opera &amp; Music Screen coming soon
+          &lt;/RohText&gt;
+      }
+    &lt;/View&gt;
+  );
+};
+</code></pre>
+<p>There are also many full-featured feature flag services available such as <a href="https://flagsmith.com">flagsmith</a> and <a href="https://developers.flagship.io">flagship</a>. These can be used to extend the existing provider functionality. Flagged can recieve either an array of flags or an object with flag keys and values. This fact enables us to prepare the flags elsewhere - for example, perhaps via flagship's Decision API. In this way, we can handle the same feature in various systems simultaneously.</p>
+<h3 id="technologies-used">Technologies used:</h3>
+<ul>
+<li>Typescript!</li>
+<li>Redux: app state</li>
+<li>Redux-saga: asynchronous side-effects middleware</li>
+<li>Axios: promise-based http client</li>
+<li>Prismic: headless CMS</li>
+<li>Fuse: client-side fuzzy search</li>
+</ul>
+<h3 id="architecture-notes">Architecture notes</h3>
+<p>There are two main loops in the app, initiated/maintained by sagas:</p>
+<ul>
+<li>the auth login loop<ul>
+<li>updates every 10 secs</li>
+<li>continues until login is complete</li>
+</ul>
+</li>
+<li>the main login loop<ul>
+<li>updates every 30 mins</li>
+<li>continues throughout app lifetime</li>
+<li>fetches new content </li>
+</ul>
+</li>
+</ul>
+<p>Please note that we fetch a list of videos from Prismic in <code>store\videos\Sagas.ts</code>(<code>getVideoListLoopWorker()</code>). This list is filtered first by selecting videos from the Events store and selecting those with <code>isBroken</code> set to false, then further cross-referenced to the fetched list of videos filtered on video_type "performance". (In <code>General.tsx</code>). This result will be an array. In production the array should only contain one "performance" video, so we fetch the first element. There may be extra "performance" videos in the staging environment however.</p>
+<p>NB: There is currently an issue with sizing of images in FastImage when running react-native-tvos (as opposed to the standard react-native repo, which doesn't exhibit the issue). To work around it,
+add a style of <code>zindex: 0</code> to your FastImage component instance. See <a href="https://github.com/react-native-tvos/react-native-tvos/issues/226">here</a>.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Overview
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../docs/" class="md-footer__link md-footer__link--next" aria-label="Next: Writing documentation" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Writing documentation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.ed9748b7.min.js"></script>
+      
+    
+  </body>
+</html>
