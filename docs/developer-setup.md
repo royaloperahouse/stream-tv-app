@@ -74,7 +74,7 @@ _(Status: Will build, but not currently operational)_
 
 ### AppleTV
 
-`$ npx react-native run-ios  --simulator "Apple TV" --scheme "RohTvApp-tvOS"`
+`$ npx react-native run-ios  --simulator "Apple TV" --scheme "RohTVApp-tvOS"`
 
 Follow the getting started follow described above.
 
