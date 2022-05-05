@@ -75,6 +75,9 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
             isFirstRail,
             isLastRail,
             scrollToRail,
+            setRailItemRefCb,
+            removeRailItemRefCb,
+            hasEndlessScroll,
           }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
@@ -87,11 +90,13 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
               ref={previewRef}
               onFocus={scrollToRail}
               canMoveUp={!isFirstRail}
-              canMoveDown={!isLastRail}
               canMoveRight={index !== section.data.length - 1}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
               lastItem={index === section.data.length - 1}
+              setRailItemRefCb={setRailItemRefCb}
+              removeRailItemRefCb={removeRailItemRefCb}
+              canMoveDown={(isLastRail && hasEndlessScroll) || !isLastRail}
             />
           )}
         />

@@ -3,7 +3,9 @@ import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import get from 'lodash.get';
 import {
   useNavigation,
@@ -28,6 +30,16 @@ type DigitalEventItemProps = {
   eventGroupTitle?: string;
   selectedItemIndex?: number;
   lastItem?: boolean;
+  setRailItemRefCb: (
+    eventId: string,
+    ref: React.MutableRefObject<TTouchableHighlightWrapperRef | undefined>,
+    sectionIdx: number,
+  ) => void;
+  removeRailItemRefCb: (
+    eventId: string,
+    ref: React.MutableRefObject<TTouchableHighlightWrapperRef | undefined>,
+    sectionIdx: number,
+  ) => void;
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -45,10 +57,13 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       canMoveDown = true,
       selectedItemIndex,
       lastItem = false,
+      setRailItemRefCb = () => {},
+      removeRailItemRefCb = () => {},
     },
     ref: any,
   ) => {
     const navigation = useNavigation();
+    const touchableRef = useRef<TTouchableHighlightWrapperRef>();
     const route = useRoute();
     const isMounted = useRef(false);
     const [focused, setFocused] = useState(false);
@@ -97,8 +112,16 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       };
     }, []);
 
+    useLayoutEffect(() => {
+      setRailItemRefCb(event.id, touchableRef, sectionIndex);
+      return () => {
+        removeRailItemRefCb(event.id, touchableRef, sectionIndex);
+      };
+    }, []);
+
     return (
       <TouchableHighlightWrapper
+        ref={touchableRef}
         hasTVPreferredFocus={hasTVPreferredFocus}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
