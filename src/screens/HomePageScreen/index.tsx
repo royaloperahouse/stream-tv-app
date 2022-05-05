@@ -149,24 +149,29 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
             isFirstRail,
             isLastRail,
             sectionIndex,
+            setRailItemRefCb,
+            removeRailItemRefCb,
+            hasEndlessScroll,
           }) => (
             <DigitalEventItem
               event={item}
               ref={previewRef}
               screenNameFrom={route.name}
-              canMoveUp={!isFirstRail}
               hasTVPreferredFocus={hasTVPreferredFocus(
                 isFirstRail,
                 index,
                 sectionIndex,
               )}
               canMoveRight={index !== section.data.length - 1}
-              canMoveDown={!isLastRail}
               onFocus={scrollToRail}
               continueWatching={section.title === continueWatchingRailTitle}
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
               lastItem={index === section.data.length - 1}
+              setRailItemRefCb={setRailItemRefCb}
+              removeRailItemRefCb={removeRailItemRefCb}
+              canMoveDown={(isLastRail && hasEndlessScroll) || !isLastRail}
+              canMoveUp={!isFirstRail}
             />
           )}
         />

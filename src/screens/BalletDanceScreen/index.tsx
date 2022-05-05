@@ -72,13 +72,15 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
             sectionIndex,
             isFirstRail,
             isLastRail,
+            setRailItemRefCb,
+            removeRailItemRefCb,
+            hasEndlessScroll,
           }) => (
             <DigitalEventItem
               screenNameFrom={route.name}
               event={item}
               ref={previewRef}
               canMoveUp={!isFirstRail}
-              canMoveDown={!isLastRail}
               hasTVPreferredFocus={
                 route.params.fromEventDetails &&
                 sectionIndex === route.params.sectionIndex &&
@@ -89,6 +91,9 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
               eventGroupTitle={section.title}
               sectionIndex={sectionIndex}
               lastItem={index === section.data.length - 1}
+              setRailItemRefCb={setRailItemRefCb}
+              removeRailItemRefCb={removeRailItemRefCb}
+              canMoveDown={(isLastRail && hasEndlessScroll) || !isLastRail}
             />
           )}
         />

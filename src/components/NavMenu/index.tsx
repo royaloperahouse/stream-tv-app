@@ -51,7 +51,6 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import {
-  clearAuthState,
   endLoginLoop,
   endFullSubscriptionLoop,
 } from '@services/store/auth/Slices';
@@ -77,6 +76,7 @@ const navMenuRef = createRef<
     setNavMenuAccessible: () => void;
     setNavMenuNotAccessible: () => void;
     setNextFocusRightValue: (nodeValue: number, screenName: string) => void;
+    isNavMenuOpen: () => boolean;
   }>
 >();
 
@@ -116,6 +116,11 @@ export const navMenuManager = Object.freeze({
       navMenuRef.current.setNextFocusRightValue(nodeValue, screenName);
     }
   },
+/*   isNavMenuOpen: (): boolean | undefined => {
+    if (typeof navMenuRef.current?.isNavMenuOpen === 'function') {
+      return navMenuRef.current.isNavMenuOpen();
+    }
+  }, */
 });
 
 const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
@@ -268,8 +273,9 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
       setNavMenuFocus: () => {
         setIsMenuFocused(true);
       },
+      isNavMenuOpen: () => isMenuFocused,
     }),
-    [],
+    [isMenuFocused],
   );
   const setMenuBlur = useCallback(() => {
     onBlurRef.current = true;
