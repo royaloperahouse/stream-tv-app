@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions, FlatList, TVFocusGuideView } from 'react-native';
+import { View, StyleSheet, Dimensions, FlatList } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
 import { Colors } from '@themes/Styleguide';
-import collectionOfSettingsSections, {
+import getCollectionOfSettingsSections, {
   settingsTitle,
-  settingsSectionsConfig,
+  getSettingsSectionsConfig,
 } from '@configs/settingsConfig';
 import { SettingsNavMenuItem } from '@components/SettingsComponents';
 import {
@@ -19,36 +19,37 @@ type TSettingsScreenProps = {};
 const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
   const [activeContentKey, setActiveContentKey] = useState<string>('');
   const activeItemRef = useRef<TTouchableHighlightWrapperRef>();
-  const viewRef = useRef<View>(null);
   const contentFactory = (contentKey: string) => {
     if (
       !contentKey ||
-      !(contentKey in settingsSectionsConfig) ||
-      typeof settingsSectionsConfig[contentKey].ContentComponent !== 'function'
+      !(contentKey in getSettingsSectionsConfig()) ||
+      typeof getSettingsSectionsConfig()[contentKey].ContentComponent !==
+        'function'
     ) {
       return View;
     }
-    return settingsSectionsConfig[contentKey].ContentComponent;
+    return getSettingsSectionsConfig()[contentKey].ContentComponent;
   };
   const Content = contentFactory(activeContentKey);
-  console.log('settings', viewRef.current);
+
   return (
-    <TVFocusGuideView style={styles.root}
-      destinations={[viewRef.current]}>
+    <View style={styles.root}>
       <View style={styles.container}>
-        <View style={styles.navMenuContainer}>
+        <View style={styles.navMenuContainer}>
           <RohText style={styles.pageTitle}>{settingsTitle}</RohText>
           <FlatList
-            data={collectionOfSettingsSections}
+            data={getCollectionOfSettingsSections()}
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <SettingsNavMenuItem
+                isFirst={index === 0}
                 isActive={item.key === activeContentKey}
                 title={item.navMenuItemTitle}
-                canMoveDown={index !== collectionOfSettingsSections.length - 1}
+                canMoveDown={
+                  index !== getCollectionOfSettingsSections().length - 1
+                }
                 canMoveUp={index !== 0}
-                hasTVPreferredFocus={index === 0}
                 onFocus={touchableRef => {
                   activeItemRef.current = touchableRef.current;
                   setActiveContentKey(item.key);
@@ -57,11 +58,11 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             )}
           />
         </View>
-          <View ref={viewRef} hasTVPreferredFocus={activeItemRef.current != null} style={styles.contentContainer}>            
-              <Content listItemGetNode={activeItemRef.current?.getNode} />
-          </View>
+        <View style={styles.contentContainer}>
+          <Content listItemGetNode={activeItemRef.current?.getNode} />
+        </View>
       </View>
-    </TVFocusGuideView>
+    </View>
   );
 };
 const styles = StyleSheet.create({

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import {
   TEventContainer,
-  TVSEventDetailsCreative,
+  TDieseActitvityCreatives,
 } from '@services/types/models';
 import RohText from '@components/RohText';
 import GoDown from '../commonControls/GoDown';
@@ -14,20 +14,29 @@ import { Colors } from '@themes/Styleguide';
 type CreativesProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
-const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
-  const creativesList: Array<TVSEventDetailsCreative> = get(
+const Creatives: React.FC<CreativesProps> = ({
+  event,
+  nextScreenText,
+  setScreenAvailabilety,
+  screenName,
+}) => {
+  const creativesList: Array<TDieseActitvityCreatives> = get(
     event.data,
-    ['vs_event_details', 'creatives'],
+    ['diese_activity', 'creatives'],
     [],
   );
 
   const listOfEvalableCreatives = creativesList.reduce<{
     [key: string]: string;
-  }>((acc, cast) => {
-    const role = get(cast, ['attributes', 'role'], '');
-    const name = get(cast, ['attributes', 'name'], '');
+  }>((acc, creative) => {
+    const role = creative.role_title;
+    const name =
+      (creative.contact_firstName ? creative.contact_firstName + ' ' : '') +
+        creative.contact_lastName || '';
     if (!name) {
       return acc;
     }
@@ -42,8 +51,20 @@ const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
     listOfEvalableCreatives,
   ).map(([role, name]) => ({ role, name }));
 
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(data.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [data.length, screenName, setScreenAvailabilety]);
+  if (!data.length) {
+    return null;
+  }
   return (
     <View style={styles.generalContainer}>
+      <View style={styles.downContainer}>
+        <GoDown text={nextScreenText} />
+      </View>
       <View style={styles.wrapper}>
         <View style={styles.titleContainer}>
           <RohText style={styles.title}>Creatives</RohText>
@@ -56,9 +77,6 @@ const Creatives: React.FC<CreativesProps> = ({ event, nextScreenText }) => {
           />
         </View>
       </View>
-      <View style={styles.downContainer}>
-        <GoDown text={nextScreenText} />
-      </View>
     </View>
   );
 };
@@ -67,7 +85,6 @@ const styles = StyleSheet.create({
   generalContainer: {
     height: Dimensions.get('window').height,
     paddingRight: scaleSize(200),
-    paddingTop: scaleSize(110),
   },
   wrapper: {
     flexDirection: 'row',
@@ -77,6 +94,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(110),
     paddingBottom: scaleSize(60),
+    top: -scaleSize(110),
   },
   title: {
     width: '100%',

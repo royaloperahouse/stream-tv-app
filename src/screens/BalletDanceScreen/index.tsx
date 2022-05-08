@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 import { digitalEventsForBalletAndDanceSelector } from '@services/store/events/Selectors';
 import {
@@ -15,13 +15,26 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TPreviewRef } from '@components/EventListComponents/components/Preview';
+import { useIsFocused } from '@react-navigation/native';
+import { navMenuManager } from '@components/NavMenu';
 
 type TBalletDanceScreenProps = {};
-const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
-  const data = useSelector(digitalEventsForBalletAndDanceSelector);
+const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
+  const { data, eventsLoaded } = useSelector(
+    digitalEventsForBalletAndDanceSelector,
+  );
   const previewRef = useRef<TPreviewRef | null>(null);
   const runningOnceRef = useRef<boolean>(false);
-  const viewRef = useRef<View>(null);
+  const isFocused = useIsFocused();
+  useLayoutEffect(() => {
+    if (isFocused && eventsLoaded) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      }
+    }
+  }, [isFocused, route, data.length, eventsLoaded]);
   useLayoutEffect(() => {
     if (
       typeof previewRef.current?.setDigitalEvent === 'function' &&
@@ -35,18 +48,15 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
   if (!data.length) {
     return null;
   }
-  console.log('ballet & dance', viewRef.current);
   return (
-    <TVFocusGuideView 
-      style={styles.root} 
-      destinations={[viewRef.current]}
-    >
+    <View style={styles.root}>
       <Preview ref={previewRef} />
-      <View ref={viewRef}>
+      <View>
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
           railStyle={styles.railStyle}
+          sectionIndex={route.params.sectionIndex || 0}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
           renderHeader={section => (
@@ -54,19 +64,41 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            scrollToRail,
+            sectionIndex,
+            isFirstRail,
+            isLastRail,
+            setRailItemRefCb,
+            removeRailItemRefCb,
+            hasEndlessScroll,
+          }) => (
             <DigitalEventItem
+              screenNameFrom={route.name}
               event={item}
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
+              canMoveUp={!isFirstRail}
+              hasTVPreferredFocus={
+                route.params.fromEventDetails &&
+                sectionIndex === route.params.sectionIndex &&
+                index === 0
+              }
               canMoveRight={index !== section.data.length - 1}
-              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
               onFocus={scrollToRail}
+              eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
+              lastItem={index === section.data.length - 1}
+              setRailItemRefCb={setRailItemRefCb}
+              removeRailItemRefCb={removeRailItemRefCb}
+              canMoveDown={(isLastRail && hasEndlessScroll) || !isLastRail}
             />
           )}
         />
       </View>
-    </TVFocusGuideView>
+    </View>
   );
 };
 

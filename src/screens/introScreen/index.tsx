@@ -1,23 +1,22 @@
 import React from 'react';
-import {
-  TouchableHighlight,
-  View,
-  Image,
-  ImageBackground,
-  StyleSheet,
-} from 'react-native';
+import { View, ImageBackground, StyleSheet } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { Colors, Images } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import RohText from '@components/RohText';
-import { startLoginLoop } from '@services/store/auth/Slices';
+import {
+  startLoginLoop,
+  switchOffIntroScreen,
+} from '@services/store/auth/Slices';
 import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import IntroStreamLogoSvg from '@assets/svg/IntroStreamLogo.svg';
 
 type TIntroScreenProps = {};
 
 const IntroScreen: React.FC<TIntroScreenProps> = () => {
   const dispatch = useDispatch();
   const getStarted = () => {
+    dispatch(switchOffIntroScreen());
     dispatch(startLoginLoop());
   };
   return (
@@ -25,7 +24,11 @@ const IntroScreen: React.FC<TIntroScreenProps> = () => {
       style={styles.containerBackground}
       source={Images.introBackground}>
       <View style={styles.container}>
-        <Image style={styles.logo} source={Images.ROHLogo} />
+        <IntroStreamLogoSvg
+          style={styles.logo}
+          width={scaleSize(520)}
+          height={scaleSize(142)}
+        />
         <RohText style={styles.welcome}>Welcome to ROH Stream</RohText>
         <View style={styles.descriptionContainer}>
           <RohText style={styles.description}>
@@ -59,12 +62,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundColorTransparent,
   },
   logo: {
-    marginTop: scaleSize(48),
-    width: scaleSize(167),
-    height: scaleSize(232),
+    marginTop: scaleSize(186),
   },
   welcome: {
-    marginTop: scaleSize(174),
+    marginTop: scaleSize(126),
     color: 'white',
     textTransform: 'uppercase',
     fontSize: scaleSize(38),

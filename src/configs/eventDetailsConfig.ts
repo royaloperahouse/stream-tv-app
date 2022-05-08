@@ -3,7 +3,10 @@ import {
   Cast,
   Creatives,
   Synopsis,
+  AboutProduction,
+  Extras,
 } from '@components/EventDetailsComponents/';
+export type { TGeneralRef } from '@components/EventDetailsComponents/components//General';
 
 export type TEventDetailsSection = {
   key: string;
@@ -16,23 +19,33 @@ export const eventDetailsSectionsConfig: {
 } = {
   general: {
     key: 'general',
-    nextSectionTitle: 'CAST & MORE',
+    nextSectionTitle: '',
     Component: General,
   },
   cast: {
     key: 'cast',
-    nextSectionTitle: 'CREATIVES & MORE',
+    nextSectionTitle: 'CAST & MORE',
     Component: Cast,
   },
   creatives: {
     key: 'creatives',
-    nextSectionTitle: 'SYNOPSIS & MORE',
+    nextSectionTitle: 'CREATIVES & MORE',
     Component: Creatives,
   },
   synopsis: {
     key: 'synopsis',
-    nextSectionTitle: 'INFO & MORE',
+    nextSectionTitle: 'SYNOPSIS & MORE',
     Component: Synopsis,
+  },
+  info: {
+    key: 'info',
+    nextSectionTitle: 'INFO & MORE',
+    Component: AboutProduction,
+  },
+  extra: {
+    key: 'extras',
+    nextSectionTitle: 'EXTRAS & MORE',
+    Component: Extras,
   },
 };
 

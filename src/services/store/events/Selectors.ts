@@ -7,9 +7,13 @@ import {
   homePageWhiteList,
   operaAndMusicWhiteList,
   balletAndDanceWhiteList,
+  currentRentalsRailTitle,
+  availableToRentRailTitle,
 } from '@configs/eventListScreensConfig';
 import get from 'lodash.get';
-
+import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
+import { removeItemsFromSavedPositionListByEventIds } from '@services/bitMovinPlayer';
+import difference from 'lodash.difference';
 export const digitalEventDetailsSearchSelector = (store: {
   [key: string]: any;
 }) =>
@@ -24,15 +28,38 @@ export const searchQuerySelector = (store: { [key: string]: any }) =>
   store.events.searchQueryString;
 
 export const digitalEventsForHomePageSelector =
-  (myList: Array<string>) => (store: { [key: string]: any }) => {
+  (myList: Array<string>, continueWatchingList: Array<string>) =>
+  (store: { [key: string]: any }) => {
     const eventGroupsArray = Object.entries<{
       title: string;
       ids: Array<string>;
     }>(store.events.eventGroups).filter(([key]) => key in homePageWhiteList);
     const arrayOfIdsForRemoveFromMyList: Array<string> = [];
-    if (myList.length && eventGroupsArray.length) {
+    const arrayOfIdsForRemoveFromContinueWatchingList: Array<string> = [];
+    if (eventGroupsArray.length) {
+      if (store.auth.fullSubscription) {
+        eventGroupsArray.unshift([
+          '',
+          { title: currentRentalsRailTitle, ids: store.events.ppvEventsIds },
+        ]);
+        eventGroupsArray.unshift([
+          '',
+          {
+            title: availableToRentRailTitle,
+            ids: difference(
+              store.events.availablePPVEventsIds,
+              store.events.ppvEventsIds,
+            ),
+          },
+        ]);
+      }
       eventGroupsArray.unshift(['', { title: myListTitle, ids: myList }]);
+      eventGroupsArray.unshift([
+        '',
+        { title: continueWatchingRailTitle, ids: continueWatchingList },
+      ]);
     }
+
     const eventSections = eventGroupsArray.reduce<
       Array<{
         sectionIndex: number;
@@ -40,7 +67,7 @@ export const digitalEventsForHomePageSelector =
         data: Array<TEventContainer>;
       }>
     >((acc, [_, groupInfo], index) => {
-      acc.push({
+      const rail = {
         sectionIndex: index,
         title: groupInfo.title,
         data: groupInfo.ids.reduce<Array<TEventContainer>>((accEvents, id) => {
@@ -48,16 +75,25 @@ export const digitalEventsForHomePageSelector =
             accEvents.push(store.events.allDigitalEventsDetail[id]);
           } else if (groupInfo.title === myListTitle) {
             arrayOfIdsForRemoveFromMyList.push(id);
+          } else if (groupInfo.title === continueWatchingRailTitle) {
+            arrayOfIdsForRemoveFromContinueWatchingList.push(id);
           }
           return accEvents;
         }, []),
-      });
+      };
+      if (rail.data.length) {
+        acc.push(rail);
+      }
       return acc;
     }, []);
     if (store.events.eventsLoaded) {
       removeIdsFromMyList(arrayOfIdsForRemoveFromMyList);
+      removeItemsFromSavedPositionListByEventIds(
+        arrayOfIdsForRemoveFromContinueWatchingList,
+      );
     }
-    return eventSections;
+
+    return { data: eventSections, eventsLoaded: store.events.eventsLoaded };
   };
 
 export const digitalEventsForMyListScreenSelector =
@@ -90,6 +126,15 @@ export const digitalEventsForBalletAndDanceSelector = (store: {
     ([key]) => key in balletAndDanceWhiteList,
   );
   let sectionIndex = 0;
+  const eventsWithoutSubtags: {
+    sectionIndex: number;
+    title: string;
+    data: Array<TEventContainer>;
+  } = {
+    sectionIndex: 0,
+    title: '',
+    data: [],
+  };
   const eventSections = Array.from(
     new Set(
       eventGroupsArray.reduce<Array<string>>((acc, [_, groupInfo]) => {
@@ -105,22 +150,33 @@ export const digitalEventsForBalletAndDanceSelector = (store: {
     };
   }>((acc, id) => {
     const event = store.events.allDigitalEventsDetail[id];
-    const genres: Array<{ tag: string }> = get(event.data, 'vs_genres', []);
-    for (let i = 0; i < genres.length; i++) {
-      const genre = genres[i].tag || 'without genre';
-      if (genre in acc) {
-        acc[genre].data.push(store.events.allDigitalEventsDetail[id]);
+    const subtags: Array<{ tag: string }> = get(event.data, 'vs_subtags', []);
+    for (let i = 0; i < subtags.length; i++) {
+      const subtag = subtags[i].tag || 'without subtag';
+      if (subtag in acc) {
+        acc[subtag].data.push(store.events.allDigitalEventsDetail[id]);
       } else {
-        acc[genre] = {
+        acc[subtag] = {
           sectionIndex: sectionIndex++,
-          title: genre,
+          title: subtag,
           data: [store.events.allDigitalEventsDetail[id]],
         };
       }
     }
     return acc;
   }, {});
-  return Object.values(eventSections);
+  if (!eventsWithoutSubtags.data.length) {
+    return {
+      data: Object.values(eventSections),
+      eventsLoaded: store.events.eventsLoaded,
+    };
+  }
+  const sections = Object.values(eventSections).map(eventSection => ({
+    ...eventSection,
+    sectionIndex: ++eventSection.sectionIndex,
+  }));
+  sections.unshift(eventsWithoutSubtags);
+  return { data: sections, eventsLoaded: store.events.eventsLoaded };
 };
 
 export const digitalEventsForOperaAndMusicSelector = (store: {
@@ -131,6 +187,15 @@ export const digitalEventsForOperaAndMusicSelector = (store: {
     ids: Array<string>;
   }>(store.events.eventGroups).filter(([key]) => key in operaAndMusicWhiteList);
   let sectionIndex = 0;
+  const eventsWithoutSubtags: {
+    sectionIndex: number;
+    title: string;
+    data: Array<TEventContainer>;
+  } = {
+    sectionIndex: 0,
+    title: '',
+    data: [],
+  };
   const eventSections = Array.from(
     new Set(
       eventGroupsArray.reduce<Array<string>>((acc, [_, groupInfo]) => {
@@ -146,20 +211,46 @@ export const digitalEventsForOperaAndMusicSelector = (store: {
     };
   }>((acc, id) => {
     const event = store.events.allDigitalEventsDetail[id];
-    const genres: Array<{ tag: string }> = get(event.data, 'vs_genres', []);
-    for (let i = 0; i < genres.length; i++) {
-      const genre = genres[i].tag || 'without genre';
-      if (genre in acc) {
-        acc[genre].data.push(store.events.allDigitalEventsDetail[id]);
+    const subtags: Array<{ tag: string }> = get(event.data, 'vs_subtags', []);
+    if (!subtags.length) {
+      eventsWithoutSubtags.data.push(store.events.allDigitalEventsDetail[id]);
+      return acc;
+    }
+    for (let i = 0; i < subtags.length; i++) {
+      const subtag = subtags[i].tag;
+      if (subtag in acc) {
+        acc[subtag].data.push(store.events.allDigitalEventsDetail[id]);
       } else {
-        acc[genre] = {
+        acc[subtag] = {
           sectionIndex: sectionIndex++,
-          title: genre,
+          title: subtag,
           data: [store.events.allDigitalEventsDetail[id]],
         };
       }
     }
     return acc;
   }, {});
-  return Object.values(eventSections);
+
+  if (!eventsWithoutSubtags.data.length) {
+    return {
+      data: Object.values(eventSections),
+      eventsLoaded: store.events.eventsLoaded,
+    };
+  }
+  const sections = Object.values(eventSections).map(eventSection => ({
+    ...eventSection,
+    sectionIndex: ++eventSection.sectionIndex,
+  }));
+  sections.unshift(eventsWithoutSubtags);
+  return { data: sections, eventsLoaded: store.events.eventsLoaded };
 };
+
+export const ppvEventsIdsSelector = (store: { [key: string]: any }) =>
+  store.events.ppvEventsIds;
+
+export const availablePPVEventsDateOfUpdateSelector = (store: {
+  [key: string]: any;
+}) => store.events.availablePPVEventsDateOfUpdate;
+
+export const availblePpvEventsIdsSelector = (store: { [key: string]: any }) =>
+  store.events.availablePPVEventsIds;

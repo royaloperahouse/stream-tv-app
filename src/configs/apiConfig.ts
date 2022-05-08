@@ -14,5 +14,12 @@ export const ApiConfig = Object.freeze({
     videoSource: '/video-source',
     pinUnlink: '/auth/device/unlink',
     subscriptionInfo: '/auth/device/subscription-info',
+    digitalEvents: '/digital-events',
+    checkoutPayPerView: '/checkout/payPerView',
+    checkoutPurchasedStreams: '/checkout/purchasedStreams',
+  },
+  auth: {
+    username: 'tvapp',
+    password: 'stream',
   },
 });

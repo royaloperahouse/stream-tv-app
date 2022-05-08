@@ -1,3 +1,4 @@
+import { store } from '@services/store';
 export const prismicApiEndpoint =
   'https://royal-opera-house.cdn.prismic.io/api/v2';
 export const prismicApiAccessToken =
@@ -12,4 +13,5 @@ export const documentTypes: TDocumentTypeList = Object.freeze({
   digitalEventVideo: 'digital_event_video',
 });
 
-export const refLabelOfPublishing = 'Staging';
+export const getRefLabelOfPublishing = () =>
+  store.getState().settings.isProductionEnv ? 'Master Ref' : 'Staging';

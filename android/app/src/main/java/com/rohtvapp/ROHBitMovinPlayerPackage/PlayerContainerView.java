@@ -2,6 +2,10 @@ package com.rohtvapp.ROHBitMovinPlayerPackage;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.Choreographer;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -24,7 +28,12 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.rohtvapp.R;
+import com.bitmovin.player.api.deficiency.ErrorEvent;
+import com.bitmovin.player.api.PlaybackConfig;
+import com.bitmovin.player.api.SeekMode;
+import com.bitmovin.player.api.media.MediaFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerContainerView extends RelativeLayout {
@@ -54,10 +63,38 @@ public class PlayerContainerView extends RelativeLayout {
 
         PlayerConfig playerConfig = new PlayerConfig();
         playerConfig.setStyleConfig(styleConfig);
+        ArrayList<String> videoCodecPriority = new ArrayList<String>();
+        videoCodecPriority.add("h264");
+        videoCodecPriority.add("av1");
+        videoCodecPriority.add("hevc");
+        videoCodecPriority.add("hvc");
+        videoCodecPriority.add("vp9");
+        videoCodecPriority.add("avc");
+        ArrayList<String> audioCodecPriority = new ArrayList<String>();
+        audioCodecPriority.add("ec-3");
+        audioCodecPriority.add("mp4a.a6");
+        audioCodecPriority.add("ac-3");
+        audioCodecPriority.add("mp4a.a5");
+        audioCodecPriority.add("mp4a.40");
 
+        PlaybackConfig playbackConfig = new PlaybackConfig(
+            false,
+            false,
+            true,
+            videoCodecPriority,
+            audioCodecPriority,
+            true,
+            SeekMode.Exact,
+            null,
+            MediaFilter.Loose,
+            MediaFilter.Loose
+        );
+        //playbackConfig.setTunneledPlaybackEnabled(true);
+        playerConfig.setPlaybackConfig(playbackConfig);
+
+        playerView = findViewById(R.id.bitmovinPlayerView);
         player = Player.create(context, playerConfig);
-
-        playerView = new PlayerView(context, player);
+        playerView.setPlayer(player);
 
         player.on(SourceEvent.Loaded.class, this::onLoad);
         player.on(PlayerEvent.Playing.class, this::onPlay);
@@ -70,19 +107,10 @@ public class PlayerContainerView extends RelativeLayout {
         player.on(PlayerEvent.Ready.class, this::onReady);
         player.on(SourceEvent.Error.class, this::onError);
         player.on(SourceEvent.SubtitleChanged.class, this::onSubtitleChanged);
+        player.on(PlayerEvent.Error.class, this::onError);
+        player.on(PlayerEvent.CueEnter.class, this::onCueEnter);
+        player.on(PlayerEvent.CueExit.class, this::onCueExit);
 
-        RelativeLayout playerContainer = findViewById(R.id.player_container);
-
-        subtitleView = new SubtitleView(context, null);
-        subtitleView.setPlayer(player);
-        subtitleView.setUserDefaultStyle();
-        subtitleView.setUserDefaultTextSize();
-
-        // Add the SubtitleView to the layout
-        playerContainer.addView(subtitleView);
-
-        // Add the PlayerView to the layout as first position (so it is the behind the SubtitleView)
-        playerContainer.addView(playerView, 0);
         player.setVolume(100);
     }
 
@@ -266,7 +294,7 @@ public class PlayerContainerView extends RelativeLayout {
         }
     }
 
-    private void onError(SourceEvent.Error event) {
+    private void onError(ErrorEvent event) {
         WritableMap map = Arguments.createMap();
         map.putString("message", "error");
         map.putString("errMessage", event.getMessage());
@@ -298,6 +326,46 @@ public class PlayerContainerView extends RelativeLayout {
             reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onSubtitleChanged", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueEnter(PlayerEvent.CueEnter event) {
+        Log.d("onCue enter",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueEnter");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueEnter", map);
+
+        } catch (Exception e) {
+            Log.e("ReactNative", "Caught Exception: " + e.getMessage());
+        }
+    }
+
+    private void onCueExit(PlayerEvent.CueExit event) {
+        Log.d("onCue exit",  event.getText());
+        WritableMap map = Arguments.createMap();
+
+        map.putString("message", "cueExit");
+        String cueText = event.getText();
+        if (cueText != null) {
+            map.putString("cueText", cueText);
+        }
+        ReactContext reactContext = (ReactContext)context;
+        try {
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit("onCueExit", map);
 
         } catch (Exception e) {
             Log.e("ReactNative", "Caught Exception: " + e.getMessage());

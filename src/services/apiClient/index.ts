@@ -1,7 +1,11 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ApiConfig } from '@configs/apiConfig';
 import { store } from '@services/store';
-
+import {
+  UnableToCheckRentalStatusError,
+  NotRentedItemError,
+  NonSubscribedStatusError,
+} from '@utils/customErrors';
 const axiosClient: AxiosInstance = axios.create({
   baseURL: ApiConfig.host,
   timeout: 20 * 1000,
@@ -15,6 +19,9 @@ axiosClient.interceptors.request.use(
       ['Content-Type']: 'application/json',
       ['X-Device-ID']: ApiConfig.deviceId,
     };
+    if (axiosConfig.url?.includes(ApiConfig.routes.checkoutPurchasedStreams)) {
+      axiosConfig.headers['x-customer-id'] = store.getState().auth.customerId;
+    }
     console.log(
       `(REQUEST) ${axiosConfig.method} ${axiosConfig.url}`,
       axiosConfig.headers,
@@ -43,34 +50,212 @@ axiosClient.interceptors.response.use(
       `(ERROR) ${axiosConfig.method} ${axiosConfig.url}`,
       response?.data,
     );
+    if (response === undefined) {
+      return { status: 500 };
+    }
     return response;
   },
 );
 
 export const verifyDevice = () =>
-  axiosClient.get(ApiConfig.routes.verifyDevice);
+  axiosClient.get(ApiConfig.routes.verifyDevice, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const fetchVideoURL = (id: string) =>
   axiosClient.get(ApiConfig.routes.videoSource, {
     params: {
       id,
     },
-    baseURL: ApiConfig.manifestURL,
+    auth: ApiConfig.auth,
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
   });
 
-export const pinUnlink = () => axiosClient.delete(ApiConfig.routes.pinUnlink);
+export const pinUnlink = () =>
+  axiosClient.delete(ApiConfig.routes.pinUnlink, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
 
 export const getSubscribeInfo = () =>
-  axiosClient.get(ApiConfig.routes.subscriptionInfo).then(response => {
-    const responseClone = {
-      ...response,
-    };
-    if (
-      responseClone.data?.data?.attributes &&
-      responseClone.data.data.attributes.isSubscriptionActive !== undefined
-    ) {
-      responseClone.data.data.attributes.isSubscriptionActive =
-        store.getState().auth.fullSubscription;
-    }
-    return responseClone;
+  axiosClient.get(ApiConfig.routes.subscriptionInfo, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
   });
+
+export const getPurchasedStreams = () =>
+  axiosClient.get(ApiConfig.routes.checkoutPurchasedStreams, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
+
+export const getAllEvalibleEventsForPPV = () =>
+  axiosClient.get(ApiConfig.routes.checkoutPayPerView, {
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
+
+export const getEventsByFeeIds = (feeIds: string) =>
+  axiosClient.get(ApiConfig.routes.digitalEvents, {
+    params: { feeIds },
+    auth: ApiConfig.auth,
+    baseURL: store.getState().settings.isProductionEnv
+      ? ApiConfig.host
+      : ApiConfig.stagingEnv,
+  });
+
+export const getAccessToWatchVideo = async (
+  getVideoDetails: Promise<any>,
+): Promise<{ [key: string]: any }> => {
+  const digitalEventVideoResponse = await getVideoDetails;
+  const videoFromPrismic = digitalEventVideoResponse.results.find(
+    (prismicResponseResult: any) =>
+      prismicResponseResult.data?.video?.video_type === 'performance',
+  );
+
+  if (videoFromPrismic === undefined || !videoFromPrismic.id) {
+    throw new UnableToCheckRentalStatusError();
+  }
+  const subscriptionResponse = await getSubscribeInfo();
+  if (
+    subscriptionResponse.status >= 200 &&
+    subscriptionResponse.status < 400 &&
+    subscriptionResponse?.data?.data?.attributes?.isSubscriptionActive
+  ) {
+    return videoFromPrismic;
+  }
+  const purchasedStreamsResponse = await getPurchasedStreams();
+  if (
+    purchasedStreamsResponse.status >= 200 &&
+    purchasedStreamsResponse.status < 400 &&
+    Array.isArray(purchasedStreamsResponse?.data?.data?.attributes?.streams) &&
+    purchasedStreamsResponse.data.data.attributes.streams.length
+  ) {
+    const ids: Array<string> =
+      purchasedStreamsResponse.data.data.attributes.streams.map(
+        (stream: {
+          stream_id: string;
+          stream_desc: string;
+          purchase_dt: string;
+        }) => stream.stream_id,
+      );
+    if (ids.length) {
+      const eventsForPPVPromiseSettledResponse: Array<
+        PromiseSettledResult<AxiosResponse<any>>
+      > = await eventsOnFeePromiseFill(ids);
+      const eventsForPPVData = eventsForPPVPromiseSettledResponse.reduce<{
+        data: Array<any>;
+        included: Array<any>;
+      }>(
+        (acc, item) => {
+          if (item.status === 'fulfilled') {
+            acc.data = acc.data.concat(
+              Array.isArray(item.value.data?.data) ? item.value.data.data : [],
+            );
+            acc.included = acc.included.concat(
+              Array.isArray(item.value.data?.included)
+                ? item.value.data.included
+                : [],
+            );
+          }
+          return acc;
+        },
+        { data: [], included: [] },
+      );
+      if (
+        eventsForPPVData.included.some(
+          (item: any) =>
+            item.type === 'videoInfo' && item.id === videoFromPrismic.id,
+        )
+      ) {
+        return videoFromPrismic;
+      }
+      throw new NotRentedItemError();
+    } else {
+      const allAvalibleEventsForPPVResponse =
+        await getAllEvalibleEventsForPPV();
+      if (
+        allAvalibleEventsForPPVResponse.status >= 400 ||
+        !Array.isArray(
+          allAvalibleEventsForPPVResponse.data?.data?.attributes?.fees,
+        )
+      ) {
+        throw new UnableToCheckRentalStatusError();
+      }
+      const feesIds: Array<string> =
+        allAvalibleEventsForPPVResponse.data.data.attributes.fees.reduce(
+          (acc: Array<string>, item: any) => {
+            if (item.Id !== null && item.Id !== undefined) {
+              acc.push(item.Id.toString());
+            }
+            return acc;
+          },
+          [],
+        );
+      if (!feesIds.length) {
+        throw new NonSubscribedStatusError();
+      }
+      const availablePPVEventsWithPrismicRelationPromiseSettledResponse: Array<
+        PromiseSettledResult<AxiosResponse<any>>
+      > = await eventsOnFeePromiseFill(feesIds);
+      const availablePPVEventsWithPrismicRelation =
+        availablePPVEventsWithPrismicRelationPromiseSettledResponse.reduce<{
+          data: Array<any>;
+          included: Array<any>;
+        }>(
+          (acc, item) => {
+            if (item.status === 'fulfilled') {
+              acc.data = acc.data.concat(
+                Array.isArray(item.value.data?.data)
+                  ? item.value.data.data
+                  : [],
+              );
+              acc.included = acc.included.concat(
+                Array.isArray(item.value.data?.included)
+                  ? item.value.data.included
+                  : [],
+              );
+            }
+            return acc;
+          },
+          { data: [], included: [] },
+        );
+      if (
+        availablePPVEventsWithPrismicRelation.data
+          .filter(item => item.type === 'digitalEvent')
+          .some(item => item.id === videoFromPrismic.id)
+      ) {
+        throw new NotRentedItemError();
+      } else {
+        throw new NonSubscribedStatusError();
+      }
+    }
+  }
+  throw new UnableToCheckRentalStatusError();
+};
+
+export function eventsOnFeePromiseFill(
+  ids: Array<string>,
+  maxCountIdsForResponse: number = 50,
+): Promise<PromiseSettledResult<AxiosResponse<any>>[]> {
+  const maxChunksIndex = Math.ceil(ids.length / maxCountIdsForResponse) - 1;
+  const allPromises: Array<Promise<AxiosResponse<any>>> = [];
+  for (let i = 0; i <= maxChunksIndex; i++) {
+    allPromises.push(
+      getEventsByFeeIds(
+        ids
+          .slice(i * maxCountIdsForResponse, (i + 1) * maxCountIdsForResponse)
+          .join(','),
+      ),
+    );
+  }
+  return Promise.allSettled(allPromises);
+}

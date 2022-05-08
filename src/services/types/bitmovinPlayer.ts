@@ -64,4 +64,12 @@ export type TBMPlayerShowingData = {
   poster?: string;
   subtitle?: string;
   position?: string;
+  eventId: string;
+  savePosition?: boolean;
+};
+
+export type TBMPlayerErrorObject = {
+  errCode: string;
+  errMessage: string;
+  url?: string;
 };

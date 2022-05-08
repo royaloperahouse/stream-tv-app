@@ -12,9 +12,14 @@ import RohText from '@components/RohText';
 import get from 'lodash.get';
 import FastImage from 'react-native-fast-image';
 import { Colors } from '@themes/Styleguide';
+import { OverflowingContainer } from '@components/OverflowingContainer';
 
 export type TPreviewRef = {
-  setDigitalEvent?: (digitalEvent: TEventContainer) => void;
+  setDigitalEvent?: (
+    digitalEvent: TEventContainer,
+    eveGroupTitle?: string,
+  ) => void;
+  setShowContinueWatching?: (showContinueWatching: boolean) => void;
 };
 
 type TPreviewProps = {};
@@ -23,35 +28,37 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   const fadeAnimation = useRef<Animated.Value>(new Animated.Value(0)).current;
   const mountedRef = useRef<boolean>(false);
   const [event, setEvent] = useState<TEvent | null>(null);
+  const [eventGroupTitle, setEventGroupTitle] = useState<string>('');
   useImperativeHandle(
     ref,
     () => ({
-      setDigitalEvent: (digitalEvent: TEventContainer) => {
+      setDigitalEvent: (
+        digitalEvent: TEventContainer,
+        eveGroupTitle: string = '',
+      ) => {
         if (mountedRef.current) {
           setEvent(digitalEvent.data);
+          setEventGroupTitle(eveGroupTitle);
         }
       },
     }),
     [],
   );
-  const eventGroupTitle: string = get(
-    event,
-    ['vs_event_details', 'tags', '0', 'attributes', 'title'],
-    '',
-  );
+
   const eventTitle: string =
-    get(event, ['vs_event_details', 'title'], '').replace(
-      /(<([^>]+)>)/gi,
-      '',
-    ) || get(event, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '');
-  const shortDescription: string = get(
-    event,
-    ['vs_event_details', 'shortDescription'],
-    '',
-  ).replace(/(<([^>]+)>)/gi, '');
+    get(event, ['vs_title', '0', 'text'], '').replace(/(<([^>]+)>)/gi, '') ||
+    get(event, ['vs_event_details', 'title'], '').replace(/(<([^>]+)>)/gi, '');
+  const shortDescription: string = !event
+    ? ''
+    : (
+        event.vs_short_description.reduce((acc, sDescription) => {
+          acc += sDescription.text + '\n';
+          return acc;
+        }, '') || get(event, ['vs_event_details', 'shortDescription'], '')
+      ).replace(/(<([^>]+)>)/gi, '');
   const snapshotImageUrl: string = get(
     event,
-    ['vs_background', '0', 'vs_background_image', 'url'],
+    ['vs_event_image', 'wide_event_image', 'url'],
     '',
   );
 
@@ -74,23 +81,27 @@ const Preview = forwardRef<TPreviewRef, TPreviewProps>((props, ref) => {
   return (
     <Animated.View
       style={[styles.previewContainer, { opacity: fadeAnimation }]}>
-      {Boolean(event) && (
-        <>
-          <View style={styles.descriptionContainer}>
-            <RohText style={styles.pageTitle}>{eventGroupTitle}</RohText>
-            <RohText style={styles.title}>{eventTitle}</RohText>
-            {/* <RohText style={styles.ellipsis}>{event.captionText}</RohText> */}
-            <RohText style={styles.description}>{shortDescription}</RohText>
-          </View>
-          <View style={styles.snapshotContainer}>
-            <FastImage
-              resizeMode={FastImage.resizeMode.cover}
-              style={styles.previewImage}
-              source={{ uri: snapshotImageUrl }}
-            />
-          </View>
-        </>
-      )}
+      <View style={styles.descriptionContainer}>
+        <OverflowingContainer
+          fixedHeight
+          contentMaxVisibleHeight={
+            styles.previewContainer.height -
+            styles.descriptionContainer.marginTop
+          }>
+          <RohText style={styles.pageTitle}>{eventGroupTitle}</RohText>
+          <RohText style={styles.title}>{eventTitle}</RohText>
+          {/* <RohText style={styles.ellipsis}>{event.captionText}</RohText> */}
+          <RohText style={styles.description}>{shortDescription}</RohText>
+        </OverflowingContainer>
+      </View>
+
+      <View style={styles.snapshotContainer}>
+        <FastImage
+          resizeMode={FastImage.resizeMode.cover}
+          style={styles.previewImage}
+          source={{ uri: snapshotImageUrl }}
+        />
+      </View>
     </Animated.View>
   );
 });

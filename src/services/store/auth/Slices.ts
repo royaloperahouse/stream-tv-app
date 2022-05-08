@@ -3,22 +3,31 @@ import { createSlice } from '@reduxjs/toolkit';
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
+  isLoaded: boolean;
   devicePin: null | string;
   customerId: null | number;
   showIntroScreen: boolean;
   errorString: string;
   fullSubscription: boolean;
+  fullSubscriptionUpdateDate: string;
+  userEmail: string;
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
+  isLoaded: false,
   devicePin: null,
   customerId: null,
   showIntroScreen: true,
   errorString: '',
   fullSubscription: false,
+  fullSubscriptionUpdateDate: '',
+  userEmail: '',
 };
+
+const defaultPinError =
+  'Sorry, there has been an error retrieving the pin code. Please try again later';
 
 const appSlice = createSlice({
   name: 'auth',
@@ -26,6 +35,8 @@ const appSlice = createSlice({
   reducers: {
     startLoginLoop: state => state,
     endLoginLoop: state => state,
+    startFullSubscriptionLoop: state => state,
+    endFullSubscriptionLoop: state => state,
     switchOnIntroScreen: state => {
       state.showIntroScreen = true;
     },
@@ -37,23 +48,35 @@ const appSlice = createSlice({
     },
     checkDeviceSuccess: (state, { payload }) => {
       state.isAuthenticated = true;
-      state.customerId = payload.data.attributes.customerId;
+      state.customerId = 5158975 || payload.data.attributes.customerId; //5158973, 5158974, 5158975 for payPerViewv
       state.devicePin = payload.data.attributes.deviceId;
       state.isLoading = false;
       state.showIntroScreen = false;
       state.errorString = '';
+      state.userEmail = payload.data.attributes.email;
+      state.isLoaded = true;
     },
     checkDeviceError: (state, { payload }) => {
       state.devicePin = payload?.detail || '';
-      state.showIntroScreen = false;
       if (payload.status !== 401) {
-        state.errorString = `${payload.status} - ${payload?.title}`;
+        state.errorString =
+          payload.status && payload.title
+            ? `${payload.status} - ${payload.title}`
+            : defaultPinError;
       }
       state.isLoading = false;
+      state.isLoaded = true;
     },
     clearAuthState: () => ({ ...initialState }),
     toggleSubscriptionMode: state => {
       state.fullSubscription = !state.fullSubscription;
+    },
+    updateSubscriptionMode: (state, { payload }) => {
+      if (state.fullSubscription === payload.fullSubscription) {
+        return state;
+      }
+      state.fullSubscription = payload.fullSubscription;
+      state.fullSubscriptionUpdateDate = payload.fullSubscriptionUpdateDate;
     },
   },
 });
@@ -68,6 +91,9 @@ export const {
   endLoginLoop,
   clearAuthState,
   toggleSubscriptionMode,
+  startFullSubscriptionLoop,
+  endFullSubscriptionLoop,
+  updateSubscriptionMode,
 } = appSlice.actions;
 
 export const { reducer, name } = appSlice;

@@ -1,17 +1,27 @@
-import React from 'react';
+import React, {
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  createRef,
+  useLayoutEffect,
+} from 'react';
 import { ViewStyle, StyleSheet, VirtualizedList } from 'react-native';
 import ExpandableButton from './ExpandableButton';
 export enum EActionButtonListType {
   common,
+  withoutTrailers,
 }
 
 type TActionButton = {
   text: string;
   Icon: any;
   onPress: (...args: Array<any>) => void;
-  onFocus: (...args: Array<any>) => void;
+  onFocus?: (...args: Array<any>) => void;
+  onBlur?: (...args: Array<any>) => void;
   key: string;
   hasTVPreferredFocus?: boolean;
+  showLoader?: boolean;
+  freezeButtonAfterPressing?: boolean;
 };
 
 type ActionButtonListProps = {
@@ -22,35 +32,74 @@ type ActionButtonListProps = {
   style?: ViewStyle;
 };
 
-const ActionButtonList: React.FC<ActionButtonListProps> = ({
-  type,
-  buttonsFactory,
-  style = {},
-}) => {
+export type TActionButtonListRef = Partial<{
+  focusOnFirstAvalibleButton: () => void;
+}>;
+
+const ActionButtonList = forwardRef<
+  TActionButtonListRef,
+  ActionButtonListProps
+>(({ type, buttonsFactory, style = {} }, ref) => {
+  const isMounted = useRef<boolean>(false);
   const buttonList = buttonsFactory(type);
+  const expandableButtonsRefs = useRef<Partial<{ [key: string]: any }>>({});
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusOnFirstAvalibleButton: () => {
+        const firstAvalibleButtonRef = Object.values(
+          expandableButtonsRefs.current,
+        )[0];
+        if (
+          isMounted.current &&
+          firstAvalibleButtonRef !== undefined &&
+          typeof firstAvalibleButtonRef?.current?.setNativeProps === 'function'
+        ) {
+          firstAvalibleButtonRef.current.setNativeProps({
+            hasTVPreferredFocus: true,
+          });
+        }
+      },
+    }),
+    [],
+  );
+  useLayoutEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   return (
     <VirtualizedList
       listKey={'eventDetailsActionButtonList'}
       style={[styles.root, style]}
-      keyExtractor={(item, index) => item[index].key}
+      keyExtractor={item => item.key}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       data={buttonList}
       initialNumToRender={5}
-      renderItem={({ item, index }) => (
+      renderItem={({ item }) => (
         <ExpandableButton
-          text={item[index].text}
-          Icon={item[index].Icon}
-          hasTVPreferredFocus={item[index].hasTVPreferredFocus || false}
-          focusCallback={item[index].onFocus}
-          onPress={item[index].onPress}
+          ref={
+            expandableButtonsRefs.current[item.key]
+              ? expandableButtonsRefs.current[item.key]
+              : (expandableButtonsRefs.current[item.key] = createRef())
+          }
+          text={item.text}
+          Icon={item.Icon}
+          hasTVPreferredFocus={item.hasTVPreferredFocus || false}
+          focusCallback={item.onFocus}
+          blurCallback={item.onBlur}
+          onPress={item.onPress}
+          showLoader={item.showLoader}
+          freezeButtonAfterPressing={item.freezeButtonAfterPressing}
         />
       )}
       getItemCount={(data: Array<TActionButton>) => data?.length || 0}
-      getItem={(data: Array<TActionButton>) => [...data]}
+      getItem={(data: Array<TActionButton>, index: number) => data[index]}
     />
   );
-};
+});
 
 const styles = StyleSheet.create({
   root: {

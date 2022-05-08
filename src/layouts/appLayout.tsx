@@ -3,7 +3,12 @@ import { useSelector, shallowEqual, useDispatch } from 'react-redux';
 import {
   introScreenShowSelector,
   deviceAuthenticatedSelector,
+  deviceAuthenticatedInfoLoadedSelector,
 } from '@services/store/auth/Selectors';
+import {
+  checkDeviceSuccess,
+  checkDeviceError,
+} from '@services/store/auth/Slices';
 import IntroScreen from '@screens/introScreen';
 import LoginScreen from '@screens/loginScreen';
 import MainLayout from '@layouts/mainLayout';
@@ -13,6 +18,10 @@ import {
   getEventListLoopStop,
 } from '@services/store/events/Slices';
 import RNBootSplash from 'react-native-bootsplash';
+import { verifyDevice } from '@services/apiClient';
+import { useFeature } from 'flagged';
+import LoginWithoutQRCodeScreen from '@screens/LoginWithoutQRCodeScreen';
+import { TVEventManager } from '@services/tvRCEventListener';
 
 type TAppLayoutProps = {};
 const AppLayout: React.FC<TAppLayoutProps> = () => {
@@ -23,6 +32,11 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
     deviceAuthenticatedSelector,
     shallowEqual,
   );
+  const deviceAuthInfoLoaded = useSelector(
+    deviceAuthenticatedInfoLoadedSelector,
+    shallowEqual,
+  );
+  const hasQRCode = useFeature('hasQRCode');
   useEffect(() => {
     const _handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (
@@ -58,11 +72,37 @@ const AppLayout: React.FC<TAppLayoutProps> = () => {
       });
     }
   });
-  if (showIntroScreen) {
+
+  useEffect(() => {
+    if (!deviceAuthInfoLoaded) {
+      verifyDevice().then(response => {
+        if (response?.data?.data?.attributes?.customerId) {
+          dispatch(getEventListLoopStart());
+          dispatch(checkDeviceSuccess(response.data));
+          TVEventManager.init();
+        } else if (response?.data?.errors?.length) {
+          const errObj = response.data.errors[0];
+          dispatch(checkDeviceError(errObj));
+        }
+      });
+    }
+  }, [deviceAuthInfoLoaded]);
+
+  useLayoutEffect(
+    () => () => {
+      TVEventManager.unmount();
+    },
+    [],
+  );
+
+  if (
+    !deviceAuthInfoLoaded ||
+    (deviceAuthInfoLoaded && !isAuthenticated && showIntroScreen)
+  ) {
     return <IntroScreen />;
   }
   if (!isAuthenticated) {
-    return <LoginScreen />;
+    return hasQRCode ? <LoginScreen /> : <LoginWithoutQRCodeScreen />;
   }
   return <MainLayout />;
 };

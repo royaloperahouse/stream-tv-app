@@ -1,8 +1,10 @@
 import {
   SignOut,
-  SwitchSubscriptionMode,
+  Account,
+  AppVersion,
+  SwitchingBetweenEnvironments,
 } from '@components/SettingsComponents';
-
+import { store } from '@services/store';
 export const settingsTitle = 'SETTINGS';
 
 export type TSettingsSection = {
@@ -10,29 +12,37 @@ export type TSettingsSection = {
   navMenuItemTitle: string;
   ContentComponent: React.FC<{ listItemGetNode?: () => number }>;
 };
-// TODO: put back in right order before main merge!
-export const settingsSectionsConfig: {
+
+export const getSettingsSectionsConfig: () => {
   [key: string]: TSettingsSection;
-} = {
-  switchSubscriptionMode: {
-    key: 'switchSubscriptionMode',
-    navMenuItemTitle: 'SUBSCRIPTION',
-    ContentComponent: SwitchSubscriptionMode,
-  },
-  account: {
-    key: 'account',
-    navMenuItemTitle: 'ACCOUNT',
-    ContentComponent: () => null,
-  },
-  signOut: {
-    key: 'signOut',
-    navMenuItemTitle: 'SIGN OUT',
-    ContentComponent: SignOut,
-  },
+} = () => {
+  const settingsSections: {
+    [key: string]: TSettingsSection;
+  } = {
+    account: {
+      key: 'account',
+      navMenuItemTitle: 'ACCOUNT',
+      ContentComponent: Account,
+    },
+    signOut: {
+      key: 'signOut',
+      navMenuItemTitle: 'SIGN OUT',
+      ContentComponent: SignOut,
+    },
+    appVersion: {
+      key: 'appVersion',
+      navMenuItemTitle: 'APP VERSION',
+      ContentComponent: AppVersion,
+    },
+  };
+  if (store.getState().auth.userEmail.includes('roh.org.uk')) {
+    settingsSections.switchingBetweenEnv = {
+      key: 'switchingBetweenEnv',
+      navMenuItemTitle: 'ENVIRONMENT SWITCHING',
+      ContentComponent: SwitchingBetweenEnvironments,
+    };
+  }
+  return settingsSections;
 };
 
-const collectionOfSettingsSections: Array<TSettingsSection> = Object.values(
-  settingsSectionsConfig,
-);
-
-export default collectionOfSettingsSections;
+export default () => Object.values(getSettingsSectionsConfig());

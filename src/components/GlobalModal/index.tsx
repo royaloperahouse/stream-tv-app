@@ -8,16 +8,15 @@ import React, {
 import { View, StyleSheet, Animated } from 'react-native';
 import WithLogo from '@components/WithLogo';
 import WithBackground from '@components/WithBackground';
-import { TDefaultGlobalModalContentProps } from '@services/types/globalModal';
+import { TGlobalModalContentProps } from '@services/types/globalModal';
 const fadeDuration = 500;
 type TGlobalModalProps = {};
 export type TGlobalModalConfig = {
   hasLogo?: boolean;
   hasBackground?: boolean;
-  contentComponent: React.FC<
-    TDefaultGlobalModalContentProps & { [key: string]: any }
-  >;
-  contentProps: TDefaultGlobalModalContentProps & { [key: string]: any };
+  backgroundImageUrl?: string;
+  contentComponent: React.FC<TGlobalModalContentProps | any>;
+  contentProps: TGlobalModalContentProps;
 };
 const globalModalRef = createRef<
   Partial<{
@@ -85,6 +84,9 @@ const GlobalModal: React.FC<TGlobalModalProps> = () => {
           if (typeof cb === 'function') {
             cb();
           }
+          if (!mounted.current) {
+            return;
+          }
           setOpen(null);
         });
       },
@@ -115,13 +117,22 @@ const GlobalModal: React.FC<TGlobalModalProps> = () => {
 
   useLayoutEffect(() => {
     mounted.current = true;
+    return () => {
+      if (mounted?.current) {
+        mounted.current = false;
+      }
+    };
   }, []);
 
   if (open && open.hasLogo !== false) {
     returnetContent = <WithLogo>{returnetContent}</WithLogo>;
   }
   if (open && open.hasBackground !== false) {
-    returnetContent = <WithBackground>{returnetContent}</WithBackground>;
+    returnetContent = (
+      <WithBackground url={open.backgroundImageUrl}>
+        {returnetContent}
+      </WithBackground>
+    );
   }
   return (
     <Animated.View style={[styles.overlayLayer, { opacity: fadeAnimation }]}>

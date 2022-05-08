@@ -3,20 +3,6 @@ interface Cast {
   name: string;
 }
 
-export interface EventModel {
-  id: number;
-  title: string;
-  type: string;
-  captionText: string;
-  shortDescription: string;
-  description: string;
-  thumbnailImage: string;
-  previewImage: string;
-  info: string;
-  cast: Array<Cast>;
-  creatives: Array<Cast>;
-}
-
 export type TRoutes = Array<TRoute>;
 
 export type TRoute = {
@@ -45,7 +31,7 @@ export type TEvent = {
   vs_event_card_primary_cta_link: {
     link_tytpe: string;
   };
-  vs_description: TVSDescription;
+  vs_description: Array<TVSDescription>;
   vs_price_details: null | any; // need better type;
   vs_guidance: null | any; // need better type;
   vs_guidance_details: Array<any>; // need better type;
@@ -62,6 +48,12 @@ export type TEvent = {
   vs_labels: Array<{ tag: string }>; //example Available soon
   vs_genres: Array<{ tag: string }>; //example Romance
   vs_behind_the_scenes: Array<any>; // need better type;
+  diese_activity: TDieseActivity | null;
+  tags: Array<{ tag: string | null }>;
+  vs_tray_image: TVSTrayImage;
+  vs_short_description: Array<TVSDescription>;
+  vs_synopsis: Array<TVSSynops>;
+  vs_sponsors: Array<TVSSponsor>;
 };
 
 export type TVSTitle = {
@@ -203,11 +195,84 @@ export type TVSBackgroundImage = {
 export type TBitMovinPlayerSavedPosition = {
   id: string;
   position: string;
-  eventId?: string;
+  eventId: string;
 };
 
 export type TEventVideo = {
   id: string;
   video_type: 'performance' | 'trailer' | 'behind_the_scenes';
   performanceVideoURL: string;
+};
+
+export type TDieseActivity = {
+  activity_id: number;
+  start: string;
+  end: string;
+  activity_type: string;
+  activity_status: 'Confirmed';
+  activity_venue: string;
+  activity_production: string;
+  production_id: number;
+  cast: Array<TDieseActivityCast>;
+  creatives: Array<TDieseActitvityCreatives>;
+};
+
+export type TDieseActivityCast = {
+  contact_lastName: string;
+  contact_firstName: string;
+  role_title: string;
+  role_order: number;
+  roleCategory_title: string;
+  attendingArtist_isCover: number;
+};
+
+export type TDieseActitvityCreatives = {
+  contact_lastName: string;
+  contact_firstName: string;
+  role_title: string;
+  role_order: number;
+  roleCategory_title: string;
+};
+
+export type TVSTrayImage = {
+  dimensions: {
+    width: number;
+    height: number;
+  };
+  alt: string | null;
+  copyright: string | null;
+  url: string;
+  large_tray_video: {
+    dimensions: {
+      width: number;
+      height: number;
+    };
+    alt: string | null;
+    copyright: string | null;
+    url: string;
+  };
+};
+
+export type TVSSynops = { type: string; text: string; spans: Array<any> };
+export type TVSSponsor = {
+  sponsor_title: Array<{
+    type: string;
+    text: string;
+    spans: Array<any>;
+  }>;
+  sponsor_intro: Array<{
+    type: string;
+    text: string;
+    spans: Array<any>;
+  }>;
+  sponsor_logo: {
+    dimensions?: { width: number; height: number };
+    alt?: string | null;
+    copyright?: string | null;
+    url?: string;
+  };
+  sponsor_logo_link: {
+    link_type: string;
+  };
+  sponsor_description: Array<{ type: string; text: string; spans: Array<any> }>;
 };

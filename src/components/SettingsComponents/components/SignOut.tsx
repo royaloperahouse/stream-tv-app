@@ -9,7 +9,11 @@ import {
   clearEventState,
   getEventListLoopStop,
 } from '@services/store/events/Slices';
-import { clearAuthState, endLoginLoop } from '@services/store/auth/Slices';
+import {
+  clearAuthState,
+  endLoginLoop,
+  endFullSubscriptionLoop,
+} from '@services/store/auth/Slices';
 import { pinUnlink } from '@services/apiClient';
 import { clearPrevSearchList } from '@services/previousSearch';
 import { clearListOfBitmovinSavedPosition } from '@services/bitMovinPlayer';
@@ -29,6 +33,7 @@ const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
         }
         dispatch(getEventListLoopStop());
         dispatch(endLoginLoop());
+        dispatch(endFullSubscriptionLoop());
         dispatch(clearAuthState());
         dispatch(clearEventState());
         return Promise.all([

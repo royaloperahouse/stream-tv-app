@@ -5,6 +5,7 @@ import React, {
   useLayoutEffect,
   useRef,
   useCallback,
+  useEffect,
 } from 'react';
 import {
   View,
@@ -12,30 +13,37 @@ import {
   Animated,
   FlatList,
   SafeAreaView,
+  BackHandler,
 } from 'react-native';
-import TVEventHandler from 'react-native/Libraries/Components/AppleTV/TVEventHandler';
 import { Colors, PlayerIcons } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 
 import ControlButton from './ControlButton';
 import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
 import RohText from '@components/RohText';
-import { useAndroidBackHandler } from 'react-navigation-backhandler';
 import SubtitlesItem from './SubtitlesItem';
 import ArrowDropdown from '@assets/svg/player/ArrowDropdownForPlayer.svg';
+import { ESeekOperations } from '@configs/playerConfig';
+import { TVEventManager } from '@services/tvRCEventListener';
+
 type TPlayerControlsProps = {
   duration: number;
   playerLoaded: boolean;
   title: string;
   subtitle: string;
   onPlayPress: () => void;
-  onSeekForwardPress: () => void;
-  onSeekBackwardPress: () => void;
   onRestartPress: () => void;
   onPausePress: () => void;
   onClose: () => void;
   setSubtitle: (trackId: string) => void;
   autoPlay: boolean;
+  subtitleCue: string;
+  calculateTimeForSeeking: (
+    startTime: number,
+    countOfSeekingIteration: number,
+    seekOp: ESeekOperations,
+  ) => number;
+  seekTo: (time: number) => void;
 };
 
 export type TPlayerControlsRef = {
@@ -44,6 +52,8 @@ export type TPlayerControlsRef = {
   loadSubtitleList?: (subtitles: TSubtitles) => void;
   controlFadeIn?: () => void;
   controlFadeOut?: () => void;
+  setSeekQueueFree?: () => void;
+  seekUpdatingFinished?: () => void;
 };
 
 const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
@@ -53,27 +63,39 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
       title,
       subtitle,
       onPlayPress,
-      onSeekForwardPress,
-      onSeekBackwardPress,
       onRestartPress,
       onPausePress,
       onClose,
       setSubtitle,
+      playerLoaded,
+      autoPlay,
+      subtitleCue,
+      calculateTimeForSeeking,
+      seekTo,
     } = props;
-    const tvEventHandler = useRef<typeof TVEventHandler>(new TVEventHandler());
-    const tvEventFireCounter = useRef<number>(0);
+    const otherRCTVEvents = useRef<Array<(_: any, event: any) => void>>([]);
     const activeAnimation = useRef<Animated.Value>(
-      new Animated.Value(1),
+      new Animated.Value(0),
     ).current;
-    const [isPlaying, setPlaying] = useState(false);
     const isPlayingRef = useRef<boolean>(false);
     const controlMountedRef = useRef<boolean>(false);
     const progressBarRef = useRef<TProgressBarRef | null>(null);
     const subtitleButtonRef = useRef<null | TTouchableHighlightWrapperRef>(
       null,
     );
+    const centralControlsRef = useRef<TCentralControlsRef | null>(null);
     const subtitlesRef = useRef<null | TSubtitlesRef>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const controlPanelVisibleRef = useRef<boolean>(true);
+    const [hasSubtitles, setHasSubtitles] = useState<boolean>(false);
+    const countOfFastForwardClicks = useRef<number>(0);
+    const countOfRewindClicks = useRef<number>(0);
+    const seekQueueuBusy = useRef<boolean>(false);
+    const seekUpdatingOnDevice = useRef<boolean>(false);
+    const startPointForSeek = useRef<number>(0.0);
+    const seekOperation = useRef<ESeekOperations>(ESeekOperations.fastForward);
+    const exitButtonRef = useRef<null | TTouchableHighlightWrapperRef>(null);
+    const restartButtonRef = useRef<null | TTouchableHighlightWrapperRef>(null);
     const focusToSutitleButton = useCallback(() => {
       if (
         typeof subtitleButtonRef.current?.getRef === 'function' &&
@@ -89,15 +111,35 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         subtitlesRef.current.showSubtitles();
       }
     };
+    const getControlPanelVisible = useCallback(
+      () => controlPanelVisibleRef.current,
+      [],
+    );
     useImperativeHandle(
       ref,
       () => ({
         setCurrentTime: (time: number) => {
-          if (!controlMountedRef.current) {
+          const timeForSeeking: number = calculateTimeForSeeking(
+            startPointForSeek.current,
+            seekOperation.current === ESeekOperations.fastForward
+              ? countOfFastForwardClicks.current
+              : countOfRewindClicks.current,
+            seekOperation.current,
+          );
+          if (
+            !controlMountedRef.current ||
+            typeof progressBarRef.current?.setCurrentTime !== 'function'
+          ) {
             return;
           }
-          if (typeof progressBarRef.current?.setCurrentTime === 'function') {
+
+          if (!seekQueueuBusy.current) {
+            countOfRewindClicks.current = 0;
+            countOfFastForwardClicks.current = 0;
+            startPointForSeek.current = time;
             progressBarRef.current?.setCurrentTime(time);
+          } else if (timeForSeeking !== -1) {
+            progressBarRef.current?.setCurrentTime(timeForSeeking);
           }
         },
         setPlay: (play: boolean) => {
@@ -105,76 +147,302 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
             return;
           }
           isPlayingRef.current = play;
-          setPlaying(play);
+          if (typeof centralControlsRef.current?.setPlay === 'function') {
+            centralControlsRef.current.setPlay(play);
+          }
         },
         loadSubtitleList: (subtitles: TSubtitles) => {
           if (!controlMountedRef.current) {
             return;
+          }
+          if (subtitles.length > 1) {
+            setHasSubtitles(true);
           }
           if (typeof subtitlesRef?.current?.setsubtitleList === 'function') {
             subtitlesRef.current.setsubtitleList(subtitles);
           }
         },
         controlFadeIn: () => {
-          isPlayingRef.current = true;
           Animated.timing(activeAnimation, {
             toValue: 0,
             useNativeDriver: true,
             duration: 5000,
-          }).start();
+          }).start(({ finished }) => {
+            if (finished) {
+              controlPanelVisibleRef.current = false;
+            }
+          });
         },
         controlFadeOut: () => {
           Animated.timing(activeAnimation, {
             toValue: 1,
             useNativeDriver: true,
             duration: 500,
-          }).start();
+          }).start(({ finished }) => {
+            if (finished) {
+              controlPanelVisibleRef.current = true;
+            }
+          });
+        },
+        setSeekQueueFree: () => {
+          if (!controlMountedRef.current) {
+            return;
+          }
+          seekQueueuBusy.current = false;
+        },
+        seekUpdatingFinished: () => {
+          if (!controlMountedRef.current) {
+            return;
+          }
+          seekUpdatingOnDevice.current = false;
         },
       }),
-      [activeAnimation],
+      [calculateTimeForSeeking],
     );
 
     useLayoutEffect(() => {
-      tvEventHandler.current?.enable(null, (_: any, eve: any) => {
+      if (autoPlay && playerLoaded) {
+        activeAnimation.setValue(1);
+        controlPanelVisibleRef.current = true;
+        Animated.timing(activeAnimation, {
+          toValue: 0,
+          useNativeDriver: true,
+          duration: 5000,
+        }).start(({ finished }) => {
+          if (finished) {
+            controlPanelVisibleRef.current = false;
+          }
+        });
+      }
+      if (!autoPlay && playerLoaded) {
+        activeAnimation.setValue(1);
+        controlPanelVisibleRef.current = true;
+      }
+    }, [autoPlay && playerLoaded]);
+
+    useEffect(() => {
+      otherRCTVEvents.current = TVEventManager.getEventListeners();
+      return () => {
+        TVEventManager.setEventListeners(otherRCTVEvents.current);
+      };
+    }, []);
+
+    useEffect(() => {
+      TVEventManager.setEventListeners([
+        (_: any, eve: any) => {
+          if (eve?.eventType === 'blur' || eve?.eventType === 'focus') {
+            return;
+          }
+          if (eve.eventKeyAction === 0) {
+            switch (eve.eventType) {
+              case 'select': {
+                if (
+                  eve.target === centralControlsRef.current?.getFwdNode() &&
+                  seekUpdatingOnDevice.current === false &&
+                  (seekOperation.current === ESeekOperations.fastForward ||
+                    seekQueueuBusy.current === false)
+                ) {
+                  seekQueueuBusy.current = true;
+                  countOfFastForwardClicks.current++;
+                  seekOperation.current = ESeekOperations.fastForward;
+                  break;
+                }
+                if (
+                  eve.target === centralControlsRef.current?.getRwdNode() &&
+                  seekUpdatingOnDevice.current === false &&
+                  (seekOperation.current === ESeekOperations.rewind ||
+                    seekQueueuBusy.current === false)
+                ) {
+                  seekQueueuBusy.current = true;
+                  countOfRewindClicks.current++;
+                  seekOperation.current = ESeekOperations.rewind;
+                  break;
+                }
+                break;
+              }
+              case 'fastForward': {
+                if (
+                  seekUpdatingOnDevice.current ||
+                  (seekOperation.current !== ESeekOperations.fastForward &&
+                    seekQueueuBusy.current)
+                ) {
+                  break;
+                }
+                seekQueueuBusy.current = true;
+                countOfFastForwardClicks.current++;
+                seekOperation.current = ESeekOperations.fastForward;
+                break;
+              }
+              case 'rewind': {
+                if (
+                  seekUpdatingOnDevice.current ||
+                  (seekOperation.current !== ESeekOperations.rewind &&
+                    seekQueueuBusy.current)
+                ) {
+                  break;
+                }
+                seekQueueuBusy.current = true;
+                countOfRewindClicks.current++;
+                seekOperation.current = ESeekOperations.rewind;
+                break;
+              }
+              default:
+                break;
+            }
+          }
+
+          if (eve.eventKeyAction === 1) {
+            switch (eve.eventType) {
+              case 'select': {
+                if (
+                  eve.target === centralControlsRef.current?.getFwdNode() &&
+                  countOfFastForwardClicks.current &&
+                  seekOperation.current === ESeekOperations.fastForward
+                ) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfFastForwardClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfFastForwardClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
+                  break;
+                }
+                if (
+                  eve.target === centralControlsRef.current?.getRwdNode() &&
+                  countOfRewindClicks.current &&
+                  seekOperation.current === ESeekOperations.rewind
+                ) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfRewindClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfRewindClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
+                }
+                break;
+              }
+              case 'fastForward': {
+                if (countOfFastForwardClicks.current) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfFastForwardClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfFastForwardClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
+                }
+                break;
+              }
+              case 'rewind': {
+                if (countOfRewindClicks.current) {
+                  seekUpdatingOnDevice.current = true;
+                  const timeForSeeking: number = calculateTimeForSeeking(
+                    startPointForSeek.current,
+                    countOfRewindClicks.current,
+                    seekOperation.current,
+                  );
+                  if (timeForSeeking === -1) {
+                    countOfRewindClicks.current = 0;
+                    seekUpdatingOnDevice.current = false;
+                    seekQueueuBusy.current = false;
+                    break;
+                  }
+                  seekTo(timeForSeeking);
+                }
+                break;
+              }
+              case 'playPause': {
+                const currentPlayerAction = isPlayingRef.current
+                  ? onPausePress
+                  : onPlayPress;
+                currentPlayerAction();
+                break;
+              }
+              default:
+                break;
+            }
+          }
+
+          if (eve.eventKeyAction === 0) {
+            Animated.timing(activeAnimation, {
+              toValue: 1,
+              useNativeDriver: true,
+              duration: 500,
+            }).start(({ finished }) => {
+              if (!finished) {
+                activeAnimation.setValue(1);
+              }
+              controlPanelVisibleRef.current = true;
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
+              timeoutRef.current = setTimeout(() => {
+                if (!isPlayingRef.current) {
+                  return;
+                }
+                Animated.timing(activeAnimation, {
+                  toValue: 0,
+                  useNativeDriver: true,
+                  duration: 500,
+                }).start(({ finished: animationFinished }) => {
+                  if (animationFinished) {
+                    controlPanelVisibleRef.current = false;
+                  }
+                });
+              }, 5000);
+            });
+          }
+        },
+      ]);
+    }, [onPausePress, onPlayPress, calculateTimeForSeeking, seekTo]);
+
+    useLayoutEffect(() => {
+      const intervalId = setInterval(() => {
+        const timeForSeeking: number = calculateTimeForSeeking(
+          startPointForSeek.current,
+          seekOperation.current === ESeekOperations.fastForward
+            ? countOfFastForwardClicks.current
+            : countOfRewindClicks.current,
+          seekOperation.current,
+        );
         if (
           !controlMountedRef.current ||
-          eve?.eventType === 'blur' ||
-          eve?.eventType === 'focus'
+          typeof progressBarRef.current?.setCurrentTime !== 'function'
         ) {
           return;
         }
-        if (tvEventFireCounter.current === 1) {
-          tvEventFireCounter.current = 0;
-          Animated.timing(activeAnimation, {
-            toValue: 1,
-            useNativeDriver: true,
-            duration: 500,
-          }).start(({ finished }) => {
-            if (!finished) {
-              activeAnimation.setValue(1);
-            }
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            timeoutRef.current = setTimeout(() => {
-              if (!isPlayingRef.current) {
-                return;
-              }
-              Animated.timing(activeAnimation, {
-                toValue: 0,
-                useNativeDriver: true,
-                duration: 500,
-              }).start();
-            }, 5000);
-          });
-          return;
+        if (
+          !isPlayingRef.current &&
+          seekQueueuBusy.current &&
+          timeForSeeking !== -1
+        ) {
+          progressBarRef.current.setCurrentTime(timeForSeeking);
         }
-        tvEventFireCounter.current += 1;
-      });
+      }, 500);
       return () => {
-        tvEventHandler?.current.disable();
+        clearInterval(intervalId);
       };
-    }, [activeAnimation]);
+    }, [calculateTimeForSeeking]);
 
     useLayoutEffect(() => {
       controlMountedRef.current = true;
@@ -184,24 +452,31 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
         }
       };
     }, []);
-    useLayoutEffect(() => {
-      console.log('control render');
-    });
     return (
       <SafeAreaView style={styles.root}>
         <Animated.View style={[styles.container, { opacity: activeAnimation }]}>
           <View style={styles.topContainer}>
             <ControlButton
+              ref={exitButtonRef}
               icon={PlayerIcons.close}
               onPress={onClose}
               text="Exit"
-              visibleAnimation={activeAnimation}
+              canMoveLeft={false}
+              canMoveUp={false}
+              nextFocusRight={restartButtonRef.current?.getNode?.()}
+              nextFocusDown={centralControlsRef.current?.getRwdNode()}
+              getControlPanelVisible={getControlPanelVisible}
             />
             <ControlButton
+              ref={restartButtonRef}
               icon={PlayerIcons.restart}
               onPress={onRestartPress}
               text="Restart"
-              visibleAnimation={activeAnimation}
+              canMoveRight={false}
+              canMoveUp={false}
+              nextFocusLeft={exitButtonRef?.current?.getNode?.()}
+              getControlPanelVisible={getControlPanelVisible}
+              nextFocusDown={centralControlsRef.current?.getRwdNode()}
             />
           </View>
           <View style={styles.titleContainer}>
@@ -222,31 +497,28 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           </View>
           <ProgressBar duration={duration} ref={progressBarRef} />
           <View style={styles.controlContainer}>
-            <View style={styles.centralControls}>
-              <ControlButton
-                icon={PlayerIcons.seekBackward}
-                onPress={onSeekBackwardPress}
-                visibleAnimation={activeAnimation}
-              />
-              <ControlButton
-                icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
-                onPress={isPlaying ? onPausePress : onPlayPress}
-                hasTVPreferredFocus
-                visibleAnimation={activeAnimation}
-              />
-              <ControlButton
-                icon={PlayerIcons.seekForward}
-                onPress={onSeekForwardPress}
-                visibleAnimation={activeAnimation}
-              />
-            </View>
+            <CentralControls
+              onPausePress={onPausePress}
+              onPlayPress={onPlayPress}
+              ref={centralControlsRef}
+              hasSubtitles={hasSubtitles}
+              exitButtonNode={exitButtonRef.current?.getNode?.()}
+              getControlPanelVisible={getControlPanelVisible}
+              subtitlesButtonNode={subtitleButtonRef.current?.getNode?.()}
+            />
             <View style={styles.rightControls}>
-              <ControlButton
-                ref={subtitleButtonRef}
-                icon={PlayerIcons.subtitles}
-                onPress={openSubtitleListHandler}
-                visibleAnimation={activeAnimation}
-              />
+              {hasSubtitles && (
+                <ControlButton
+                  ref={subtitleButtonRef}
+                  icon={PlayerIcons.subtitles}
+                  onPress={openSubtitleListHandler}
+                  getControlPanelVisible={getControlPanelVisible}
+                  canMoveRight={false}
+                  canMoveDown={false}
+                  nextFocusUp={exitButtonRef.current?.getNode?.()}
+                  nextFocusLeft={centralControlsRef.current?.getFwdNode?.()}
+                />
+              )}
             </View>
           </View>
         </Animated.View>
@@ -255,6 +527,11 @@ const PlayerControls = forwardRef<TPlayerControlsRef, TPlayerControlsProps>(
           ref={subtitlesRef}
           setSubtitle={setSubtitle}
         />
+        {subtitleCue !== '' && (
+          <View style={styles.subtitleCueContainer}>
+            <RohText style={styles.subtitleCueText}>{subtitleCue}</RohText>
+          </View>
+        )}
       </SafeAreaView>
     );
   },
@@ -419,13 +696,23 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
     subtitlesMountedRef.current = true;
   }, []);
 
-  useAndroidBackHandler(() => {
-    if (showList) {
-      hideSubtitles();
-      return true;
-    }
-    return false;
-  });
+  useEffect(() => {
+    const handleBackButtonClick = () => {
+      if (showList) {
+        hideSubtitles();
+        return true;
+      }
+      return false;
+    };
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, [showList, hideSubtitles]);
+
   return (
     <SafeAreaView style={styles.subtitlesContainer}>
       <Animated.View
@@ -480,6 +767,108 @@ const Subtitles = forwardRef<TSubtitlesRef, TSubtitlesProps>((props, ref) => {
     </SafeAreaView>
   );
 });
+
+//Central Controls Component
+
+type TCentralControlsProps = {
+  onPausePress: () => void;
+  onPlayPress: () => void;
+  getControlPanelVisible: () => boolean;
+  hasSubtitles: boolean;
+  exitButtonNode?: number;
+  subtitlesButtonNode?: number;
+};
+type TCentralControlsRef = {
+  setPlay: (play: boolean) => void;
+  getFwdNode: () => number | undefined;
+  getRwdNode: () => number | undefined;
+};
+const CentralControls = forwardRef<TCentralControlsRef, TCentralControlsProps>(
+  (props, ref) => {
+    const {
+      onPausePress,
+      onPlayPress,
+      getControlPanelVisible,
+      hasSubtitles,
+      exitButtonNode,
+      subtitlesButtonNode,
+    } = props;
+    const centralControlsMounted = useRef<boolean>(false);
+    const [isPlaying, setPlaying] = useState(false);
+    const fwdRef = useRef<TTouchableHighlightWrapperRef | null>(null);
+    const rwdRef = useRef<TTouchableHighlightWrapperRef | null>(null);
+    const playRef = useRef<TTouchableHighlightWrapperRef | null>(null);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        setPlay: play => {
+          if (centralControlsMounted.current) {
+            setPlaying(play);
+          }
+        },
+        getFwdNode: () => {
+          if (
+            centralControlsMounted.current &&
+            typeof fwdRef.current?.getNode === 'function'
+          ) {
+            return fwdRef.current.getNode();
+          }
+        },
+        getRwdNode: () => {
+          if (
+            centralControlsMounted.current &&
+            typeof rwdRef.current?.getNode === 'function'
+          ) {
+            return rwdRef.current.getNode();
+          }
+        },
+      }),
+      [],
+    );
+
+    useLayoutEffect(() => {
+      centralControlsMounted.current = true;
+      return () => {
+        centralControlsMounted.current = false;
+      };
+    }, []);
+    return (
+      <View style={styles.centralControls}>
+        <ControlButton
+          icon={PlayerIcons.seekBackward}
+          ref={rwdRef}
+          getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          canMoveLeft={false}
+          nextFocusRight={playRef.current?.getNode?.()}
+          nextFocusUp={exitButtonNode}
+        />
+        <ControlButton
+          ref={playRef}
+          icon={isPlaying ? PlayerIcons.pause : PlayerIcons.play}
+          onPress={isPlaying ? onPausePress : onPlayPress}
+          hasTVPreferredFocus
+          getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          nextFocusUp={exitButtonNode}
+          nextFocusLeft={rwdRef.current?.getNode?.()}
+          nextFocusRight={fwdRef.current?.getNode?.()}
+        />
+        <ControlButton
+          ref={fwdRef}
+          icon={PlayerIcons.seekForward}
+          getControlPanelVisible={getControlPanelVisible}
+          canMoveDown={false}
+          nextFocusLeft={playRef.current?.getNode?.()}
+          canMoveRight={hasSubtitles}
+          nextFocusRight={subtitlesButtonNode}
+          nextFocusUp={exitButtonNode}
+        />
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   root: {
@@ -610,5 +999,21 @@ const styles = StyleSheet.create({
     marginTop: scaleSize(16),
     marginBottom: scaleSize(12),
     alignItems: 'center',
+  },
+  subtitleCueContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: scaleSize(100),
+    right: 0,
+    left: 0,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  subtitleCueText: {
+    textAlign: 'center',
+    color: 'white',
+    backgroundColor: 'black',
+    fontSize: scaleSize(32),
+    padding: scaleSize(4),
   },
 });

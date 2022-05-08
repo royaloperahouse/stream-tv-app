@@ -1,6 +1,16 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, { useRef, useLayoutEffect, useCallback, useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  AppState,
+  AppStateStatus,
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  startFullSubscriptionLoop,
+  endFullSubscriptionLoop,
+} from '@services/store/auth/Slices';
 import { digitalEventsForHomePageSelector } from '@services/store/events/Selectors';
 import {
   DigitalEventItem,
@@ -15,30 +25,114 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { useMyList } from '@hooks/useMyList';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { TRailSectionsProps } from '@components/EventListComponents/components/RailSections';
+import { useContinueWatchingList } from '@hooks/useContinueWatchingList';
+import { continueWatchingRailTitle } from '@configs/bitMovinPlayerConfig';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import { navMenuManager } from '@components/NavMenu';
 
 type THomePageScreenProps = {};
-const HomePageScreen: React.FC<THomePageScreenProps> = () => {
-  const myList = useMyList();
-  const data = useSelector(digitalEventsForHomePageSelector(myList));
+const HomePageScreen: React.FC<THomePageScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const dispatch = useDispatch();
+  const appState = useRef(AppState.currentState);
+  const { data: myList, ejected: myListEjected } = useMyList();
+  const { data: continueWatchingList, ejected: continueWatchingListEjected } =
+    useContinueWatchingList();
+  const { data, eventsLoaded } = useSelector(
+    digitalEventsForHomePageSelector(myList, continueWatchingList),
+  );
   const previewRef = useRef(null);
-  const viewRef = useRef<View>(null);
-  if (!data.length) {
+  const isFocused = useIsFocused();
+
+  useLayoutEffect(() => {
+    if (
+      isFocused &&
+      myListEjected &&
+      continueWatchingListEjected &&
+      eventsLoaded
+    ) {
+      if (!data.length) {
+        navMenuManager.setNavMenuAccessible();
+        navMenuManager.showNavMenu();
+        navMenuManager.setNavMenuFocus();
+      }
+    }
+  }, [
+    isFocused,
+    route,
+    data.length,
+    navigation,
+    continueWatchingListEjected,
+    myListEjected,
+    eventsLoaded,
+  ]);
+  useEffect(() => {
+    const _handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        dispatch(startFullSubscriptionLoop());
+      }
+      if (
+        appState.current === 'active' &&
+        nextAppState.match(/inactive|background/)
+      ) {
+        dispatch(endFullSubscriptionLoop());
+      }
+      appState.current = nextAppState;
+    };
+    AppState.addEventListener('change', _handleAppStateChange);
+
+    return () => {
+      AppState.removeEventListener('change', _handleAppStateChange);
+    };
+  }, [dispatch]);
+
+  useLayoutEffect(() => {
+    if (
+      typeof previewRef.current?.setDigitalEvent === 'function' &&
+      data.length
+    ) {
+      previewRef.current?.setDigitalEvent(data[0]?.data[0]);
+    }
+  }, [data]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(startFullSubscriptionLoop());
+      return () => {
+        dispatch(endFullSubscriptionLoop());
+      };
+    }, []),
+  );
+
+  if (!data.length || !continueWatchingListEjected || !myListEjected) {
     return null;
   }
 
-  console.log('homepage', viewRef.current);
+  const hasTVPreferredFocus = (
+    isFirstRail: boolean,
+    index: number,
+    sectionIndex: number,
+  ) => {
+    return route.params === undefined
+      ? isFirstRail && index === 0
+      : route.params.fromEventDetails &&
+          sectionIndex === route.params.sectionIndex &&
+          index === 0;
+  };
+
   return (
-    <TVFocusGuideView 
-      style={styles.root} 
-      destinations={[viewRef.current]}
-    >
+    <View style={styles.root}>
       <Preview ref={previewRef} />
-      <View ref={viewRef}>
+      <View>
         <RailSections
           containerStyle={styles.railContainerStyle}
           headerContainerStyle={styles.railHeaderContainerStyle}
+          sectionIndex={route?.params?.sectionIndex || 0}
           railStyle={styles.railStyle}
           sections={data}
           sectionKeyExtractor={item => item.sectionIndex?.toString()}
@@ -47,19 +141,42 @@ const HomePageScreen: React.FC<THomePageScreenProps> = () => {
               {section.title}
             </DigitalEventSectionHeader>
           )}
-          renderItem={({ item, section, index, scrollToRail }) => (
+          renderItem={({
+            item,
+            section,
+            index,
+            scrollToRail,
+            isFirstRail,
+            isLastRail,
+            sectionIndex,
+            setRailItemRefCb,
+            removeRailItemRefCb,
+            hasEndlessScroll,
+          }) => (
             <DigitalEventItem
               event={item}
               ref={previewRef}
-              canMoveUp={section.sectionIndex !== 0}
-              hasTVPreferredFocus={section.sectionIndex === 0 && index === 0}
+              screenNameFrom={route.name}
+              hasTVPreferredFocus={hasTVPreferredFocus(
+                isFirstRail,
+                index,
+                sectionIndex,
+              )}
               canMoveRight={index !== section.data.length - 1}
               onFocus={scrollToRail}
+              continueWatching={section.title === continueWatchingRailTitle}
+              eventGroupTitle={section.title}
+              sectionIndex={sectionIndex}
+              lastItem={index === section.data.length - 1}
+              setRailItemRefCb={setRailItemRefCb}
+              removeRailItemRefCb={removeRailItemRefCb}
+              canMoveDown={(isLastRail && hasEndlessScroll) || !isLastRail}
+              canMoveUp={!isFirstRail}
             />
           )}
         />
       </View>
-    </TVFocusGuideView>
+    </View>
   );
 };
 

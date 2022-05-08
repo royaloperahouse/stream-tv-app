@@ -63,7 +63,6 @@ function* saveSearchResultQueryWatcher() {
 function* getEventListLoopWorker(): any {
   while (true) {
     const result = [];
-    const eventIdsForHomePage: Array<string> = [];
     try {
       const initialResponse: ApiSearchResponse = yield call(
         getDigitalEventDetails,
@@ -92,21 +91,11 @@ function* getEventListLoopWorker(): any {
           ),
         );
       }
-    } catch (err) {
+    } catch (err: any) {
       logError('something went wrong with prismic request', err);
     }
     if (result.length) {
-      eventIdsForHomePage.push(
-        ...result.reduce((acc, event: any, index) => {
-          if (index % 2 === 0) {
-            acc.push(event.id);
-          }
-          return acc;
-        }, []),
-      );
       const resultForDigitalEventsDetailUpdate = groupDigitalEvents(result);
-      resultForDigitalEventsDetailUpdate.eventIdsForHomePage =
-        eventIdsForHomePage;
       yield put(
         getEventListSuccess({
           digitalEventDetailsList: resultForDigitalEventsDetailUpdate,
@@ -146,13 +135,21 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
           ),
         },
       };
-      const tags: Array<any> = Array.isArray(
-        digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
-      )
-        ? digitalEventDetail.data.vs_event_details.tags
-        : [];
+      const tags: Array<any> =
+        Array.isArray(digitalEventDetail?.data?.tags) &&
+        digitalEventDetail.data.tags.length &&
+        digitalEventDetail.data.tags.some((item: any) => !!item.tag)
+          ? digitalEventDetail.data.tags
+          : Array.isArray(
+              digitalEventDetail?.data?.vs_event_details?.tags, // can be null. need to improve it later
+            )
+          ? digitalEventDetail.data.vs_event_details.tags
+          : [];
       for (let i = 0; i < tags.length; i++) {
-        const groupKey = tags[i].attributes.title
+        if (tags[i].tag === null) {
+          continue;
+        }
+        const groupKey = (tags[i].tag || tags[i].attributes.title)
           .toLowerCase()
           .trim()
           .replace(/\s/g, '_');
@@ -160,7 +157,7 @@ function groupDigitalEvents(digitalEventsDetail: Array<any>): any {
           acc.eventGroups[groupKey].ids.push(digitalEventDetail.id);
         } else {
           acc.eventGroups[groupKey] = {
-            title: tags[i].attributes.title,
+            title: tags[i].tag || tags[i].attributes.title,
             ids: [digitalEventDetail.id],
           };
         }

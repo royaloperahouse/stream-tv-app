@@ -5,6 +5,7 @@ import {
   CommonActions,
   StackActions,
   DefaultTheme,
+  Route,
 } from '@react-navigation/native';
 import { TVMenuControl } from 'react-native';
  import 'react-native/tvos-types.d';
@@ -77,6 +78,14 @@ export function resetStackCacheAndNavigate(
         index: stateIndex,
       }),
     );
+  }
+}
+
+export function getCurrentRoute():
+  | Route<string, object | undefined>
+  | undefined {
+  if (isReady && navigationRef.current?.getCurrentRoute) {
+    return navigationRef.current.getCurrentRoute();
   }
 }
 

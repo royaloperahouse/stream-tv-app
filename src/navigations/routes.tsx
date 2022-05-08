@@ -5,6 +5,7 @@ import LiveStreamScreen from '@screens/LiveStreamScreen';
 import MyListScreen from '@screens/MyListScreen';
 import OperaMusicScreen from '@screens/OperaMusicScreen';
 import SettingsScreen from '@screens/SettingsScreen';
+import ExitScreen from '@screens/ExitScreen';
 
 import EventDetailsScreen from '@screens/EventDetailsScreen';
 import HomePageScreen from '@screens/HomePageScreen';
@@ -92,14 +93,19 @@ export const routes: TRoutes = [
 ];
 
 export const additionalRoutesWithoutNavMenuNavigation = {
-  eventDetais: {
+  eventDetails: {
     navMenuScreenName: 'eventDetails',
     ScreenComponent: EventDetailsScreen,
+    isDefault: false,
+  },
+  exit: {
+    navMenuScreenName: 'exit',
+    ScreenComponent: ExitScreen,
     isDefault: false,
   },
 };
 
 export const allRoutes = [
-  ...routes,
   ...Object.values(additionalRoutesWithoutNavMenuNavigation),
+  ...routes,
 ];

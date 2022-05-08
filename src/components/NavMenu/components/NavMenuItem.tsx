@@ -23,6 +23,7 @@ type TNavMenuItemProps = {
   setActiveMunuItemRef: (ref: React.RefObject<TouchableHighlight>) => void;
   isVisible: boolean;
   iconOpacityValue: Animated.AnimatedInterpolation;
+  nextFocusRight?: number;
 };
 const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   index,
@@ -38,6 +39,7 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   setActiveMunuItemRef,
   isVisible,
   iconOpacityValue,
+  nextFocusRight,
 }) => {
   const mountedComponentRef = useRef(false);
   const dynemicStyles = StyleSheet.create({
@@ -67,6 +69,7 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
       onFocus={onFocusHandler}
       onBlur={onBlur}
       accessible={isVisible}
+      nextFocusRight={nextFocusRight}
       style={dynemicStyles.touchableWrapperStyle}>
       <View style={styles.root}>
         <Animated.View

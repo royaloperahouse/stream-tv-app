@@ -1,38 +1,82 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
-import { TEventContainer } from '@services/types/models';
+import { TEvent, TEventContainer, TVSSynops } from '@services/types/models';
 import RohText from '@components/RohText';
 import GoDown from '../commonControls/GoDown';
 import get from 'lodash.get';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
+import MultiColumnSynopsisList from '../commonControls/MultiColumnSynopsisList';
 
 type SynopsisProps = {
   event: TEventContainer;
   nextScreenText: string;
+  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
+  screenName: string;
 };
 
-const Synopsis: React.FC<SynopsisProps> = ({ event, nextScreenText }) => {
-  const synopsis = get(event.data, ['vs_event_details', 'productions'], []).map(
-    production => (
-      <RohText style={styles.synopsis} key={production.id}>
-        {production.attributes.synopsis.replace(/(<([^>]+)>)/gi, '')}
-      </RohText>
-    ),
-  );
+const Synopsis: React.FC<SynopsisProps> = ({
+  event,
+  nextScreenText,
+  screenName,
+  setScreenAvailabilety,
+}) => {
+  const synopsis: Array<TVSSynops> = event.data.vs_synopsis.filter(
+    synops => synops.text.length,
+  ).length
+    ? event.data.vs_synopsis.filter(synops => synops.text.length)
+    : get<TEvent, 'vs_event_details', 'productions', any[]>(
+        event.data,
+        ['vs_event_details', 'productions'],
+        [],
+      ).reduce((acc: Array<TVSSynops>, production: any) => {
+        if (production.attributes.synopsis) {
+          acc.push(
+            ...production.attributes.synopsis
+              .split('</p>')
+              .reduce((result: Array<TVSSynops>, item: string) => {
+                result.push({
+                  type: 'paragraph',
+                  text: item.replace(/(<([^>]+)>)/gi, ''),
+                  spans: [],
+                });
+                return result;
+              }, []),
+          );
+        }
+        return acc;
+      }, []);
+
+  useLayoutEffect(() => {
+    setScreenAvailabilety(screenName, Boolean(synopsis.length));
+    return () => {
+      setScreenAvailabilety(screenName);
+    };
+  }, [synopsis.length, screenName, setScreenAvailabilety]);
+
+  if (!synopsis.length) {
+    return null;
+  }
+  const blocksOfSynopsis = synopsis.map((synops, i) => ({
+    key: i.toString(),
+    text: synops.text,
+  }));
   return (
-    <TouchableHighlightWrapper canMoveDown={false} canMoveRight={false}>
-      <View style={styles.generalContainer}>
-        <View style={styles.wrapper}>
-          <RohText style={styles.title}>Synopsis</RohText>
-          <View style={styles.synopsisContainer}>{synopsis}</View>
-        </View>
-        <View style={styles.downContainer}>
-          <GoDown text={nextScreenText} />
+    <View style={styles.generalContainer}>
+      <View style={styles.downContainer}>
+        <GoDown text={nextScreenText} />
+      </View>
+      <View style={styles.wrapper}>
+        <RohText style={styles.title}>Synopsis</RohText>
+        <View style={styles.synopsisContainer}>
+          <MultiColumnSynopsisList
+            data={blocksOfSynopsis}
+            columnWidth={scaleSize(740)}
+            columnHeight={scaleSize(770)}
+          />
         </View>
       </View>
-    </TouchableHighlightWrapper>
+    </View>
   );
 };
 
@@ -42,7 +86,6 @@ const styles = StyleSheet.create({
     paddingRight: scaleSize(200),
   },
   wrapper: {
-    paddingTop: scaleSize(110),
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -52,6 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: scaleSize(50),
     paddingBottom: scaleSize(60),
+    top: -scaleSize(85),
   },
   title: {
     flex: 1,
@@ -67,7 +111,6 @@ const styles = StyleSheet.create({
     lineHeight: scaleSize(38),
   },
   synopsisContainer: {
-    height: '100%',
     width: scaleSize(740),
   },
 });

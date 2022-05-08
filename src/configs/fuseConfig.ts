@@ -4,11 +4,11 @@ export const detailEventsSearchOptions = {
   useExtendedSearch: false,
   keys: [
     {
-      name: 'data.vs_event_details.title',
+      name: 'data.vs_title.text',
       weight: 0.7,
     },
     {
-      name: 'data.vs_title.text',
+      name: 'data.vs_event_details.title',
       weight: 0.5,
     },
   ],
