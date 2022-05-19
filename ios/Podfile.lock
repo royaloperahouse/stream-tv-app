@@ -230,6 +230,8 @@ PODS:
   - React-jsinspector (0.63.4-0)
   - react-native-safe-area-context (3.3.2):
     - React-Core
+  - react-native-spinkit (1.4.1):
+    - React
   - React-RCTAnimation (0.63.4-0):
     - FBReactNativeSpec (= 0.63.4-0)
     - Folly (= 2020.01.13.00)
@@ -357,6 +359,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-spinkit (from `../node_modules/react-native-spinkit`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../node_modules/react-native/Libraries/Blob`)
   - React-RCTImage (from `../node_modules/react-native/Libraries/Image`)
@@ -432,6 +435,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-spinkit:
+    :path: "../node_modules/react-native-spinkit"
   React-RCTAnimation:
     :path: "../node_modules/react-native/Libraries/NativeAnimation"
   React-RCTBlob:
@@ -502,6 +507,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: a2d57cd174d11835a2e1369820664db94dc68244
   React-jsinspector: b02749ab9b71584a1a93e93bdf2b483179f5f4af
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
+  react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   React-RCTAnimation: 325e04d9a829ebf8199cf97dd93fbde540473ebe
   React-RCTBlob: ed6d47f5e46f71135c6d7c647c9c114641ee4ae4
   React-RCTImage: 38dbe05645489f5e6a18956c0b2456ec35f087b6

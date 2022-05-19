@@ -22,11 +22,11 @@ axiosClient.interceptors.request.use(
     if (axiosConfig.url?.includes(ApiConfig.routes.checkoutPurchasedStreams)) {
       axiosConfig.headers['x-customer-id'] = store.getState().auth.customerId;
     }
-    console.log(
+/*     console.log(
       `(REQUEST) ${axiosConfig.method} ${axiosConfig.url}`,
       axiosConfig.headers,
       axiosConfig.data,
-    );
+    ); */
     return axiosConfig;
   },
 );
@@ -35,21 +35,21 @@ axiosClient.interceptors.response.use(
   (
     response: AxiosResponse<any>,
   ): AxiosResponse<any> | Promise<AxiosResponse<any>> => {
-    console.log(response);
+/*     console.log(response);
     console.log(
       `(RESPONSE) ${response.config.method} ${response.config.url}`,
       response.headers,
       response.data,
-    );
+    ); */
     return response;
   },
   error => {
     const { config: axiosConfig, response } = error;
-    console.log(error);
+/*     console.log(error);
     console.log(
       `(ERROR) ${axiosConfig.method} ${axiosConfig.url}`,
       response?.data,
-    );
+    ); */
     if (response === undefined) {
       return { status: 500 };
     }

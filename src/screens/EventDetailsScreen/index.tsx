@@ -226,7 +226,6 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
 
   return (
     <View style={styles.rootContainer}>
-      <GoBack />
       <View>
         <View style={styles.moveToTopSectionButton}>
           <MoveToTopSectionButton
@@ -314,6 +313,7 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
           }}
         />
       </View>
+      <GoBack />
     </View>
   );
 };
@@ -321,7 +321,7 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
 const styles = StyleSheet.create({
   rootContainer: {
     height: Dimensions.get('window').height,
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
   },
   scrollView: {
     flex: 1,

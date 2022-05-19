@@ -116,7 +116,7 @@ export const navMenuManager = Object.freeze({
       navMenuRef.current.setNextFocusRightValue(nodeValue, screenName);
     }
   },
-/*   isNavMenuOpen: (): boolean | undefined => {
+  /*   isNavMenuOpen: (): boolean | undefined => {
     if (typeof navMenuRef.current?.isNavMenuOpen === 'function') {
       return navMenuRef.current.isNavMenuOpen();
     }

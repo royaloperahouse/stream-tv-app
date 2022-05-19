@@ -6,7 +6,7 @@ import { store } from '@services/store';
 import AppLayout from '@layouts/appLayout';
 import { FlagsProvider } from 'flagged';
 import { decode, encode } from 'base-64';
-
+import 'react-native/tvos-types.d';
 // Pronlem with allSettled in RN 0.63, 0.64; use promise.allsettled as polyfill
 if (typeof Promise.allSettled !== 'function') {
   Promise.allSettled = require('promise.allsettled');

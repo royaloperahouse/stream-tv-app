@@ -15,6 +15,10 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { navMenuManager } from '@components/NavMenu';
+import {
+  NavMenuScreenRedirect,
+  TNavMenuScreenRedirectRef,
+} from '@components/NavmenuScreenRedirect';
 
 type TMyListScreenProps = {};
 const MyListScreen: React.FC<TMyListScreenProps> = ({ route }) => {
@@ -23,6 +27,7 @@ const MyListScreen: React.FC<TMyListScreenProps> = ({ route }) => {
   const isFocused = useIsFocused();
   const listRef = useRef(null);
   const itemRef = useRef(null);
+  const navMenuScreenRedirectRef = useRef<TNavMenuScreenRedirectRef>(null);
   const selectedIndex =
     route.params?.sectionIndex < data.length
       ? route.params.sectionIndex
@@ -44,46 +49,70 @@ const MyListScreen: React.FC<TMyListScreenProps> = ({ route }) => {
 
   return (
     <View style={styles.root}>
-      <RohText style={styles.pageTitle}>{myListTitle}</RohText>
-      {data.length ? (
-        <FlatList
-          data={data}
-          ref={listRef}
-          keyExtractor={item => item.id}
-          onScrollToIndexFailed={() => {}}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          numColumns={countOfItemsPeerRail}
-          renderItem={({ item, index }) => (
-            <DigitalEventItem
-              ref={itemRef}
-              screenNameFrom={route.name}
-              hasTVPreferredFocus={
-                route.params.fromEventDetails && selectedIndex === index
-              }
-              event={item}
-              canMoveUp={index >= countOfItemsPeerRail}
-              canMoveRight={
-                (index + 1) % countOfItemsPeerRail !== 0 &&
-                index !== data.length - 1
-              }
-              sectionIndex={index}
-            />
-          )}
-        />
-      ) : (
-        <View style={styles.emptyListContainer}>
-          <RohText style={styles.emptyListText} bold>
-            No items have been added to your list
-          </RohText>
-        </View>
-      )}
+      <NavMenuScreenRedirect
+        screenName={route.name}
+        ref={navMenuScreenRedirectRef}
+      />
+      <View style={styles.contentContainer}>
+        <RohText style={styles.pageTitle}>{myListTitle}</RohText>
+        {data.length ? (
+          <FlatList
+            data={data}
+            ref={listRef}
+            keyExtractor={item => item.id}
+            onScrollToIndexFailed={() => {}}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            numColumns={countOfItemsPeerRail}
+            renderItem={({ item, index }) => (
+              <DigitalEventItem
+                ref={itemRef}
+                screenNameFrom={route.name}
+                hasTVPreferredFocus={
+                  route.params.fromEventDetails && selectedIndex === index
+                }
+                event={item}
+                canMoveUp={index >= countOfItemsPeerRail}
+                canMoveRight={
+                  (index + 1) % countOfItemsPeerRail !== 0 &&
+                  index !== data.length - 1
+                }
+                onFocus={(cp: React.Component<any, any, any>) => {
+                  navMenuScreenRedirectRef.current?.setRedirectFromNavMenu?.(
+                    cp,
+                  );
+                }}
+                sectionIndex={index}
+                setFirstItemFocusable={
+                  index === 0 || index % countOfItemsPeerRail === 0
+                    ? navMenuScreenRedirectRef.current
+                        ?.setDefaultRedirectFromNavMenu
+                    : undefined
+                }
+                removeFirstItemFocusable={
+                  index === 0 || index % countOfItemsPeerRail === 0
+                    ? navMenuScreenRedirectRef.current
+                        ?.removeDefaultRedirectFromNavMenu
+                    : undefined
+                }
+              />
+            )}
+          />
+        ) : (
+          <View style={styles.emptyListContainer}>
+            <RohText style={styles.emptyListText} bold>
+              No items have been added to your list
+            </RohText>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, marginTop: scaleSize(189) },
+  root: { flex: 1, flexDirection: 'row' },
+  contentContainer: { flex: 1, marginTop: scaleSize(189) },
   emptyListContainer: {
     flex: 1,
     marginTop: scaleSize(25),

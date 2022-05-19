@@ -16,6 +16,7 @@ import FastImage from 'react-native-fast-image';
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
 import { Colors } from '@themes/Styleguide';
+import { TNavMenuScreenRedirectRef } from '@components/NavmenuScreenRedirect';
 
 type DigitalEventItemProps = {
   event: TEventContainer;
@@ -30,16 +31,18 @@ type DigitalEventItemProps = {
   eventGroupTitle?: string;
   selectedItemIndex?: number;
   lastItem?: boolean;
-  setRailItemRefCb: (
+  setRailItemRefCb?: (
     eventId: string,
     ref: React.MutableRefObject<TTouchableHighlightWrapperRef | undefined>,
     sectionIdx: number,
   ) => void;
-  removeRailItemRefCb: (
+  removeRailItemRefCb?: (
     eventId: string,
     ref: React.MutableRefObject<TTouchableHighlightWrapperRef | undefined>,
     sectionIdx: number,
   ) => void;
+  setFirstItemFocusable?: TNavMenuScreenRedirectRef['setDefaultRedirectFromNavMenu'];
+  removeFirstItemFocusable?: TNavMenuScreenRedirectRef['removeDefaultRedirectFromNavMenu'];
 };
 
 const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
@@ -59,6 +62,8 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       lastItem = false,
       setRailItemRefCb = () => {},
       removeRailItemRefCb = () => {},
+      setFirstItemFocusable,
+      removeFirstItemFocusable,
     },
     ref: any,
   ) => {
@@ -113,12 +118,26 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     }, []);
 
     useLayoutEffect(() => {
+      console.log(sectionIndex, 'index')
+      if (setFirstItemFocusable && touchableRef.current?.getRef?.().current) {
+        setFirstItemFocusable(
+          `${event.id}-${sectionIndex}`,
+          touchableRef.current?.getRef?.().current,
+        );
+      }
+/*       return () => {
+        if (removeFirstItemFocusable) {
+          removeFirstItemFocusable(`${event.id}-${sectionIndex}`);
+        }
+      }; */
+    }, [setFirstItemFocusable, event.id, sectionIndex]);
+    useLayoutEffect(() => {
       setRailItemRefCb(event.id, touchableRef, sectionIndex);
       return () => {
         removeRailItemRefCb(event.id, touchableRef, sectionIndex);
       };
     }, []);
-
+    console.log(setFirstItemFocusable, sectionIndex, hasTVPreferredFocus, '  lolololol')
     return (
       <TouchableHighlightWrapper
         ref={touchableRef}
@@ -139,7 +158,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
           ref?.current?.setDigitalEvent(event, eventGroupTitle);
           navMenuManager.setNavMenuAccessible();
           if (typeof onFocus === 'function') {
-            onFocus();
+            onFocus(touchableRef.current?.getRef?.().current);
           }
           if (route.params?.fromEventDetails) {
             navigation.setParams({

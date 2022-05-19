@@ -4,6 +4,7 @@ import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import { TRoute } from '@services/types/models';
+import { setNavMenuItemsRefs } from '@components/NavmenuScreenRedirect';
 type TNavMenuItemProps = {
   id: string;
   isActive: boolean;
@@ -63,6 +64,9 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
     }
     mountedComponentRef.current = true;
   }, [setActiveMunuItemRef, isActive]);
+  useLayoutEffect(() => {
+    setNavMenuItemsRefs(id, touchRef);
+  }, []);
   return (
     <TouchableHighlight
       ref={touchRef}
