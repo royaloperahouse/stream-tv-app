@@ -80,21 +80,21 @@ const General: React.FC<Props> = ({
       ) {
         throw new Error('Something went wrong');
       }
-      if (!result[0]?.data?.data?.attributes?.isSubscriptionActive) {
-        globalModalManager.openModal({
-          contentComponent: NonSubscribedModeAlert,
-          contentProps: {
-            confirmActionHandler: () => {
-              globalModalManager.closeModal(() => {
-                if (typeof ref?.current?.setNativeProps === 'function') {
-                  ref.current.setNativeProps({ hasTVPreferredFocus: true });
-                }
-              });
-            },
-          },
-        });
-        return;
-      }
+      // if (!result[0]?.data?.data?.attributes?.isSubscriptionActive) {
+      //   globalModalManager.openModal({
+      //     contentComponent: NonSubscribedModeAlert,
+      //     contentProps: {
+      //       confirmActionHandler: () => {
+      //         globalModalManager.closeModal(() => {
+      //           if (typeof ref?.current?.setNativeProps === 'function') {
+      //             ref.current.setNativeProps({ hasTVPreferredFocus: true });
+      //           }
+      //         });
+      //       },
+      //     },
+      //   });
+      //   return;
+      // }
 
       const videoFromPrismic = result[1].results.find(
         prismicResponseResult =>
@@ -105,13 +105,14 @@ const General: React.FC<Props> = ({
         throw new Error('Something went wrong');
       }
 
-      const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
-      if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
-        throw new Error('Something went wrong');
-      }
+      // const manifestInfo = await fetchVideoURL(videoFromPrismic.id);
+      // if (!manifestInfo?.data?.data?.attributes?.hlsManifestUrl) {
+      //   throw new Error('Something went wrong');
+      // }
+
       showPlayer({
         videoId: videoFromPrismic.id,
-        url: manifestInfo.data.data.attributes.hlsManifestUrl,
+        url: 'https://streamv2.production.website.roh.org.uk/324489/performance/manifest.m3u8?hdnts=st=1652980808~exp=1652981408~acl=/324489/performance/manifest.m3u8~hmac=079c3211d69aedb9d136fac3996c9841040082f04ec574e5403d35d4dea96388',
         title,
         poster:
           'https://actualites.music-opera.com/wp-content/uploads/2019/09/14OPENING-superJumbo.jpg',
