@@ -172,12 +172,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
                   sectionIndex,
                 )}
                 canMoveRight={index !== section.data.length - 1}
-                onFocus={(cp: React.Component<any, any, any>) => {
-                  scrollToRail();
-                  navMenuScreenRedirectRef.current?.setRedirectFromNavMenu?.(
-                    cp,
-                  );
-                }}
+                onFocus={scrollToRail}
                 continueWatching={section.title === continueWatchingRailTitle}
                 eventGroupTitle={section.title}
                 sectionIndex={sectionIndex}
@@ -198,6 +193,7 @@ const HomePageScreen: React.FC<THomePageScreenProps> = ({
                         ?.removeDefaultRedirectFromNavMenu
                     : undefined
                 }
+                index={index}
               />
             )}
           />

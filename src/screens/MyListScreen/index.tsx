@@ -77,11 +77,6 @@ const MyListScreen: React.FC<TMyListScreenProps> = ({ route }) => {
                   (index + 1) % countOfItemsPeerRail !== 0 &&
                   index !== data.length - 1
                 }
-                onFocus={(cp: React.Component<any, any, any>) => {
-                  navMenuScreenRedirectRef.current?.setRedirectFromNavMenu?.(
-                    cp,
-                  );
-                }}
                 sectionIndex={index}
                 setFirstItemFocusable={
                   index === 0 || index % countOfItemsPeerRail === 0

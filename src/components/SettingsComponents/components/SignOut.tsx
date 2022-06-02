@@ -1,9 +1,11 @@
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useCallback, useRef } from 'react';
+import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import { useDispatch } from 'react-redux';
 import {
   clearEventState,
@@ -18,13 +20,24 @@ import { pinUnlink } from '@services/apiClient';
 import { clearPrevSearchList } from '@services/previousSearch';
 import { clearListOfBitmovinSavedPosition } from '@services/bitMovinPlayer';
 import { clearMyList } from '@services/myList';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  NavMenuScreenRedirect,
+  TNavMenuScreenRedirectRef,
+} from '@components/NavmenuScreenRedirect';
 
 type TSignOutProps = {
   listItemGetNode?: () => number;
+  listItemGetRef?: () => React.RefObject<TouchableHighlight>;
 };
 
-const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
+const SignOut: React.FC<TSignOutProps> = ({
+  listItemGetNode,
+  listItemGetRef,
+}) => {
   const dispatch = useDispatch();
+  const navMenuScreenRedirectRef = useRef<TNavMenuScreenRedirectRef>(null);
+  const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
   const signOutActionHandler = () =>
     pinUnlink()
       .then(response => {
@@ -43,43 +56,67 @@ const SignOut: React.FC<TSignOutProps> = ({ listItemGetNode }) => {
         ]);
       })
       .catch(console.log);
+  useFocusEffect(
+    useCallback(() => {
+      if (typeof buttonRef.current?.getRef === 'function') {
+        navMenuScreenRedirectRef.current?.setDefaultRedirectFromNavMenu?.(
+          'signOutBtn',
+          buttonRef.current.getRef().current,
+        );
+      }
+      if (typeof listItemGetRef === 'function') {
+        navMenuScreenRedirectRef.current?.setDefaultRedirectToNavMenu?.(
+          'signOutBtn',
+          listItemGetRef().current,
+        );
+      }
+      return () => {
+        navMenuScreenRedirectRef.current?.removeAllDefaultRedirectFromNavMenu();
+        navMenuScreenRedirectRef.current?.removeAllDefaultRedirectToNavMenu();
+      };
+    }, [listItemGetRef]),
+  );
   return (
     <View style={styles.root}>
-      <View style={styles.titleContainer}>
-        <RohText style={styles.titleText}>SIGN OUT OF THIS DEVICE</RohText>
-      </View>
-      <View style={styles.descriptionContainer}>
-        <RohText style={styles.descriptionText}>
-          Choosing to sign out of this device will stop this device being paired
-          with your ROH account. To access content on this device again, you
-          will need to pair.
-        </RohText>
-      </View>
-      <View style={styles.commonQuestionContainer}>
-        <RohText style={styles.commonQuestionText}>
-          Are you sure you want to sign out?
-        </RohText>
-      </View>
-      <View style={styles.actionButtonsContainer}>
-        <View style={styles.actionButtonContainer}>
-          <TouchableHighlightWrapper
-            canMoveRight={false}
-            canMoveUp={false}
-            canMoveDown={false}
-            nextFocusLeft={
-              typeof listItemGetNode === 'function'
-                ? listItemGetNode()
-                : undefined
-            }
-            onPress={signOutActionHandler}
-            style={styles.actionButtonDefault}
-            styleFocused={styles.actionButtonFocus}>
-            <View style={styles.actionButtonContentContainer}>
-              <RohText style={styles.actionButtonText}>
-                I want to sign out
-              </RohText>
-            </View>
-          </TouchableHighlightWrapper>
+      <NavMenuScreenRedirect ref={navMenuScreenRedirectRef} />
+      <View style={styles.contentContainer}>
+        <View style={styles.titleContainer}>
+          <RohText style={styles.titleText}>SIGN OUT OF THIS DEVICE</RohText>
+        </View>
+        <View style={styles.descriptionContainer}>
+          <RohText style={styles.descriptionText}>
+            Choosing to sign out of this device will stop this device being
+            paired with your ROH account. To access content on this device
+            again, you will need to pair.
+          </RohText>
+        </View>
+        <View style={styles.commonQuestionContainer}>
+          <RohText style={styles.commonQuestionText}>
+            Are you sure you want to sign out?
+          </RohText>
+        </View>
+        <View style={styles.actionButtonsContainer}>
+          <View style={styles.actionButtonContainer}>
+            <TouchableHighlightWrapper
+              ref={buttonRef}
+              canMoveRight={false}
+              canMoveUp={false}
+              canMoveDown={false}
+              nextFocusLeft={
+                typeof listItemGetNode === 'function'
+                  ? listItemGetNode()
+                  : undefined
+              }
+              onPress={signOutActionHandler}
+              style={styles.actionButtonDefault}
+              styleFocused={styles.actionButtonFocus}>
+              <View style={styles.actionButtonContentContainer}>
+                <RohText style={styles.actionButtonText}>
+                  I want to sign out
+                </RohText>
+              </View>
+            </TouchableHighlightWrapper>
+          </View>
         </View>
       </View>
     </View>
@@ -90,6 +127,9 @@ export default SignOut;
 
 const styles = StyleSheet.create({
   root: {
+    flexDirection: 'row',
+  },
+  contentContainer: {
     flex: 1,
     paddingTop: scaleSize(42),
     marginLeft: scaleSize(80),

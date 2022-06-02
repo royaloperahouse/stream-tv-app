@@ -64,6 +64,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       removeRailItemRefCb = () => {},
       setFirstItemFocusable,
       removeFirstItemFocusable,
+      index,
     },
     ref: any,
   ) => {
@@ -110,6 +111,23 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       );
     };
 
+    const onFocusHandler = () => {
+      if (isMounted.current) {
+        setFocused(true);
+      }
+      ref?.current?.setDigitalEvent(event, eventGroupTitle);
+      navMenuManager.setNavMenuAccessible();
+      if (typeof onFocus === 'function') {
+        onFocus(touchableRef.current?.getRef?.().current);
+      }
+      if (route.params?.fromEventDetails) {
+        navigation.setParams({
+          ...route.params,
+          fromEventDetails: false,
+        });
+      }
+    };
+
     useLayoutEffect(() => {
       isMounted.current = true;
       return () => {
@@ -118,26 +136,29 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
     }, []);
 
     useLayoutEffect(() => {
-      console.log(sectionIndex, 'index')
       if (setFirstItemFocusable && touchableRef.current?.getRef?.().current) {
         setFirstItemFocusable(
-          `${event.id}-${sectionIndex}`,
+          sectionIndex.toString(),
           touchableRef.current?.getRef?.().current,
         );
       }
-/*       return () => {
+      return () => {
         if (removeFirstItemFocusable) {
-          removeFirstItemFocusable(`${event.id}-${sectionIndex}`);
+          removeFirstItemFocusable(sectionIndex.toString());
         }
-      }; */
-    }, [setFirstItemFocusable, event.id, sectionIndex]);
+      };
+    }, [
+      removeFirstItemFocusable,
+      setFirstItemFocusable,
+      event.id,
+      sectionIndex,
+    ]);
     useLayoutEffect(() => {
       setRailItemRefCb(event.id, touchableRef, sectionIndex);
       return () => {
         removeRailItemRefCb(event.id, touchableRef, sectionIndex);
       };
     }, []);
-    console.log(setFirstItemFocusable, sectionIndex, hasTVPreferredFocus, '  lolololol')
     return (
       <TouchableHighlightWrapper
         ref={touchableRef}
@@ -151,22 +172,7 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
             setFocused(false);
           }
         }}
-        onFocus={() => {
-          if (isMounted.current) {
-            setFocused(true);
-          }
-          ref?.current?.setDigitalEvent(event, eventGroupTitle);
-          navMenuManager.setNavMenuAccessible();
-          if (typeof onFocus === 'function') {
-            onFocus(touchableRef.current?.getRef?.().current);
-          }
-          if (route.params?.fromEventDetails) {
-            navigation.setParams({
-              ...route.params,
-              fromEventDetails: false,
-            });
-          }
-        }}
+        onFocus={onFocusHandler}
         onPress={onPressHandler}>
         <View style={styles.container}>
           <View

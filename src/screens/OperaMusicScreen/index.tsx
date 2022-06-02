@@ -98,12 +98,7 @@ const OperaMusicScreen: React.FC<TOperaMusicScreenProps> = ({
                   index === 0
                 }
                 ref={previewRef}
-                onFocus={(cp: React.Component<any, any, any>) => {
-                  scrollToRail();
-                  navMenuScreenRedirectRef.current?.setRedirectFromNavMenu?.(
-                    cp,
-                  );
-                }}
+                onFocus={scrollToRail}
                 canMoveUp={!isFirstRail}
                 canMoveRight={index !== section.data.length - 1}
                 eventGroupTitle={section.title}

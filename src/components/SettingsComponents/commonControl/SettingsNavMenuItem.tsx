@@ -4,12 +4,14 @@ import TouchableHighlightWrapper, {
 } from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { navMenuManager } from '@components/NavMenu';
+import { TNavMenuScreenRedirectRef } from '@components/NavmenuScreenRedirect';
 
 type TSettingsNavMenuItemProps = {
+  id: string;
   title: string;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -19,9 +21,11 @@ type TSettingsNavMenuItemProps = {
   isActive: boolean;
   hasTVPreferredFocus?: boolean;
   isFirst: boolean;
+  onMount?: TNavMenuScreenRedirectRef['setDefaultRedirectFromNavMenu'];
 };
 const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
   const {
+    id,
     title,
     canMoveUp,
     canMoveDown,
@@ -29,6 +33,7 @@ const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
     isActive,
     hasTVPreferredFocus,
     isFirst,
+    onMount,
   } = props;
   const touchableRef = useRef<TTouchableHighlightWrapperRef>();
   const focusHandler = () => {
@@ -46,6 +51,16 @@ const SettingsNavMenuItem: React.FC<TSettingsNavMenuItemProps> = props => {
         );
       }
     }, [isFirst, route.name]),
+  );
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        touchableRef.current?.getRef?.().current &&
+        typeof onMount === 'function'
+      ) {
+        onMount(id, touchableRef.current?.getRef?.().current);
+      }
+    }, [id, onMount]),
   );
   return (
     <TouchableHighlightWrapper

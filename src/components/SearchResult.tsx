@@ -244,6 +244,9 @@ const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
 
   useLayoutEffect(() => {
     isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   useEffect(() => {

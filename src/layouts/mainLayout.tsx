@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
   maninContentContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'row', //'row-reverse',
   },
   buildInfo: {
     position: 'absolute',

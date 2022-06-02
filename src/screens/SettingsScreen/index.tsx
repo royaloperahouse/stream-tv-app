@@ -14,11 +14,16 @@ import {
   marginLeftStop,
 } from '@configs/navMenuConfig';
 import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
+import {
+  NavMenuScreenRedirect,
+  TNavMenuScreenRedirectRef,
+} from '@components/NavmenuScreenRedirect';
 
 type TSettingsScreenProps = {};
-const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
+const SettingsScreen: React.FC<TSettingsScreenProps> = ({ route }) => {
   const [activeContentKey, setActiveContentKey] = useState<string>('');
   const activeItemRef = useRef<TTouchableHighlightWrapperRef>();
+  const navMenuScreenRedirectRef = useRef<TNavMenuScreenRedirectRef>(null);
   const contentFactory = (contentKey: string) => {
     if (
       !contentKey ||
@@ -34,7 +39,11 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
 
   return (
     <View style={styles.root}>
-      <View style={styles.container}>
+      <NavMenuScreenRedirect
+        screenName={route.name}
+        ref={navMenuScreenRedirectRef}
+      />
+      <View style={styles.mainContainer}>
         <View style={styles.navMenuContainer}>
           <RohText style={styles.pageTitle}>{settingsTitle}</RohText>
           <FlatList
@@ -43,6 +52,7 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item, index }) => (
               <SettingsNavMenuItem
+                id={item.key}
                 isFirst={index === 0}
                 isActive={item.key === activeContentKey}
                 title={item.navMenuItemTitle}
@@ -54,29 +64,43 @@ const SettingsScreen: React.FC<TSettingsScreenProps> = () => {
                   activeItemRef.current = touchableRef.current;
                   setActiveContentKey(item.key);
                 }}
+                onMount={(key, touchableRef) => {
+                  navMenuScreenRedirectRef.current?.setDefaultRedirectFromNavMenu?.(
+                    key,
+                    touchableRef,
+                  );
+                }}
               />
             )}
           />
         </View>
         <View style={styles.contentContainer}>
-          <Content listItemGetNode={activeItemRef.current?.getNode} />
+          <Content
+            listItemGetNode={activeItemRef.current?.getNode}
+            listItemGetRef={activeItemRef.current?.getRef}
+          />
         </View>
       </View>
     </View>
   );
 };
 const styles = StyleSheet.create({
-  root: { flex: 1, marginTop: scaleSize(189) },
-  container: {
-    flexDirection: 'row',
+  root: {
     width:
       Dimensions.get('window').width -
       (widthWithOutFocus + marginRightWithOutFocus + marginLeftStop),
+    height: Dimensions.get('window').height,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  mainContainer: {
+    flexDirection: 'row',
     height: Dimensions.get('window').height - scaleSize(189),
+    paddingRight: scaleSize(80),
+    width: '100%',
   },
   navMenuContainer: {
     width: scaleSize(486),
-    marginRight: scaleSize(80),
     height: '100%',
   },
   pageTitle: {
@@ -84,11 +108,6 @@ const styles = StyleSheet.create({
     fontSize: scaleSize(48),
     marginBottom: scaleSize(24),
     textTransform: 'uppercase',
-  },
-  listContainer: {
-    width:
-      Dimensions.get('window').width -
-      (widthWithOutFocus + marginRightWithOutFocus + marginLeftStop),
   },
   contentContainer: {
     flex: 1,

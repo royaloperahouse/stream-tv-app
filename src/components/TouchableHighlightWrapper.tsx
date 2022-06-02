@@ -101,12 +101,22 @@ const TouchableHighlightWrapper = forwardRef<
   }
   const onFocusHandler = useCallback(
     (event: NativeSyntheticEvent<TargetedEvent>): void => {
-      if (canCollapseNavMenu) {
-        navMenuManager.setNavMenuBlur();
-      }
-      setFocused(true);
-      if (typeof onFocus === 'function') {
-        onFocus(event);
+      const focusEventCB = (ev: NativeSyntheticEvent<TargetedEvent>) => {
+        if (canCollapseNavMenu) {
+          navMenuManager.setNavMenuBlur();
+        }
+        setFocused(true);
+        if (typeof onFocus === 'function') {
+          onFocus(ev);
+        }
+        navMenuManager.setNavMenuAccessible();
+      };
+      if (Platform.OS === 'ios' && Platform.isTV) {
+        setTimeout(() => {
+          focusEventCB(event);
+        }, 0);
+      } else {
+        focusEventCB(event);
       }
     },
     [onFocus, canCollapseNavMenu],

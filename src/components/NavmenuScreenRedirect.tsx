@@ -6,18 +6,13 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import {
+  Dimensions,
   StyleSheet,
   TouchableHighlight,
   TVFocusGuideView,
   View,
 } from 'react-native';
 export type TNavMenuScreenRedirectRef = {
-  setRedirectFromNavMenu: (
-    cp:
-      | React.Component<any, any, any>
-      | React.ComponentClass<any, any>
-      | undefined,
-  ) => void;
   setDefaultRedirectFromNavMenu: (
     key: string,
     cp:
@@ -28,9 +23,19 @@ export type TNavMenuScreenRedirectRef = {
   ) => void;
   removeDefaultRedirectFromNavMenu: (key: string) => void;
   removeAllDefaultRedirectFromNavMenu: () => void;
+  setDefaultRedirectToNavMenu: (
+    key: string,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  removeDefaultRedirectToNavMenu: (key: string) => void;
+  removeAllDefaultRedirectToNavMenu: () => void;
 };
 
-type TNavMenuScreenRedirectProps = { screenName: string };
+type TNavMenuScreenRedirectProps = { screenName?: string };
 
 const navMenuItemsRefs: { [key: string]: React.RefObject<TouchableHighlight> } =
   {};
@@ -46,17 +51,15 @@ export const NavMenuScreenRedirect = forwardRef<
   TNavMenuScreenRedirectProps
 >((props, ref) => {
   const isMounted = useRef(false);
-  const [redirectRromNavMenu, setRedirectFromNavMenu] = useState<
-    | (
-        | number
-        | React.Component<any, any, any>
-        | React.ComponentClass<any, any>
-        | null
-      )[]
-    | undefined
-  >();
+  const [difaultRedirectFromNavMenu, setDefRedirectFromNavMenu] = useState<{
+    [key: string]:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number;
+  }>({});
 
-  const [difaultRedirectRromNavMenu, setDefRedirectFromNavMenu] = useState<{
+  const [difaultRedirectToNavMenu, setDefRedirectToNavMenu] = useState<{
     [key: string]:
       | React.Component<any, any, any>
       | React.ComponentClass<any, any>
@@ -67,15 +70,7 @@ export const NavMenuScreenRedirect = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      setRedirectFromNavMenu: cp => {
-        if (true || !isMounted.current) {
-          return;
-        }
-        const component = cp !== undefined ? [cp] : cp;
-        setRedirectFromNavMenu(component);
-      },
       setDefaultRedirectFromNavMenu: (key, cp) => {
-        console.log(key, '  keyAdd');
         if (!isMounted.current) {
           return;
         }
@@ -86,11 +81,22 @@ export const NavMenuScreenRedirect = forwardRef<
           return newState;
         });
       },
+      setDefaultRedirectToNavMenu: (key, cp) => {
+        if (!isMounted.current) {
+          return;
+        }
+
+        setDefRedirectToNavMenu(prevState => {
+          const newState = { ...prevState };
+          newState[key] = cp;
+          return newState;
+        });
+      },
+
       removeDefaultRedirectFromNavMenu: key => {
         if (!isMounted.current) {
           return;
         }
-        console.log(key, '  keyremove');
         setDefRedirectFromNavMenu(prevState => {
           if (!(key in prevState)) {
             return prevState;
@@ -106,22 +112,58 @@ export const NavMenuScreenRedirect = forwardRef<
         }
         setDefRedirectFromNavMenu({});
       },
+      removeDefaultRedirectToNavMenu: key => {
+        if (!isMounted.current) {
+          return;
+        }
+        setDefRedirectToNavMenu(prevState => {
+          if (!(key in prevState)) {
+            return prevState;
+          }
+          const newState = { ...prevState };
+          delete newState[key];
+          return newState;
+        });
+      },
+      removeAllDefaultRedirectToNavMenu: () => {
+        if (!isMounted.current) {
+          return;
+        }
+        setDefRedirectToNavMenu({});
+      },
     }),
     [],
   );
   const redirectToContent =
-    redirectRromNavMenu === undefined &&
-    Object.values(difaultRedirectRromNavMenu).length === 0
+    Object.values(difaultRedirectFromNavMenu).length === 0
       ? undefined
-      : redirectRromNavMenu === undefined
-      ? Object.values(difaultRedirectRromNavMenu)
-      : [...redirectRromNavMenu, ...Object.values(difaultRedirectRromNavMenu)];
-  console.log(
-    props.screenName,
-    redirectToContent,
-    Object.keys(difaultRedirectRromNavMenu),
-    '   navMenuItemsRefsCPs',
-  );
+      : Object.entries(difaultRedirectFromNavMenu)
+          .sort(([firstKey], [nextKey]) => {
+            const firstKeyNumber = Number(firstKey);
+            const nextKeyNumber = Number(nextKey);
+            if (Number.isNaN(firstKeyNumber) || Number.isNaN(nextKeyNumber)) {
+              return 0;
+            }
+            return firstKeyNumber - nextKeyNumber;
+          })
+          .map(([_, value]) => value);
+
+  const redirectFromContent =
+    props.screenName && props.screenName in navMenuItemsRefs
+      ? [navMenuItemsRefs[props.screenName].current]
+      : Object.values(difaultRedirectToNavMenu).length === 0
+      ? undefined
+      : Object.entries(difaultRedirectToNavMenu)
+          .sort(([firstKey], [nextKey]) => {
+            const firstKeyNumber = Number(firstKey);
+            const nextKeyNumber = Number(nextKey);
+            if (Number.isNaN(firstKeyNumber) || Number.isNaN(nextKeyNumber)) {
+              return 0;
+            }
+            return firstKeyNumber - nextKeyNumber;
+          })
+          .map(([_, value]) => value);
+
   useLayoutEffect(() => {
     isMounted.current = true;
     return () => {
@@ -131,22 +173,12 @@ export const NavMenuScreenRedirect = forwardRef<
   return (
     <View style={styles.root}>
       <TVFocusGuideView
-        style={[
-          styles.redirectBlock,
-          { borderEndWidth: 1, borderColor: 'green' },
-        ]}
+        style={[styles.redirectBlock, { borderWidth: 1, borderColor: 'green' }]}
         destinations={redirectToContent}
       />
       <TVFocusGuideView
-        style={[
-          styles.redirectBlock,
-          { borderEndWidth: 1, borderColor: 'red' },
-        ]}
-        destinations={
-          props.screenName in navMenuItemsRefs
-            ? [navMenuItemsRefs[props.screenName].current]
-            : undefined
-        }
+        style={[styles.redirectBlock, { borderWidth: 1, borderColor: 'red' }]}
+        destinations={redirectFromContent}
       />
     </View>
   );
@@ -154,8 +186,8 @@ export const NavMenuScreenRedirect = forwardRef<
 
 const styles = StyleSheet.create({
   root: {
-    height: '100%',
-    width: 2,
+    height: Dimensions.get('window').height,
+    width: 4,
     flexDirection: 'row',
   },
   redirectBlock: {

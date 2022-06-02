@@ -96,12 +96,7 @@ const BalletDanceScreen: React.FC<TBalletDanceScreenProps> = ({ route }) => {
                   index === 0
                 }
                 canMoveRight={index !== section.data.length - 1}
-                onFocus={(cp: React.Component<any, any, any>) => {
-                  scrollToRail();
-                  navMenuScreenRedirectRef.current?.setRedirectFromNavMenu?.(
-                    cp,
-                  );
-                }}
+                onFocus={scrollToRail}
                 eventGroupTitle={section.title}
                 sectionIndex={sectionIndex}
                 lastItem={index === section.data.length - 1}

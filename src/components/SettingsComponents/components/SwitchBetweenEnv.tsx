@@ -1,9 +1,11 @@
 import RohText from '@components/RohText';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useRef, useCallback } from 'react';
+import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { switchEnv } from '@services/store/settings/Slices';
 import {
@@ -16,15 +18,23 @@ import {
 } from '@services/store/auth/Slices';
 
 import { isProductionEvironmentSelector } from '@services/store/settings/Selectors';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  NavMenuScreenRedirect,
+  TNavMenuScreenRedirectRef,
+} from '@components/NavmenuScreenRedirect';
 
 type TSwitchingBetweenEnvironmentsProps = {
   listItemGetNode?: () => number;
+  listItemGetRef?: () => React.RefObject<TouchableHighlight>;
 };
 
 const SwitchingBetweenEnvironments: React.FC<
   TSwitchingBetweenEnvironmentsProps
-> = ({ listItemGetNode }) => {
+> = ({ listItemGetNode, listItemGetRef }) => {
   const dispatch = useDispatch();
+  const navMenuScreenRedirectRef = useRef<TNavMenuScreenRedirectRef>(null);
+  const buttonRef = useRef<TTouchableHighlightWrapperRef>(null);
   const isProductionEnvironment: boolean = useSelector(
     isProductionEvironmentSelector,
     shallowEqual,
@@ -42,36 +52,61 @@ const SwitchingBetweenEnvironments: React.FC<
   const currentEvironmentInfoText = `This is app is currently using ${
     isProductionEnvironment ? 'production' : 'staging'
   } environment`;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (typeof buttonRef.current?.getRef === 'function') {
+        navMenuScreenRedirectRef.current?.setDefaultRedirectFromNavMenu?.(
+          'signOutBtn',
+          buttonRef.current.getRef().current,
+        );
+      }
+      if (typeof listItemGetRef === 'function') {
+        navMenuScreenRedirectRef.current?.setDefaultRedirectToNavMenu?.(
+          'signOutBtn',
+          listItemGetRef().current,
+        );
+      }
+      return () => {
+        navMenuScreenRedirectRef.current?.removeAllDefaultRedirectFromNavMenu();
+        navMenuScreenRedirectRef.current?.removeAllDefaultRedirectToNavMenu();
+      };
+    }, [listItemGetRef]),
+  );
   return (
     <View style={styles.root}>
-      <View style={styles.titleContainer}>
-        <RohText style={styles.titleText}>ENVIRONMENT SWITCHING</RohText>
-      </View>
-      <View style={styles.descriptionContainer}>
-        <RohText style={styles.descriptionText}>
-          {currentEvironmentInfoText}
-        </RohText>
-      </View>
-      <View style={styles.actionButtonsContainer}>
-        <View style={styles.actionButtonContainer}>
-          <TouchableHighlightWrapper
-            canMoveRight={false}
-            canMoveUp={false}
-            canMoveDown={false}
-            nextFocusLeft={
-              typeof listItemGetNode === 'function'
-                ? listItemGetNode()
-                : undefined
-            }
-            onPress={switchingBetweenEnvActionHandler}
-            style={styles.actionButtonDefault}
-            styleFocused={styles.actionButtonFocus}>
-            <View style={styles.actionButtonContentContainer}>
-              <RohText style={styles.actionButtonText}>
-                {actionButtonText}
-              </RohText>
-            </View>
-          </TouchableHighlightWrapper>
+      <NavMenuScreenRedirect ref={navMenuScreenRedirectRef} />
+      <View style={styles.contentContainer}>
+        <View style={styles.titleContainer}>
+          <RohText style={styles.titleText}>ENVIRONMENT SWITCHING</RohText>
+        </View>
+        <View style={styles.descriptionContainer}>
+          <RohText style={styles.descriptionText}>
+            {currentEvironmentInfoText}
+          </RohText>
+        </View>
+        <View style={styles.actionButtonsContainer}>
+          <View style={styles.actionButtonContainer}>
+            <TouchableHighlightWrapper
+              ref={buttonRef}
+              canMoveRight={false}
+              canMoveUp={false}
+              canMoveDown={false}
+              nextFocusLeft={
+                typeof listItemGetNode === 'function'
+                  ? listItemGetNode()
+                  : undefined
+              }
+              onPress={switchingBetweenEnvActionHandler}
+              style={styles.actionButtonDefault}
+              styleFocused={styles.actionButtonFocus}>
+              <View style={styles.actionButtonContentContainer}>
+                <RohText style={styles.actionButtonText}>
+                  {actionButtonText}
+                </RohText>
+              </View>
+            </TouchableHighlightWrapper>
+          </View>
         </View>
       </View>
     </View>
@@ -82,6 +117,9 @@ export default SwitchingBetweenEnvironments;
 
 const styles = StyleSheet.create({
   root: {
+    flexDirection: 'row',
+  },
+  contentContainer: {
     flex: 1,
     paddingTop: scaleSize(42),
     marginLeft: scaleSize(80),

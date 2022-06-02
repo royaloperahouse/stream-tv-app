@@ -199,7 +199,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   const onBlurRef = useRef<boolean>(false);
   const exitOfAppButtonGotFocus = useRef<boolean>(false);
   const activeItemRef = useRef<TouchableHighlight | null>(null);
-  const [isMenuAccessible, setMenuAccessible] = useState<boolean>(true);
+  const [isMenuAccessible, setMenuAccessible] = useState<boolean>(false);
   const exitOfAppButtonRef = useRef<TTouchableHighlightWrapperRef>(null);
   const dispatch = useDispatch();
   const exitOfApp = useCallback(
