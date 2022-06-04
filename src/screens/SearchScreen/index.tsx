@@ -7,23 +7,71 @@ import VirtualKeyboard, {
 } from '@components/VirtualKeyboard';
 import { Colors } from '@themes/Styleguide';
 import SearchResult from '@components/SearchResult';
+import {
+  NavMenuScreenRedirect,
+  TNavMenuScreenRedirectRef,
+} from '@components/NavmenuScreenRedirect';
 
 type TSearchScreenProps = {};
-const SearchScreen: React.FC<TSearchScreenProps> = () => {
+const SearchScreen: React.FC<TSearchScreenProps> = ({ route }) => {
   const vkRef = useRef();
+  const navMenuScreenRedirectRef = useRef<TNavMenuScreenRedirectRef>(null);
+  const keyboardToResultTransitionRef = useRef<TNavMenuScreenRedirectRef>(null);
   return (
     <View style={styles.root}>
+      <NavMenuScreenRedirect
+        screenName={route.name}
+        ref={navMenuScreenRedirectRef}
+      />
       <View style={styles.virtualKeyboardContainer}>
-        <View style={styles.screenTitleContainer}>
-          <RohText style={styles.screenTitleText}>SEARCH</RohText>
+        <NavMenuScreenRedirect
+          ref={keyboardToResultTransitionRef}
+          screenName="serchress"
+        />
+        <View style={styles.virtualKeyboardMainContent}>
+          <View style={styles.screenTitleContainer}>
+            <RohText style={styles.screenTitleText}>SEARCH</RohText>
+          </View>
+          <View style={styles.searchTextDisplayContainer}>
+            <DisplayForVirtualKeyboard ref={vkRef} />
+          </View>
+          <VirtualKeyboard
+            ref={vkRef}
+            onMountForNavMenuTransition={(key, touchableRef) => {
+              navMenuScreenRedirectRef.current?.setDefaultRedirectFromNavMenu?.(
+                key,
+                touchableRef,
+              );
+            }}
+            onMountToSearchKeybordTransition={(key, touchableRef) => {
+              console.log(key, touchableRef, ' vk');
+              keyboardToResultTransitionRef.current?.setDefaultRedirectToNavMenu?.(
+                key,
+                touchableRef,
+              );
+            }}
+          />
         </View>
-        <View style={styles.searchTextDisplayContainer}>
-          <DisplayForVirtualKeyboard ref={vkRef} />
-        </View>
-        <VirtualKeyboard ref={vkRef} />
       </View>
       <View style={styles.resultsContainer}>
-        <SearchResult />
+        <SearchResult
+          onMountToSearchResultTransition={(key, touchableRef) => {
+            console.log(
+              'rerrer',
+              keyboardToResultTransitionRef.current
+                ?.setDefaultRedirectFromNavMenu,
+            );
+            keyboardToResultTransitionRef.current?.setDefaultRedirectFromNavMenu?.(
+              key,
+              touchableRef,
+            );
+          }}
+          onUnMountToSearchResultTransition={key => {
+            keyboardToResultTransitionRef.current?.removeDefaultRedirectFromNavMenu?.(
+              key,
+            );
+          }}
+        />
       </View>
     </View>
   );
@@ -36,9 +84,13 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
   },
   virtualKeyboardContainer: {
-    width: scaleSize(486),
+    width: scaleSize(495),
     height: '100%',
-    marginRight: scaleSize(160),
+    marginLeft: scaleSize(160),
+    flexDirection: 'row-reverse',
+  },
+  virtualKeyboardMainContent: {
+    flex: 1,
   },
   searchTextDisplayContainer: {
     marginBottom: scaleSize(30),

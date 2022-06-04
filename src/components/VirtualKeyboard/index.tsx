@@ -1,8 +1,8 @@
 import React, {
-  useState,
   forwardRef,
   useImperativeHandle,
   useRef,
+  useCallback,
 } from 'react';
 import { View, FlatList, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import keyboardDataEng from './components/translations/eng.json';
@@ -17,8 +17,10 @@ import {
   clearSearchQuery,
   setSearchQuery,
 } from '@services/store/events/Slices';
-import { useLayoutEffect } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { TNavMenuScreenRedirectRef } from '@components/NavmenuScreenRedirect';
+import { useFocusEffect } from '@react-navigation/native';
+import { TTouchableHighlightWrapperRef } from '@components/TouchableHighlightWrapper';
 
 const keyboardDataLocale: TKeyboardAdditionalLocales = [keyboardDataEng];
 
@@ -37,6 +39,8 @@ type TVirtualKeyboardProps = {
   cols?: number;
   cellWidth?: number;
   cellHeight?: number;
+  onMountForNavMenuTransition: TNavMenuScreenRedirectRef['setDefaultRedirectFromNavMenu'];
+  onMountToSearchKeybordTransition: TNavMenuScreenRedirectRef['setDefaultRedirectToNavMenu'];
 };
 const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
   (
@@ -45,16 +49,13 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
       cols = 6,
       cellWidth = scaleSize(81),
       cellHeight = scaleSize(81),
+      onMountForNavMenuTransition,
+      onMountToSearchKeybordTransition,
     },
     ref,
   ) => {
-    const specSymbolsButtonRef = useRef(null);
-    const [specSymbolsButtonNode, setSpecSymbolsButtonNode] = useState<
-      number | undefined
-    >();
-    const [keyboardDatalastItemButtonNode, setKeyboardDatalastItemButtonNode] =
-      useState<number | undefined>();
-    const keyboardDatalastItemButtonRef = useRef();
+    const spaceButtonRef = useRef<TTouchableHighlightWrapperRef>(null);
+    const lastButtonInFirstRowRef = useRef<TTouchableHighlightWrapperRef>(null);
     const addLetterToSearch = (text: string): void => {
       ref?.current?.addLetterToSearch?.(text);
     };
@@ -71,15 +72,35 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
       ...keyboardDataLocale[0].letters,
       ...keyboardDataNumbers,
     ];
-    const startIndexOfLastRow: number =
-      Math.floor(keyboardData.length / cols) * cols;
-    useLayoutEffect(() => {
-      setSpecSymbolsButtonNode(specSymbolsButtonRef.current?.getNode());
-    }, []);
+
+    useFocusEffect(
+      useCallback(() => {
+        if (
+          typeof onMountForNavMenuTransition === 'function' &&
+          spaceButtonRef.current?.getRef?.().current
+        ) {
+          onMountForNavMenuTransition(
+            'spaceBtn',
+            spaceButtonRef.current.getRef().current,
+          );
+        }
+        if (
+          typeof onMountToSearchKeybordTransition === 'function' &&
+          typeof lastButtonInFirstRowRef.current?.getRef === 'function'
+        ) {
+          onMountToSearchKeybordTransition(
+            'clearBtn',
+            lastButtonInFirstRowRef.current.getRef().current,
+          );
+        }
+      }, [onMountForNavMenuTransition, onMountToSearchKeybordTransition]),
+    );
+
     return (
       <View style={{ width: cols * cellWidth }}>
         <View style={styles.supportButtonsContainer}>
           <Button
+            ref={spaceButtonRef}
             text="space"
             onPress={addSpaceToSearch}
             style={{
@@ -121,18 +142,11 @@ const VirtualKeyboard = forwardRef<any, TVirtualKeyboardProps>(
           showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <Button
-              ref={
-                index === keyboardData.length - 1
-                  ? keyboardDatalastItemButtonRef
-                  : undefined
-              }
+              ref={index < cols ? lastButtonInFirstRowRef : undefined}
               text={item.text}
               canMoveDown={index <= cols * (rows - 1)}
               onPress={addLetterToSearch}
               style={{ width: cellWidth, height: cellHeight }}
-              nextFocusDown={
-                index >= startIndexOfLastRow ? specSymbolsButtonNode : undefined
-              }
             />
           )}
         />
@@ -201,7 +215,7 @@ export const DisplayForVirtualKeyboard = forwardRef<
   );
   return (
     <View style={[dStyle.container, containerStyle]}>
-      <RohText style={[dStyle.text, textStyle, dStyle.textDifault]}>
+      <RohText style={[dStyle.text, textStyle, dStyle.textDefault]}>
         {searchText.toUpperCase()}
       </RohText>
     </View>
@@ -214,7 +228,7 @@ const dStyle = StyleSheet.create({
     height: scaleSize(80),
     backgroundColor: Colors.searchDisplayBackgroundColor,
   },
-  textDifault: {
+  textDefault: {
     width: '100%',
     height: '100%',
     paddingHorizontal: scaleSize(24),

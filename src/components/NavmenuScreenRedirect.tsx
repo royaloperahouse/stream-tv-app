@@ -163,7 +163,10 @@ export const NavMenuScreenRedirect = forwardRef<
             return firstKeyNumber - nextKeyNumber;
           })
           .map(([_, value]) => value);
-
+  if (props.screenName === 'serchress') {
+    console.log(difaultRedirectToNavMenu, props.screenName, ' toMenu');
+    console.log(difaultRedirectFromNavMenu, props.screenName, ' fromMenu');
+  }
   useLayoutEffect(() => {
     isMounted.current = true;
     return () => {

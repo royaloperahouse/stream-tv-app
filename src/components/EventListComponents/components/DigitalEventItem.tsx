@@ -1,4 +1,10 @@
-import React, { forwardRef, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { View, StyleSheet } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
@@ -17,6 +23,7 @@ import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { navMenuManager } from '@components/NavMenu';
 import { Colors } from '@themes/Styleguide';
 import { TNavMenuScreenRedirectRef } from '@components/NavmenuScreenRedirect';
+import { useFocusEffect } from '@react-navigation/native';
 
 type DigitalEventItemProps = {
   event: TEventContainer;
@@ -135,24 +142,21 @@ const DigitalEventItem = forwardRef<any, DigitalEventItemProps>(
       };
     }, []);
 
-    useLayoutEffect(() => {
-      if (setFirstItemFocusable && touchableRef.current?.getRef?.().current) {
-        setFirstItemFocusable(
-          sectionIndex.toString(),
-          touchableRef.current?.getRef?.().current,
-        );
-      }
-      return () => {
-        if (removeFirstItemFocusable) {
-          removeFirstItemFocusable(sectionIndex.toString());
+    useFocusEffect(
+      useCallback(() => {
+        if (setFirstItemFocusable && touchableRef.current?.getRef?.().current) {
+          setFirstItemFocusable(
+            sectionIndex.toString(),
+            touchableRef.current?.getRef?.().current,
+          );
         }
-      };
-    }, [
-      removeFirstItemFocusable,
-      setFirstItemFocusable,
-      event.id,
-      sectionIndex,
-    ]);
+        return () => {
+          if (removeFirstItemFocusable) {
+            removeFirstItemFocusable(sectionIndex.toString());
+          }
+        };
+      }, [removeFirstItemFocusable, setFirstItemFocusable, sectionIndex]),
+    );
     useLayoutEffect(() => {
       setRailItemRefCb(event.id, touchableRef, sectionIndex);
       return () => {

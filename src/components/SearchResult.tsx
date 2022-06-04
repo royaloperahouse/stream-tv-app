@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 import { View, FlatList, StyleSheet, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { digitalEventDetailsSearchSelector } from '@services/store/events/Selectors';
@@ -7,7 +13,9 @@ import {
   saveSearchResultQuery,
 } from '@services/store/events/Slices';
 import RohText from './RohText';
-import TouchableHighlightWrapper from './TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from './TouchableHighlightWrapper';
 import FastImage from 'react-native-fast-image';
 import get from 'lodash.get';
 import { scaleSize } from '@utils/scaleSize';
@@ -22,9 +30,17 @@ import {
 import { additionalRoutesWithoutNavMenuNavigation } from '@navigations/routes';
 import { TEventContainer } from '@services/types/models';
 import { navMenuManager } from '@components/NavMenu';
+import { TNavMenuScreenRedirectRef } from '@components/NavmenuScreenRedirect';
+import { useFocusEffect } from '@react-navigation/native';
 
-type TSearchResultProps = {};
-const SearchResult: React.FC<TSearchResultProps> = () => {
+type TSearchResultProps = {
+  onMountToSearchResultTransition?: TNavMenuScreenRedirectRef['setDefaultRedirectToNavMenu'];
+  onUnMountToSearchResultTransition?: TNavMenuScreenRedirectRef['removeDefaultRedirectToNavMenu'];
+};
+const SearchResult: React.FC<TSearchResultProps> = ({
+  onMountToSearchResultTransition,
+  onUnMountToSearchResultTransition,
+}) => {
   const route = useRoute();
   const resultListRef = useRef(null);
   const focused = useIsFocused();
@@ -46,7 +62,12 @@ const SearchResult: React.FC<TSearchResultProps> = () => {
     }
   }, [focused, digitalEventDetails.length, route]);
   if (!digitalEventDetails.length) {
-    return <PreviousSearchList />;
+    return (
+      <PreviousSearchList
+        onMountToSearchResultTransition={onMountToSearchResultTransition}
+        onUnMountToSearchResultTransition={onUnMountToSearchResultTransition}
+      />
+    );
   }
   return (
     <FlatList
@@ -82,6 +103,12 @@ const SearchResult: React.FC<TSearchResultProps> = () => {
           screenNameFrom={route.name}
           sectionIndex={index}
           hasTVPreferredFocus={route?.params?.sectionIndex === index}
+          onMountToSearchResultTransition={
+            index === 0 ? onMountToSearchResultTransition : undefined
+          }
+          onUnMountToSearchResultTransition={
+            index === 0 ? onUnMountToSearchResultTransition : undefined
+          }
         />
       )}
     />
@@ -96,6 +123,8 @@ type TSearchItemComponentProps = {
   sectionIndex: number;
   canMoveDown: boolean;
   hasTVPreferredFocus: boolean;
+  onMountToSearchResultTransition?: TSearchResultProps['onMountToSearchResultTransition'];
+  onUnMountToSearchResultTransition?: TSearchResultProps['onUnMountToSearchResultTransition'];
 };
 
 export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
@@ -105,31 +134,32 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
   sectionIndex,
   canMoveDown,
   hasTVPreferredFocus,
+  onMountToSearchResultTransition,
+  onUnMountToSearchResultTransition,
 }) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
   const [isFocused, setIsFocused] = useState(false);
+  const btnRef = useRef<TTouchableHighlightWrapperRef>(null);
   const touchableHandler = () => {
     navMenuManager.hideNavMenu();
     navigation.dispatch(
-      CommonActions.reset({
-        routes: [
-          {
-            name: additionalRoutesWithoutNavMenuNavigation.eventDetails
-              .navMenuScreenName,
-            params: {
-              fromEventDetails: false,
-              event: item,
-              screenNameFrom,
-              sectionIndex,
-            },
-          },
-        ],
-        index: 0,
+      CommonActions.navigate({
+        name: additionalRoutesWithoutNavMenuNavigation.eventDetails
+          .navMenuScreenName,
+        params: {
+          fromEventDetails: false,
+          event: item,
+          screenNameFrom,
+          sectionIndex,
+        },
+        key: additionalRoutesWithoutNavMenuNavigation.eventDetails
+          .navMenuScreenName,
       }),
     );
   };
+
   const title: string =
     get(item.data, ['vs_title', '0', 'text'], '').replace(
       /(<([^>]+)>)/gi,
@@ -164,9 +194,23 @@ export const SearchItemComponent: React.FC<TSearchItemComponentProps> = ({
     }
     navMenuManager.setNavMenuAccessible();
   };
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        typeof onMountToSearchResultTransition === 'function' &&
+        btnRef.current?.getRef?.().current
+      ) {
+        onMountToSearchResultTransition(
+          'mvFromKeyboard',
+          btnRef.current.getRef().current,
+        );
+      }
+    }, [onMountToSearchResultTransition]),
+  );
   return (
     <View style={styles.itemContainer}>
       <TouchableHighlightWrapper
+        ref={btnRef}
         underlayColor={Colors.defaultBlue}
         onPress={touchableHandler}
         onBlur={toggleFocus}
@@ -235,9 +279,15 @@ const ResultHraderComponent: React.FC<TResultHeaderComponentProps> = ({
   </View>
 );
 
-type TPreviousSearchListProps = {};
+type TPreviousSearchListProps = {
+  onMountToSearchResultTransition?: TSearchResultProps['onMountToSearchResultTransition'];
+  onUnMountToSearchResultTransition?: TSearchResultProps['onUnMountToSearchResultTransition'];
+};
 
-const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
+const PreviousSearchList: React.FC<TPreviousSearchListProps> = ({
+  onMountToSearchResultTransition,
+  onUnMountToSearchResultTransition,
+}) => {
   const isMounted = useRef<boolean>(false);
   const [previousSearchesList, setPreviousSearchesList] =
     useState<Array<string>>();
@@ -276,6 +326,12 @@ const PreviousSearchList: React.FC<TPreviousSearchListProps> = () => {
           text={item}
           canMoveUp={index !== 0}
           canMoveDown={index !== previousSearchesList.length - 1}
+          onMountToSearchResultTransition={
+            index === 0 ? onMountToSearchResultTransition : undefined
+          }
+          onUnMountToSearchResultTransition={
+            index === 0 ? onUnMountToSearchResultTransition : undefined
+          }
         />
       )}
     />
@@ -286,21 +342,44 @@ type TPreviousSearchListItemComponentProps = {
   text: string;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  onMountToSearchResultTransition?: TSearchResultProps['onMountToSearchResultTransition'];
+  onUnMountToSearchResultTransition?: TSearchResultProps['onUnMountToSearchResultTransition'];
 };
 const PreviousSearchListItemComponent: React.FC<
   TPreviousSearchListItemComponentProps
-> = ({ text, canMoveUp, canMoveDown }) => {
+> = ({
+  text,
+  canMoveUp,
+  canMoveDown,
+  onMountToSearchResultTransition,
+  onUnMountToSearchResultTransition,
+}) => {
   const dispatch = useDispatch();
+  const btnRef = useRef<TTouchableHighlightWrapperRef>(null);
   const navigation = useNavigation();
   const onPressHandler = () => {
     navMenuManager.setNavMenuNotAccessible();
     navigation.setParams({ sectionIndex: 0 });
     dispatch(setFullSearchQuery({ searchQuery: text }));
   };
+  useFocusEffect(
+    useCallback(() => {
+      if (
+        typeof onMountToSearchResultTransition === 'function' &&
+        typeof btnRef.current?.getRef === 'function'
+      ) {
+        onMountToSearchResultTransition(
+          'mvFromKeyboard',
+          btnRef.current.getRef().current,
+        );
+      }
+    }, [onMountToSearchResultTransition]),
+  );
   return (
     <View style={styles.searchesResultItemContainer}>
       <View>
         <TouchableHighlightWrapper
+          ref={btnRef}
           underlayColor={Colors.defaultBlue}
           onPress={onPressHandler}
           canMoveUp={canMoveUp}
