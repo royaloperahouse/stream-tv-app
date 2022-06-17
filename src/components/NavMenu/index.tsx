@@ -55,6 +55,7 @@ import {
   endFullSubscriptionLoop,
 } from '@services/store/auth/Slices';
 import { useFeature } from 'flagged';
+import { isTVOS } from '@configs/globalConfig';
 
 type TNavMenuProps = {
   navMenuConfig: Array<{
@@ -199,7 +200,7 @@ const NavMenu: React.FC<TNavMenuProps> = ({ navMenuConfig }) => {
   const onBlurRef = useRef<boolean>(false);
   const exitOfAppButtonGotFocus = useRef<boolean>(false);
   const activeItemRef = useRef<TouchableHighlight | null>(null);
-  const [isMenuAccessible, setMenuAccessible] = useState<boolean>(false);
+  const [isMenuAccessible, setMenuAccessible] = useState<boolean>(!isTVOS);
   const exitOfAppButtonRef = useRef<TTouchableHighlightWrapperRef>(null);
   const dispatch = useDispatch();
   const exitOfApp = useCallback(

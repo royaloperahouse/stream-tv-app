@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import {
   TEventContainer,
@@ -14,20 +14,57 @@ import { Colors } from '@themes/Styleguide';
 type CreativesProps = {
   event: TEventContainer;
   nextScreenText: string;
-  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
-  screenName: string;
+  setRefToMovingUp: (
+    index: number,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  getPrevRefToMovingUp: (
+    index: number,
+  ) =>
+    | Array<
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number
+      >
+    | undefined;
+  index: number;
 };
 
 const Creatives: React.FC<CreativesProps> = ({
   event,
   nextScreenText,
-  setScreenAvailabilety,
-  screenName,
+  index,
+  setRefToMovingUp,
+  getPrevRefToMovingUp,
 }) => {
   const creativesList: Array<TDieseActitvityCreatives> = get(
     event.data,
     ['diese_activity', 'creatives'],
     [],
+  );
+  const [listOfFocusRef, setListOfFocusRef] = useState<
+    | Array<React.Component<any, any, any> | React.ComponentClass<any, any>>
+    | undefined
+  >();
+  const setFocusRef = useCallback(
+    (
+      cp:
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number,
+    ) => {
+      setRefToMovingUp(index, cp);
+      setListOfFocusRef(
+        cp === null || typeof cp === 'number' ? undefined : [cp],
+      );
+    },
+    [setRefToMovingUp, index],
   );
 
   const listOfEvalableCreatives = creativesList.reduce<{
@@ -51,12 +88,6 @@ const Creatives: React.FC<CreativesProps> = ({
     listOfEvalableCreatives,
   ).map(([role, name]) => ({ role, name }));
 
-  useLayoutEffect(() => {
-    setScreenAvailabilety(screenName, Boolean(data.length));
-    return () => {
-      setScreenAvailabilety(screenName);
-    };
-  }, [data.length, screenName, setScreenAvailabilety]);
   if (!data.length) {
     return null;
   }
@@ -64,14 +95,24 @@ const Creatives: React.FC<CreativesProps> = ({
     <View style={styles.generalContainer}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
+        <TVFocusGuideView
+          style={styles.navigationToDownContainer}
+          destinations={listOfFocusRef}
+        />
       </View>
+      <TVFocusGuideView
+        style={styles.navigationToUpContainer}
+        destinations={getPrevRefToMovingUp(index)}
+      />
       <View style={styles.wrapper}>
         <View style={styles.titleContainer}>
           <RohText style={styles.title}>Creatives</RohText>
         </View>
         <View style={styles.creativesContainer}>
           <MultiColumnRoleNameList
+            id={nextScreenText}
             data={data}
+            setFocusRef={setFocusRef}
             columnHeight={scaleSize(770)}
             columnWidth={scaleSize(387)}
           />
@@ -88,13 +129,23 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     flexDirection: 'row',
-    height: Dimensions.get('window').height - scaleSize(220),
+    height: Dimensions.get('window').height,
+  },
+  navigationToDownContainer: {
+    width: '100%',
+    height: 2,
+  },
+  navigationToUpContainer: {
+    width: '100%',
+    height: 2,
   },
   downContainer: {
-    flexDirection: 'row',
     height: scaleSize(110),
-    paddingBottom: scaleSize(60),
     top: -scaleSize(110),
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    position: 'absolute',
   },
   title: {
     width: '100%',
@@ -104,6 +155,7 @@ const styles = StyleSheet.create({
   },
   creativesContainer: {
     width: scaleSize(945),
+    justifyContent: 'center',
   },
   titleContainer: {
     flex: 1,

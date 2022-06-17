@@ -43,8 +43,7 @@ const SearchScreen: React.FC<TSearchScreenProps> = ({ route }) => {
                 touchableRef,
               );
             }}
-            onMountToSearchKeybordTransition={(key, touchableRef) => {
-              console.log(key, touchableRef, ' vk');
+            onMountToSearchKeybordTransition={(key, touchableRef) => {;
               keyboardToResultTransitionRef.current?.setDefaultRedirectToNavMenu?.(
                 key,
                 touchableRef,

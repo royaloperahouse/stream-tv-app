@@ -1,11 +1,19 @@
+import { isTVOS } from '@configs/globalConfig';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import React, {
   forwardRef,
   useRef,
   useImperativeHandle,
   createRef,
   useLayoutEffect,
+  useCallback,
 } from 'react';
-import { ViewStyle, StyleSheet, VirtualizedList } from 'react-native';
+import {
+  ViewStyle,
+  StyleSheet,
+  VirtualizedList,
+  TouchableHighlight,
+} from 'react-native';
 import ExpandableButton from './ExpandableButton';
 export enum EActionButtonListType {
   common,
@@ -29,6 +37,13 @@ type ActionButtonListProps = {
   buttonsFactory: (
     actionButtonListType: EActionButtonListType,
   ) => Array<TActionButton>;
+  setFocusRef: (
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
   style?: ViewStyle;
 };
 
@@ -39,9 +54,11 @@ export type TActionButtonListRef = Partial<{
 const ActionButtonList = forwardRef<
   TActionButtonListRef,
   ActionButtonListProps
->(({ type, buttonsFactory, style = {} }, ref) => {
+>(({ type, buttonsFactory, setFocusRef, style = {} }, ref) => {
   const isMounted = useRef<boolean>(false);
   const buttonList = buttonsFactory(type);
+  //const firstButtonKeyName = useRef<string>(buttonList[0].key);
+  const isFocused = useIsFocused();
   const expandableButtonsRefs = useRef<Partial<{ [key: string]: any }>>({});
   useImperativeHandle(
     ref,
@@ -63,12 +80,29 @@ const ActionButtonList = forwardRef<
     }),
     [],
   );
+
   useLayoutEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
     };
   }, []);
+
+  useLayoutEffect(() => {
+    const arrayOfAvalibleButtonRef = Object.values(
+      expandableButtonsRefs.current,
+    );
+    if (isFocused && isMounted.current) {
+      setFocusRef(
+        arrayOfAvalibleButtonRef.length &&
+          arrayOfAvalibleButtonRef[arrayOfAvalibleButtonRef.length - 1].current
+          ? arrayOfAvalibleButtonRef[arrayOfAvalibleButtonRef.length - 1]
+              .current
+          : null,
+      );
+    }
+  }, [setFocusRef, isFocused, buttonList.length]);
+
   return (
     <VirtualizedList
       listKey={'eventDetailsActionButtonList'}

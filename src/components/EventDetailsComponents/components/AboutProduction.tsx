@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -13,16 +13,53 @@ import MultiColumnAboutProductionList, {
 type AboutProductionProps = {
   event: TEventContainer;
   nextScreenText: string;
-  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
-  screenName: string;
+  setRefToMovingUp: (
+    index: number,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  getPrevRefToMovingUp: (
+    index: number,
+  ) =>
+    | Array<
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number
+      >
+    | undefined;
+  index: number;
 };
 
 const AboutProduction: React.FC<AboutProductionProps> = ({
   event,
   nextScreenText,
-  screenName,
-  setScreenAvailabilety,
+  index,
+  setRefToMovingUp,
+  getPrevRefToMovingUp,
 }) => {
+  const [listOfFocusRef, setListOfFocusRef] = useState<
+    | Array<React.Component<any, any, any> | React.ComponentClass<any, any>>
+    | undefined
+  >();
+  const setFocusRef = useCallback(
+    (
+      cp:
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number,
+    ) => {
+      setRefToMovingUp(index, cp);
+      setListOfFocusRef(
+        cp === null || typeof cp === 'number' ? undefined : [cp],
+      );
+    },
+    [setRefToMovingUp, index],
+  );
   const aboutProduction: Array<{
     key: string;
     type: ECellItemKey;
@@ -151,13 +188,6 @@ const AboutProduction: React.FC<AboutProductionProps> = ({
     );
   }
 
-  useLayoutEffect(() => {
-    setScreenAvailabilety(screenName, Boolean(aboutProduction.length));
-    return () => {
-      setScreenAvailabilety(screenName);
-    };
-  }, [aboutProduction.length, screenName, setScreenAvailabilety]);
-
   if (!aboutProduction.length) {
     return null;
   }
@@ -166,11 +196,21 @@ const AboutProduction: React.FC<AboutProductionProps> = ({
     <View style={styles.generalContainer}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
+        <TVFocusGuideView
+          style={styles.navigationToDownContainer}
+          destinations={listOfFocusRef}
+        />
       </View>
+      <TVFocusGuideView
+        style={styles.navigationToUpContainer}
+        destinations={getPrevRefToMovingUp(index)}
+      />
       <View style={styles.wrapper}>
         <RohText style={styles.title}>About the Production</RohText>
         <View style={styles.aboutTheProductionContainer}>
           <MultiColumnAboutProductionList
+            id={nextScreenText}
+            setFocusRef={setFocusRef}
             data={aboutProduction}
             columnWidth={scaleSize(740)}
             columnHeight={scaleSize(770)}
@@ -186,6 +226,14 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
     paddingRight: scaleSize(200),
   },
+  navigationToDownContainer: {
+    width: '100%',
+    height: 2,
+  },
+  navigationToUpContainer: {
+    width: '100%',
+    height: 2,
+  },
   wrapper: {
     flex: 1,
     flexDirection: 'row',
@@ -193,10 +241,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   downContainer: {
-    flexDirection: 'row',
-    height: scaleSize(50),
-    paddingBottom: scaleSize(60),
-    top: -scaleSize(85),
+    height: scaleSize(110),
+    top: -scaleSize(110),
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   title: {
     flex: 1,

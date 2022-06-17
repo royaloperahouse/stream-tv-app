@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     opacity: 0.7,
+    height: scaleSize(50),
     alignItems: 'center',
   },
   text: {

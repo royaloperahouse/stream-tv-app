@@ -1,25 +1,36 @@
 import { VirtualizedList, View, StyleSheet } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { Colors } from '@themes/Styleguide';
 import { useSplitingOnColumnsForSynopsis } from '@hooks/useSplitingOnColumnsForSynopsis';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import ScrollingArrowPagination, {
   TScrollingArrowPaginationRef,
 } from '@components/ScrollingArrowPagination';
 import { OverflowingContainer } from '@components/OverflowingContainer';
+import { useFocusEffect } from '@react-navigation/native';
 
 type TMultiColumnSynopsisListProps = {
   data: Array<{ key: string; text: string }>;
   columnHeight: number;
   columnWidth: number;
+  setFocusRef: (
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  id: string;
 };
 
 const MultiColumnSynopsisList: React.FC<
   TMultiColumnSynopsisListProps
 > = props => {
-  const { data, columnHeight, columnWidth } = props;
+  const { data, columnHeight, columnWidth, setFocusRef = () => {}, id } = props;
   const { onLayoutHandler, splitedItems, splited } =
     useSplitingOnColumnsForSynopsis({
       columnHeight,
@@ -27,6 +38,19 @@ const MultiColumnSynopsisList: React.FC<
     });
   const scrollingArrowPaginationRef =
     useRef<TScrollingArrowPaginationRef>(null);
+  const focusedComponentRef = useRef<TTouchableHighlightWrapperRef>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (splited) {
+        setFocusRef(focusedComponentRef.current?.getRef?.().current || null);
+      } else {
+        setFocusRef(null);
+      }
+      return () => {
+        setFocusRef(null);
+      };
+    }, [splited, setFocusRef]),
+  );
   if (!splited) {
     return (
       <View style={{ width: columnWidth }}>
@@ -43,7 +67,7 @@ const MultiColumnSynopsisList: React.FC<
   }
   if (splitedItems.length === 1) {
     return (
-      <TouchableHighlightWrapper canMoveRight={false}>
+      <TouchableHighlightWrapper canMoveRight={false} ref={focusedComponentRef}>
         <View>
           {splitedItems.map((column, index) =>
             column.needToWrap ? (
@@ -60,6 +84,7 @@ const MultiColumnSynopsisList: React.FC<
               </OverflowingContainer>
             ) : (
               <View
+                key={index}
                 style={[
                   {
                     height: columnHeight,
@@ -78,15 +103,15 @@ const MultiColumnSynopsisList: React.FC<
       </TouchableHighlightWrapper>
     );
   }
-
   return (
-    <View style={[{ height: columnHeight }]}>
+    <View style={[{ height: columnHeight, width: columnWidth }]}>
       <VirtualizedList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         horizontal
         style={styles.list}
         data={splitedItems}
+        listKey={id}
         initialNumToRender={2}
         maxToRenderPerBatch={2}
         getItemCount={columns => columns?.length || 0}
@@ -107,6 +132,7 @@ const MultiColumnSynopsisList: React.FC<
         }) => (
           <TouchableHighlightWrapper
             canMoveRight={index !== splitedItems.length - 1}
+            ref={index === 0 ? focusedComponentRef : undefined}
             onFocus={() => {
               if (
                 typeof scrollingArrowPaginationRef.current?.setCurrentIndex ===

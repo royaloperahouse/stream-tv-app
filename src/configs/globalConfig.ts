@@ -8,3 +8,5 @@ export const buildInfo = `Build version: ${getVersion()}; build number: ${getBui
 }`;
 
 export const authBreakingTime = 1000 * 60 * 25; // 25 min
+
+export const isTVOS: boolean = Platform.OS === 'ios' && Platform.isTVOS;

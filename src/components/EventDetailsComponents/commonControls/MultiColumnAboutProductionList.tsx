@@ -1,15 +1,18 @@
 import { VirtualizedList, View, StyleSheet } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { Colors } from '@themes/Styleguide';
 import { useSplitingOnColumnsForSynopsis } from '@hooks/useSplitingOnColumnsForSynopsis';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import ScrollingPagination, {
   TScrolingPaginationRef,
 } from '@components/ScrollingPagination';
 import FastImage from 'react-native-fast-image';
 import { OverflowingContainer } from '@components/OverflowingContainer';
+import { useFocusEffect } from '@react-navigation/native';
 
 export enum ECellItemKey {
   'guidance' = 'guidance',
@@ -23,12 +26,20 @@ type TMultiColumnAboutProductionListProps = {
   data: Array<{ key: string; type: ECellItemKey; content: any }>;
   columnHeight: number;
   columnWidth: number;
+  setFocusRef: (
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  id: string;
 };
 
 const MultiColumnAboutProductionList: React.FC<
   TMultiColumnAboutProductionListProps
 > = props => {
-  const { data, columnHeight, columnWidth } = props;
+  const { data, columnHeight, columnWidth, setFocusRef = () => {}, id } = props;
   const { onLayoutHandler, splitedItems, splited } =
     useSplitingOnColumnsForSynopsis({
       columnHeight,
@@ -104,6 +115,19 @@ const MultiColumnAboutProductionList: React.FC<
     }
   };
   const scrollingPaginationRef = useRef<TScrolingPaginationRef>(null);
+  const focusedComponentRef = useRef<TTouchableHighlightWrapperRef>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (splited) {
+        setFocusRef(focusedComponentRef.current?.getRef?.().current || null);
+      } else {
+        setFocusRef(null);
+      }
+      return () => {
+        setFocusRef(null);
+      };
+    }, [splited, setFocusRef]),
+  );
   if (!splited) {
     return (
       <View style={{ width: columnWidth }}>
@@ -120,7 +144,7 @@ const MultiColumnAboutProductionList: React.FC<
   }
   if (splitedItems.length < 3) {
     return (
-      <TouchableHighlightWrapper canMoveRight={false}>
+      <TouchableHighlightWrapper canMoveRight={false} ref={focusedComponentRef}>
         <View style={[styles.towColumnsList, { height: columnHeight }]}>
           {splitedItems.map((column, index) =>
             column.needToWrap ? (
@@ -174,6 +198,7 @@ const MultiColumnAboutProductionList: React.FC<
           };
         }) => (
           <TouchableHighlightWrapper
+            ref={index === 0 ? focusedComponentRef : undefined}
             style={[styles.column, { height: columnHeight }]}
             canMoveRight={index !== splitedItems.length - 1}
             onFocus={() => {

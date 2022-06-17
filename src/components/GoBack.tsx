@@ -12,6 +12,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import GoBackIcon from '@assets/svg/navIcons/GoBack.svg';
 import TouchableHighlightWrapper from './TouchableHighlightWrapper';
 import { globalModalManager } from '@components/GlobalModal';
+import { goBackButtonWidth } from '@configs/eventDetailsConfig';
 const goBackButtonRef = createRef<
   Partial<{
     showGoBackButton: () => void;
@@ -120,7 +121,7 @@ const GoBack: React.FC<TGoBackProps> = () => {
 const styles = StyleSheet.create({
   container: {
     height: Dimensions.get('window').height,
-    width: scaleSize(160),
+    width: goBackButtonWidth,
   },
   buttonContainer: {
     flex: 1,

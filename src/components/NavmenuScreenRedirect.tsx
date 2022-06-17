@@ -12,6 +12,7 @@ import {
   TVFocusGuideView,
   View,
 } from 'react-native';
+import { isTVOS } from '@configs/globalConfig';
 export type TNavMenuScreenRedirectRef = {
   setDefaultRedirectFromNavMenu: (
     key: string,
@@ -43,6 +44,9 @@ export function setNavMenuItemsRefs(
   screenName: string,
   ref: React.RefObject<TouchableHighlight>,
 ) {
+  if (!isTVOS) {
+    return;
+  }
   navMenuItemsRefs[screenName] = ref;
 }
 
@@ -71,7 +75,7 @@ export const NavMenuScreenRedirect = forwardRef<
     ref,
     () => ({
       setDefaultRedirectFromNavMenu: (key, cp) => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
 
@@ -82,7 +86,7 @@ export const NavMenuScreenRedirect = forwardRef<
         });
       },
       setDefaultRedirectToNavMenu: (key, cp) => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
 
@@ -94,7 +98,7 @@ export const NavMenuScreenRedirect = forwardRef<
       },
 
       removeDefaultRedirectFromNavMenu: key => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
         setDefRedirectFromNavMenu(prevState => {
@@ -107,13 +111,13 @@ export const NavMenuScreenRedirect = forwardRef<
         });
       },
       removeAllDefaultRedirectFromNavMenu: () => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
         setDefRedirectFromNavMenu({});
       },
       removeDefaultRedirectToNavMenu: key => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
         setDefRedirectToNavMenu(prevState => {
@@ -126,7 +130,7 @@ export const NavMenuScreenRedirect = forwardRef<
         });
       },
       removeAllDefaultRedirectToNavMenu: () => {
-        if (!isMounted.current) {
+        if (!isMounted.current || !isTVOS) {
           return;
         }
         setDefRedirectToNavMenu({});
@@ -163,24 +167,24 @@ export const NavMenuScreenRedirect = forwardRef<
             return firstKeyNumber - nextKeyNumber;
           })
           .map(([_, value]) => value);
-  if (props.screenName === 'serchress') {
-    console.log(difaultRedirectToNavMenu, props.screenName, ' toMenu');
-    console.log(difaultRedirectFromNavMenu, props.screenName, ' fromMenu');
-  }
+
   useLayoutEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
     };
   }, []);
+  if (!isTVOS) {
+    return null;
+  }
   return (
     <View style={styles.root}>
       <TVFocusGuideView
-        style={[styles.redirectBlock, { borderWidth: 1, borderColor: 'green' }]}
+        style={[styles.redirectBlock]}
         destinations={redirectToContent}
       />
       <TVFocusGuideView
-        style={[styles.redirectBlock, { borderWidth: 1, borderColor: 'red' }]}
+        style={[styles.redirectBlock]}
         destinations={redirectFromContent}
       />
     </View>
@@ -190,7 +194,7 @@ export const NavMenuScreenRedirect = forwardRef<
 const styles = StyleSheet.create({
   root: {
     height: Dimensions.get('window').height,
-    width: 4,
+    width: 2,
     flexDirection: 'row',
   },
   redirectBlock: {

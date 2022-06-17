@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, Dimensions, TVFocusGuideView } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEvent, TEventContainer, TVSSynops } from '@services/types/models';
 import RohText from '@components/RohText';
@@ -11,16 +11,53 @@ import MultiColumnSynopsisList from '../commonControls/MultiColumnSynopsisList';
 type SynopsisProps = {
   event: TEventContainer;
   nextScreenText: string;
-  setScreenAvailabilety: (screenName: string, availabilety?: boolean) => void;
-  screenName: string;
+  setRefToMovingUp: (
+    index: number,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  getPrevRefToMovingUp: (
+    index: number,
+  ) =>
+    | Array<
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number
+      >
+    | undefined;
+  index: number;
 };
 
 const Synopsis: React.FC<SynopsisProps> = ({
   event,
   nextScreenText,
-  screenName,
-  setScreenAvailabilety,
+  index,
+  setRefToMovingUp,
+  getPrevRefToMovingUp,
 }) => {
+  const [listOfFocusRef, setListOfFocusRef] = useState<
+    | Array<React.Component<any, any, any> | React.ComponentClass<any, any>>
+    | undefined
+  >();
+  const setFocusRef = useCallback(
+    (
+      cp:
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number,
+    ) => {
+      setRefToMovingUp(index, cp);
+      setListOfFocusRef(
+        cp === null || typeof cp === 'number' ? undefined : [cp],
+      );
+    },
+    [setRefToMovingUp, index],
+  );
   const synopsis: Array<TVSSynops> = event.data.vs_synopsis.filter(
     synops => synops.text.length,
   ).length
@@ -47,13 +84,6 @@ const Synopsis: React.FC<SynopsisProps> = ({
         return acc;
       }, []);
 
-  useLayoutEffect(() => {
-    setScreenAvailabilety(screenName, Boolean(synopsis.length));
-    return () => {
-      setScreenAvailabilety(screenName);
-    };
-  }, [synopsis.length, screenName, setScreenAvailabilety]);
-
   if (!synopsis.length) {
     return null;
   }
@@ -65,11 +95,23 @@ const Synopsis: React.FC<SynopsisProps> = ({
     <View style={styles.generalContainer}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
+        <TVFocusGuideView
+          style={styles.navigationToDownContainer}
+          destinations={listOfFocusRef}
+        />
       </View>
+      <TVFocusGuideView
+        style={styles.navigationToUpContainer}
+        destinations={getPrevRefToMovingUp(index)}
+      />
       <View style={styles.wrapper}>
-        <RohText style={styles.title}>Synopsis</RohText>
+        <View style={styles.titleContainer}>
+          <RohText style={styles.title}>Synopsis</RohText>
+        </View>
         <View style={styles.synopsisContainer}>
           <MultiColumnSynopsisList
+            id={nextScreenText}
+            setFocusRef={setFocusRef}
             data={blocksOfSynopsis}
             columnWidth={scaleSize(740)}
             columnHeight={scaleSize(770)}
@@ -83,27 +125,35 @@ const Synopsis: React.FC<SynopsisProps> = ({
 const styles = StyleSheet.create({
   generalContainer: {
     height: Dimensions.get('window').height,
+    flex: 1,
     paddingRight: scaleSize(200),
   },
+  navigationToDownContainer: {
+    width: '100%',
+    height: 2,
+  },
+  navigationToUpContainer: {
+    width: '100%',
+    height: 2,
+  },
   wrapper: {
-    flex: 1,
+    height: Dimensions.get('window').height,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   downContainer: {
-    flexDirection: 'row',
-    height: scaleSize(50),
-    paddingBottom: scaleSize(60),
-    top: -scaleSize(85),
+    height: scaleSize(110),
+    top: -scaleSize(110),
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   title: {
-    flex: 1,
-    color: Colors.defaultTextColor,
+    width: '100%',
+    color: Colors.title,
     fontSize: scaleSize(72),
     textTransform: 'uppercase',
-    letterSpacing: scaleSize(1),
-    lineHeight: scaleSize(84),
   },
   synopsis: {
     color: Colors.defaultTextColor,
@@ -111,7 +161,11 @@ const styles = StyleSheet.create({
     lineHeight: scaleSize(38),
   },
   synopsisContainer: {
-    width: scaleSize(740),
+    //width: scaleSize(740),
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
 });
 

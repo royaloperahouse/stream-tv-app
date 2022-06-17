@@ -6,6 +6,7 @@ import {
   AboutProduction,
   Extras,
 } from '@components/EventDetailsComponents/';
+import { scaleSize } from '@utils/scaleSize';
 export type { TGeneralRef } from '@components/EventDetailsComponents/components//General';
 
 export type TEventDetailsSection = {
@@ -53,3 +54,5 @@ const collectionOfEventDetailsSections: Array<TEventDetailsSection> =
   Object.values(eventDetailsSectionsConfig);
 
 export default collectionOfEventDetailsSections;
+
+export const goBackButtonWidth: number = scaleSize(160);

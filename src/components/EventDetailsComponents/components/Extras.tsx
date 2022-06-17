@@ -11,6 +11,7 @@ import {
   Dimensions,
   VirtualizedList,
   TouchableHighlight,
+  TVFocusGuideView,
 } from 'react-native';
 import { scaleSize } from '@utils/scaleSize';
 import { TEventContainer } from '@services/types/models';
@@ -37,28 +38,50 @@ import { TVEventManager } from '@services/tvRCEventListener';
 type ExtrasProps = {
   event: TEventContainer;
   nextScreenText: string;
-  setScreenAvailabilety: (screenName: string, availabilety: boolean) => void;
-  screenName: string;
   showMoveToTopSectionButton: () => void;
   hideMoveToTopSectionButton: () => void;
   closePlayer: (...args: any[]) => void;
   openPlayer: (...args: any[]) => void;
   closeModal: (...args: any[]) => void;
+  setRefToMovingUp: (
+    index: number,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  getPrevRefToMovingUp: (
+    index: number,
+  ) =>
+    | Array<
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number
+      >
+    | undefined;
+  index: number;
 };
 const Extras: React.FC<ExtrasProps> = ({
   event,
   nextScreenText,
-  setScreenAvailabilety,
-  screenName,
   showMoveToTopSectionButton,
   hideMoveToTopSectionButton,
   closePlayer,
   openPlayer,
   closeModal,
+  index,
+  setRefToMovingUp,
+  getPrevRefToMovingUp,
 }) => {
   const videosRefs = useRef<{
     [key: string]: any;
   }>({});
+  const [listOfFocusRef, setListOfFocusRef] = useState<
+    | Array<React.Component<any, any, any> | React.ComponentClass<any, any>>
+    | undefined
+  >();
   const scrollingPaginationRef = useRef<TScrolingPaginationRef>(null);
   const isBMPlayerShowingRef = useRef<boolean>(false);
   const extrasInfoBlockRef = useRef<TExtrasInfoBlockRef>(null);
@@ -92,7 +115,6 @@ const Extras: React.FC<ExtrasProps> = ({
       ({ video }) => video.id,
     );
     if (!videos.length) {
-      setScreenAvailabilety(screenName, false);
       loading.current = false;
       return;
     }
@@ -109,14 +131,9 @@ const Extras: React.FC<ExtrasProps> = ({
         );
         if (filteredResult.length && isMounted.current) {
           setVideosInfo(filteredResult);
-          setScreenAvailabilety(screenName, true);
-        } else {
-          setScreenAvailabilety(screenName, false);
         }
       })
-      .catch(() => {
-        setScreenAvailabilety(screenName, false);
-      })
+      .catch(console.log)
       .finally(() => {
         loading.current = false;
       });
@@ -214,6 +231,27 @@ const Extras: React.FC<ExtrasProps> = ({
     extrasVideoInFocusPressing.current = null;
   }, []);
 
+  /*
+  ToDo decide to implement it or left it at the end; moving to current section for tvos;
+  to this moment it works without this implementation
+  useFocusEffect(
+    useCallback(() => {
+      if (videosInfo.length && isMounted.current) {
+        setRefToMovingUp(index, videosRefs.current[videosInfo[0].id].current);
+        setListOfFocusRef(
+          videosRefs.current[videosInfo[0].id].current === null ||
+            typeof videosRefs.current[videosInfo[0].id].current === 'number'
+            ? undefined
+            : [videosRefs.current[videosInfo[0].id].current],
+        );
+      }
+      return () => {
+        setRefToMovingUp(index, null);
+        setListOfFocusRef(undefined);
+      };
+    }, [index, setRefToMovingUp, videosInfo]),
+  ); */
+
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -249,7 +287,15 @@ const Extras: React.FC<ExtrasProps> = ({
     <View style={[styles.generalContainer]}>
       <View style={styles.downContainer}>
         <GoDown text={nextScreenText} />
+        <TVFocusGuideView
+          style={styles.navigationToDownContainer}
+          destinations={listOfFocusRef}
+        />
       </View>
+      <TVFocusGuideView
+        style={styles.navigationToUpContainer}
+        destinations={getPrevRefToMovingUp(index)}
+      />
       <View style={styles.wrapper}>
         <View style={styles.leftSideContainer}>
           <RohText style={styles.title}>Extras</RohText>
@@ -377,16 +423,26 @@ const styles = StyleSheet.create({
   generalContainer: {
     height: Dimensions.get('window').height,
   },
+  navigationToDownContainer: {
+    width: '100%',
+    height: 2,
+  },
+  navigationToUpContainer: {
+    width: '100%',
+    height: 2,
+  },
   wrapper: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   downContainer: {
-    flexDirection: 'row',
-    height: scaleSize(50),
-    paddingBottom: scaleSize(60),
-    top: -scaleSize(85),
+    height: scaleSize(110),
+    top: -scaleSize(110),
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   title: {
     marginTop: scaleSize(105),

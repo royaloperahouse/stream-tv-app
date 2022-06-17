@@ -1,10 +1,11 @@
 import React, { useCallback, useRef, useLayoutEffect } from 'react';
-import { View, StyleSheet, TouchableHighlight, Animated, Platform } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, Animated } from 'react-native';
 import RohText from '@components/RohText';
 import { Colors } from '@themes/Styleguide';
 import { scaleSize } from '@utils/scaleSize';
 import { TRoute } from '@services/types/models';
 import { setNavMenuItemsRefs } from '@components/NavmenuScreenRedirect';
+import { isTVOS } from '@configs/globalConfig';
 type TNavMenuItemProps = {
   id: string;
   isActive: boolean;
@@ -55,7 +56,7 @@ const NavMenuItem: React.FC<TNavMenuItemProps> = ({
   });
   const touchRef = useRef<TouchableHighlight | null>(null);
   const onFocusHandler = useCallback(() => {
-    if (Platform.OS === 'ios' && Platform.isTV) {
+    if (isTVOS) {
       setTimeout(() => {
         onFocus(id, index, touchRef);
       }, 0);

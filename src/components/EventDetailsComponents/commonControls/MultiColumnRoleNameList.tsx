@@ -1,29 +1,53 @@
 import { VirtualizedList, View, StyleSheet } from 'react-native';
 import RohText from '@components/RohText';
 import { scaleSize } from '@utils/scaleSize';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Colors } from '@themes/Styleguide';
 import { useSplitingOnColumns } from '@hooks/useSplitingOnColumns';
-import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+import TouchableHighlightWrapper, {
+  TTouchableHighlightWrapperRef,
+} from '@components/TouchableHighlightWrapper';
 import ScrollingPagination, {
   TScrolingPaginationRef,
 } from '@components/ScrollingPagination';
+import { useFocusEffect } from '@react-navigation/native';
 
 type TMultiColumnRoleNameListProps = {
   data: Array<{ role: string; name: string }>;
   columnHeight: number;
   columnWidth: number;
+  setFocusRef: (
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  id: string;
 };
 
 const MultiColumnRoleNameList: React.FC<
   TMultiColumnRoleNameListProps
 > = props => {
-  const { data, columnHeight, columnWidth } = props;
+  const { data, columnHeight, columnWidth, setFocusRef = () => {}, id } = props;
   const { onLayoutHandler, splitedItems, splited } = useSplitingOnColumns({
     columnHeight,
     itemsForSpliting: data,
   });
   const scrpllingPaginationRef = useRef<TScrolingPaginationRef>(null);
+  const focusedComponentRef = useRef<TTouchableHighlightWrapperRef>(null);
+  useFocusEffect(
+    useCallback(() => {
+      if (splited) {
+        setFocusRef(focusedComponentRef.current?.getRef?.().current || null);
+      } else {
+        setFocusRef(null);
+      }
+      return () => {
+        setFocusRef(null);
+      };
+    }, [splited, setFocusRef]),
+  );
   if (!splited) {
     return (
       <View style={{ width: columnWidth }}>
@@ -41,7 +65,7 @@ const MultiColumnRoleNameList: React.FC<
   }
   if (splitedItems.length < 3) {
     return (
-      <TouchableHighlightWrapper canMoveRight={false}>
+      <TouchableHighlightWrapper canMoveRight={false} ref={focusedComponentRef}>
         <View style={[styles.towColumnsList, { height: columnHeight }]}>
           {splitedItems.map((column, index) => (
             <View style={styles.columnContainer} key={index}>
@@ -66,6 +90,7 @@ const MultiColumnRoleNameList: React.FC<
         horizontal
         style={styles.list}
         data={splitedItems}
+        listKey={id}
         initialNumToRender={2}
         maxToRenderPerBatch={2}
         getItemCount={columns => columns?.length || 0}
@@ -90,6 +115,7 @@ const MultiColumnRoleNameList: React.FC<
                 scrpllingPaginationRef.current.setCurrentIndex(index);
               }
             }}
+            ref={index === 0 ? focusedComponentRef : undefined}
             styleFocused={styles.columnInFocus}>
             <View style={styles.columnContainer}>
               {item.map(ceil => (
@@ -138,6 +164,7 @@ const styles = StyleSheet.create({
   },
   towColumnsList: {
     flexDirection: 'row',
+    marginTop: scaleSize(200),
   },
   columnContainer: {
     flex: 1,

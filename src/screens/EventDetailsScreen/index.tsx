@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
 import {
   View,
@@ -12,7 +12,9 @@ import collectionOfEventDetailsSections, {
   eventDetailsSectionsConfig,
   TEventDetailsSection,
   TGeneralRef,
+  goBackButtonWidth,
 } from '@configs/eventDetailsConfig';
+import { isTVOS } from '@configs/globalConfig';
 import GoBack from '@components/GoBack';
 
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,34 +36,26 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
   const VirtualizedListRef = useRef<VirtualizedList<any>>(null);
   const eventDetailsScreenMounted = useRef<boolean>(false);
   const generalSectionRef = useRef<TGeneralRef>(null);
-  const moveToTopSectionButtonRef = useRef<TMoveToTopSectionButtonRef>(null);
+  const movedToTopSection = useRef<boolean>(false);
 
+  const moveToTopSectionButtonRef = useRef<TMoveToTopSectionButtonRef>(null);
+  const listOfFocusedRefs = useRef<
+    Array<
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number
+    >
+  >([]);
   const moveToTopSectionCB = useCallback(() => {
-    if (typeof VirtualizedListRef.current?.scrollToOffset === 'function') {
-      typeof VirtualizedListRef.current.scrollToOffset({ offset: 0 });
-    }
     if (
-      typeof generalSectionRef.current?.focusOnFirstAvalibleButton ===
-      'function'
+      typeof VirtualizedListRef.current?.scrollToOffset === 'function' &&
+      movedToTopSection.current === false
     ) {
-      generalSectionRef.current.focusOnFirstAvalibleButton();
+      movedToTopSection.current = true;
+      VirtualizedListRef.current.scrollToOffset({ offset: 0, animated: false });
     }
   }, []);
-
-  const setScreenAvailabilety = useCallback(
-    (screenName: string, availabilety?: boolean) => {
-      if (
-        typeof moveToTopSectionButtonRef.current?.setScreenAvailabilety ===
-        'function'
-      ) {
-        typeof moveToTopSectionButtonRef.current.setScreenAvailabilety(
-          screenName,
-          availabilety,
-        );
-      }
-    },
-    [],
-  );
 
   const hideMoveToTopSectionButton = useCallback(() => {
     if (typeof moveToTopSectionButtonRef.current?.hideButton === 'function') {
@@ -162,6 +156,31 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
     [closeModal],
   );
 
+  const setRefToMovingUp = useCallback(
+    (
+      index,
+      cp:
+        | React.Component<any, any, any>
+        | React.ComponentClass<any, any>
+        | null
+        | number,
+    ) => {
+      listOfFocusedRefs.current[index] = cp;
+    },
+    [],
+  );
+  const getPrevRefToMovingUp = useCallback((index: number) => {
+    for (let i = index - 1; i >= 0; i--) {
+      if (
+        listOfFocusedRefs.current[i] !== null &&
+        typeof listOfFocusedRefs.current[i] !== 'number' &&
+        listOfFocusedRefs.current[i] !== undefined
+      ) {
+        return [listOfFocusedRefs.current[i]];
+      }
+    }
+    return [];
+  }, []);
   const sectionsFactory = useCallback(
     (item: TEventDetailsSection, index: number): JSX.Element | null => {
       const Component = item?.Component;
@@ -180,6 +199,8 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               openPlayer={openPlayer}
               closePlayer={closePlayer}
               closeModal={closeModal}
+              setRefToMovingUp={setRefToMovingUp}
+              index={index}
             />
           );
         }
@@ -190,12 +211,14 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               screenName={item.key}
               event={event}
               nextScreenText={item?.nextSectionTitle}
-              setScreenAvailabilety={setScreenAvailabilety}
               hideMoveToTopSectionButton={hideMoveToTopSectionButton}
               showMoveToTopSectionButton={showMoveToTopSectionButton}
               openPlayer={openPlayer}
               closePlayer={closePlayer}
               closeModal={closeModal}
+              setRefToMovingUp={setRefToMovingUp}
+              getPrevRefToMovingUp={getPrevRefToMovingUp}
+              index={index}
             />
           );
         }
@@ -205,11 +228,12 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
       event,
       continueWatching,
       hideMoveToTopSectionButton,
-      setScreenAvailabilety,
       showMoveToTopSectionButton,
       closePlayer,
       openPlayer,
       closeModal,
+      getPrevRefToMovingUp,
+      setRefToMovingUp,
     ],
   );
 
@@ -223,24 +247,29 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
       };
     }, []),
   );
-
   return (
     <View style={styles.rootContainer}>
-      <View>
-        <View style={styles.moveToTopSectionButton}>
-          <MoveToTopSectionButton
-            ref={moveToTopSectionButtonRef}
-            focusCallback={moveToTopSectionCB}
-            screensNames={collectionOfEventDetailsSections
-              .slice(1)
-              .map(section => section.key)}
-          />
-        </View>
+      {!isTVOS && <GoBack />}
+      <View style={styles.contentContainer}>
         <VirtualizedList
           ref={VirtualizedListRef}
           style={styles.scrollView}
           keyExtractor={item => item.key}
-          initialNumToRender={0}
+          initialNumToRender={1}
+          ListFooterComponent={() =>
+            console.log('dsdsdqqqq') ||
+            collectionOfEventDetailsSections.length > 1 ? (
+              <View style={styles.moveToTopSectionButton}>
+                <MoveToTopSectionButton
+                  ref={moveToTopSectionButtonRef}
+                  focusCallback={moveToTopSectionCB}
+                  screensNames={collectionOfEventDetailsSections
+                    .slice(1)
+                    .map(section => section.key)}
+                />
+              </View>
+            ) : null
+          }
           data={collectionOfEventDetailsSections}
           renderItem={({ item, index }) => {
             return sectionsFactory(item, index);
@@ -262,33 +291,20 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
               )) !== undefined &&
               itemForScrolling.index !== null
             ) {
-              if (
-                typeof moveToTopSectionButtonRef.current?.hideButton ===
-                'function'
-              ) {
-                moveToTopSectionButtonRef.current.hideButton();
-              }
               VirtualizedListRef.current?.scrollToIndex({
-                animated: true,
+                animated: false,
                 index: itemForScrolling.index,
               });
             }
             if (
               info.viewableItems.length === 1 &&
-              typeof moveToTopSectionButtonRef.current?.setActiveScreenIndex ===
+              movedToTopSection.current &&
+              typeof generalSectionRef.current?.focusOnFirstAvalibleButton ===
                 'function' &&
-              info.viewableItems[0].index !== null
+              info.viewableItems[0].index === 0
             ) {
-              moveToTopSectionButtonRef.current.setActiveScreenIndex(
-                info.viewableItems[0].index - 1,
-              );
-            }
-            if (
-              !info.viewableItems.length &&
-              typeof moveToTopSectionButtonRef.current?.hideButton ===
-                'function'
-            ) {
-              moveToTopSectionButtonRef.current.hideButton();
+              generalSectionRef.current.focusOnFirstAvalibleButton();
+              movedToTopSection.current = false;
             }
           }}
           getItem={(data, index) => data[index]}
@@ -306,14 +322,14 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
                 return;
               }
               VirtualizedListRef.current.scrollToIndex({
-                animated: true,
+                animated: false,
                 index: info.index,
               });
             });
           }}
         />
       </View>
-      <GoBack />
+      {isTVOS && <GoBack />}
     </View>
   );
 };
@@ -321,15 +337,19 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
 const styles = StyleSheet.create({
   rootContainer: {
     height: Dimensions.get('window').height,
-    flexDirection: 'row-reverse',
+    flexDirection: isTVOS ? 'row-reverse' : 'row',
+  },
+  contentContainer: {
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width - goBackButtonWidth,
+    //flexDirection: isTVOS ? 'column-reverse' : 'column',
   },
   scrollView: {
     flex: 1,
   },
   root: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   moveToTopSectionButton: {
-    position: 'absolute',
-    bottom: scaleSize(60),
+    top: -scaleSize(60),
     left: 0,
   },
 });

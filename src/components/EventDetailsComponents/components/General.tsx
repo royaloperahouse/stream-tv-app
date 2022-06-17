@@ -71,13 +71,45 @@ type Props = {
   closePlayer: (...args: any[]) => void;
   openPlayer: (...args: any[]) => void;
   closeModal: (...args: any[]) => void;
+  setRefToMovingUp: (
+    index: number,
+    cp:
+      | React.Component<any, any, any>
+      | React.ComponentClass<any, any>
+      | null
+      | number,
+  ) => void;
+  index: number;
 };
 
 const General = forwardRef<TGeneralRef, Props>(
-  ({ event, continueWatching, closePlayer, openPlayer, closeModal }, ref) => {
+  (
+    {
+      event,
+      continueWatching,
+      closePlayer,
+      openPlayer,
+      closeModal,
+      setRefToMovingUp,
+      index,
+    },
+    ref,
+  ) => {
     const isFocused = useIsFocused();
     const nowDate = moment.utc(moment());
     const [closeCountDown, setCloseCountDown] = useState(false);
+    const setFocusRef = useCallback(
+      (
+        cp:
+          | React.Component<any, any, any>
+          | React.ComponentClass<any, any>
+          | null
+          | number,
+      ) => {
+        setRefToMovingUp(index, cp);
+      },
+      [setRefToMovingUp, index],
+    );
     const publishingDate = moment.utc(
       get(
         event.data,
@@ -635,7 +667,6 @@ const General = forwardRef<TGeneralRef, Props>(
         };
       }, []),
     );
-
     return (
       <View style={styles.generalContainer}>
         <View style={styles.contentContainer}>
@@ -668,6 +699,7 @@ const General = forwardRef<TGeneralRef, Props>(
             <View style={styles.buttonsContainer}>
               <ActionButtonList
                 ref={watchNowButtonRef}
+                setFocusRef={setFocusRef}
                 buttonsFactory={actionButtonListFactory}
                 type={
                   hideWatchTrailerButton
