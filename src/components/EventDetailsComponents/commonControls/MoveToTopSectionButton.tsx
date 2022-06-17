@@ -7,13 +7,10 @@ import React, {
 } from 'react';
 import { StyleSheet, View } from 'react-native';
 import GoDown from './GoDown';
-import TouchableHighlightWrapper, {
-  TTouchableHighlightWrapperRef,
-} from '@components/TouchableHighlightWrapper';
-//sectionsShema: { [screenKey: string]: { availabilety?: boolean } };
+import TouchableHighlightWrapper from '@components/TouchableHighlightWrapper';
+
 type Props = {
   focusCallback: () => void;
-  screensNames: Array<string>;
 };
 
 export type TMoveToTopSectionButtonRef = {
@@ -23,9 +20,8 @@ export type TMoveToTopSectionButtonRef = {
 
 const MoveToTopSectionButton = forwardRef<TMoveToTopSectionButtonRef, Props>(
   ({ focusCallback }, ref) => {
-    const [show, setShow] = useState<boolean>(true);
+    const [show, setShow] = useState<boolean>(false);
     const isMounted = useRef<boolean>(false);
-    const touchComponetnRef = useRef<TTouchableHighlightWrapperRef>(null);
     useImperativeHandle(
       ref,
       () => ({
@@ -42,7 +38,6 @@ const MoveToTopSectionButton = forwardRef<TMoveToTopSectionButtonRef, Props>(
       }),
       [],
     );
-
     useLayoutEffect(() => {
       isMounted.current = true;
       return () => {
@@ -55,7 +50,6 @@ const MoveToTopSectionButton = forwardRef<TMoveToTopSectionButtonRef, Props>(
     }
     return (
       <TouchableHighlightWrapper
-        ref={touchComponetnRef}
         canMoveRight={false}
         canMoveUp={false}
         canMoveDown={false}

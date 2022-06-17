@@ -256,19 +256,13 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
           style={styles.scrollView}
           keyExtractor={item => item.key}
           initialNumToRender={1}
-          ListFooterComponent={() =>
-            console.log('dsdsdqqqq') ||
-            collectionOfEventDetailsSections.length > 1 ? (
-              <View style={styles.moveToTopSectionButton}>
-                <MoveToTopSectionButton
-                  ref={moveToTopSectionButtonRef}
-                  focusCallback={moveToTopSectionCB}
-                  screensNames={collectionOfEventDetailsSections
-                    .slice(1)
-                    .map(section => section.key)}
-                />
-              </View>
-            ) : null
+          ListFooterComponent={
+            <View style={styles.moveToTopSectionButton}>
+              <MoveToTopSectionButton
+                ref={moveToTopSectionButtonRef}
+                focusCallback={moveToTopSectionCB}
+              />
+            </View>
           }
           data={collectionOfEventDetailsSections}
           renderItem={({ item, index }) => {
@@ -295,6 +289,18 @@ const EventDetailsScreen: React.FC<TEventDetailsScreenProps> = ({ route }) => {
                 animated: false,
                 index: itemForScrolling.index,
               });
+            }
+            if (
+              info.viewableItems.length === 1 &&
+              info.viewableItems[0].index === 0
+            ) {
+              hideMoveToTopSectionButton();
+            }
+            if (
+              info.viewableItems.length === 1 &&
+              info.viewableItems[0].index !== 0
+            ) {
+              showMoveToTopSectionButton();
             }
             if (
               info.viewableItems.length === 1 &&
